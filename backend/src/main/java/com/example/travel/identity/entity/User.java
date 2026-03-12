@@ -1,7 +1,10 @@
-package com.example.travel.entity;
+package com.example.travel.identity.entity;
 
+import com.example.travel.core.constant.Role;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -35,23 +38,10 @@ public class User {
     @Column(columnDefinition = "TEXT")
     private String preferencesJson; // Store preferences for AI (e.g., {"interest": ["beach"], "budget": "medium"})
 
+    @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
-    public enum Role {
-        ADMIN, TRAVELER, GUEST
-    }
 }

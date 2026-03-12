@@ -1,0 +1,39 @@
+package com.example.travel.booking.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Table(name = "booking_items")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class BookingItem {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booking_id", nullable = false)
+    private Booking booking;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ServiceType serviceType;
+
+    @Column(nullable = false)
+    private String serviceId; // ID of HotelRoom, Flight, or Tour
+
+    private int quantity;
+
+    private double priceAtBooking; // Snapshot of price at the time of booking
+
+    public enum ServiceType {
+        HOTEL,
+        FLIGHT,
+        TOUR
+    }
+}

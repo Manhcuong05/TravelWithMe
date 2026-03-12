@@ -1,0 +1,88 @@
+# Spring Boot & Java Development Rules - TravelWithMe Project
+
+Bạn là một chuyên gia về Java và Spring Boot. Khi viết code trong dự án "TravelWithMe - Nền tảng Hỗ trợ Du lịch Thông minh", hãy luôn tuân thủ nghiêm ngặt các quy tắc kỹ thuật và nghiệp vụ sau:
+
+## Phần 1: Các Quy Tắc Code & Kiến Trúc (Coding Rules & Architecture)
+
+### 1. Kiến trúc phân tầng (Layered Architecture) & Thiết kế cấu trúc
+- **Controller**: Chỉ xử lý HTTP request/response và routing. Tuyệt đối không chứa logic nghiệp vụ. Gọi đến Service.
+- **Service**: Chứa toàn bộ logic nghiệp vụ (business logic). Xử lý transaction. Trở thành trung tâm của ứng dụng.
+- **Repository**: Chỉ giao tiếp với cơ sở dữ liệu (Spring Data JPA).
+- **Cấu trúc Domain-Driven (Modular Monolith)**: Chia gói theo tính năng (VD: `identity`, `booking`, `payment`, `ai_itinerary`, `catalog`) để dễ quản lý và sẵn sàng cho Microservices.
+
+### 2. Dữ liệu và API (DTO Pattern & Clean API)
+- **Không bao giờ** trả trực tiếp Entity ra API hoặc nhận Entity từ client. Luôn sử dụng DTO.
+- Chuyển đổi Entity-DTO bằng `MapStruct` hoặc thủ công.
+- **RESTful Design**: Endpoint là danh từ số nhiều (`/api/v1/bookings`). Sử dụng đúng HTTP Methods (GET, POST, PUT, PATCH, DELETE). Luôn trả về HTTP Status code chuẩn theo tình huống.
+- Gói gọn dữ liệu trả về trong chuẩn API Response chung (Ví dụ: `ApiResponse<T>` với `status`, `message`, `data`).
+
+### 3. Best Practices cho Spring Boot
+- **Lombok**: Dùng `@Getter`, `@Setter`, `@Builder`, `@NoArgsConstructor`, `@AllArgsConstructor`, `@Slf4j`. **Không dùng `@Data`** cho Entity để tránh lỗi đệ quy Hibernate (StackOverflow).
+- **Validation**: Bắt lỗi đầu vào chặt chẽ bằng `jakarta.validation` (`@NotNull`, `@Min`, `@Email`...) ở request DTO.
+- **Exception Handling**: Gom Exception về một `@RestControllerAdvice` (GlobalExceptionHandler) và trả về định dạng báo lỗi chuẩn. Dùng Custom Exception riêng lẻ (`ResourceNotFoundException`, `BusinessRuleException`).
+- **Magic Quotes/Numbers**: Tránh tuyệt đối. Dùng `Enum` và static constants (vd: lớp `Constants`).
+
+### 4. Entity và Cơ sở dữ liệu (JPA/MySQL)
+- Sử dụng kiểu dữ liệu `String` (định dạng `UUID`) cho Khóa chính (Primary Key) thay vì Auto Increment Integer để tăng bảo mật, chống đoán ID.
+- Kiểm soát **N+1 Queries**: Dùng `@EntityGraph`, `JOIN FETCH`, hoặc DTO Projection khi select dữ liệu liên kết.
+- Tự động hóa auditing với `@CreatedDate`, `@LastModifiedDate` (Spring Data JPA Auditing).
+
+### 5. Caching, Bất đồng bộ & Hiệu năng cao
+- Hệ thống cần chịu tải 100 Concurrent Users. 
+- **Phân trang (Pagination)**: Bắt buộc dùng `Pageable` khi danh sách có khả năng trả về > 20 record.
+- **Caching**: Dùng `@Cacheable` (Redis/In-Memory) cho các API thường đọc/ít ghi: Danh sách khách sạn, chuyến bay tĩnh, POI phổ biến.
+- **Bất đồng bộ (Async)**: Dùng `@Async` cho gọi API Gemini (thường phản hồi chậm), gửi email báo trạng thái và các tác vụ notification.
+
+### 6. Bảo Mật & Xác Thực (Security)
+- Thông tin nhạy cảm lưu trong biến trường (`.env` hoặc cấu hình an toàn). **Tuyệt đối không hardcode DB password, JWT secret, Gemini API key.**
+- **Mã hoá**: `BCryptPasswordEncoder` bảo mật password mức Database.
+- Xác thực Stateless dùng **JWT (JSON Web Token)**. API phân quyền (Role) rành mạch: `ADMIN`, `TRAVELER`.
+- **Data Ownership**: Kiểm tra quyền sở hữu dòng dữ liệu (Row-level access) bằng UserID. (Vd: User A không thể Get/Cancel Booking của User B). Tuân thủ xác minh OTP khi có luồng cần bảo mật cao.
+
+---
+
+## Phần 2: Kiến Thức Nghiệp Vụ Du Lịch (Domain Knowledge & Business Rules)
+
+### 1. Quản lý Hệ sinh thái Dịch vụ (Travel Services)
+- Hệ thống hỗ trợ đa dạng dịch vụ: Flight (Chuyến bay), Hotel (Khách sạn), Tour, Attraction Ticket (Vé tham quan). 
+- **Tính khả dụng (Availability)**: Luôn check số lượng phòng/vé cẩn thận trước khi tạo Đơn Đặt Chỗ hoặc Thanh toán (Lock chống Overbooking).
+
+### 2. Nghiệp vụ Đặt chỗ (Booking & Lifecycle)
+- Đặt chỗ đa dịch vụ: Một Booking có thể gom chung VÉ MÁY BAY + KHÁCH SẠN + TOUR.
+- Kỹ thuật nguyên tử: Sử dụng `@Transactional` tại Service. Nếu thanh toán thất bại trả về lỗi thì rollback đơn nếu cần, hoặc lưu pending.
+- Vòng đời Booking: `PENDING` -> `AWAITING_PAYMENT` -> `CONFIRMED` -> `COMPLETED` hoặc `CANCELLED`.
+- Sự kiện Hủy (Cancellation Policy): Phải kiểm tra chính sách hủy (thời gian trước chuyến đi, phí bồi thường) trước khi xử lý trạng thái Cancelled.
+
+### 3. Tích hợp Thanh toán (Payment Integration)
+- Hỗ trợ **VietQR** (QR Chuyển khoản) và **PayLater** (Mua trước trả sau).
+- **Webhooks**: Xây dựng API Webhook để nhận trạng thái giao dịch từ hệ thống thứ ba. Xác minh chữ ký số (Signature Hash) nghiêm ngặt để chống giả mạo thanh toán.
+- Xử lý Idempotency (Tránh thanh toán trùng lặp - Double Payment) bằng mã giao dịch duy nhất cho mỗi đơn.
+
+### 4. Tính năng AI Trợ lý Du lịch thông minh (Gemini API)
+- **Mục tiêu**: Tự động gợi ý POI và lên Lịch trình (Itinerary) cá nhân hoá theo Ngân sách (Budget), Thời gian (Duration/Day), và Sở thích (Preferences).
+- **Quản lý Prompt**: Ép AI phải trả về JSON schema cố định để backend map thẳng ra `AiItineraryDto`. Có cơ chế retry nếu JSON bị lỗi format.
+- **Cấu trúc Lịch trình theo ngày (Day-by-Day)**: Quản lý rõ ràng: `Ngày 1 -> [POI, Hoạt động, Giờ dự kiến, Chi phí]`.
+
+### 5. Tương tác Người dùng 
+- **User Profile**: Lưu giữ sở thích du lịch (Biển, Núi, Mạo hiểm,...).
+- **Wishlist**: Tính năng lưu địa điểm yêu thích (Favorite locations).
+- **Review/Rating**: User chỉ được đánh giá dịch vụ khi Booking có trạng thái `COMPLETED` (Đã trải nghiệm).
+
+*(Bất cứ khi nào bạn viết code hoặc đề xuất giải pháp cho TravelWithMe, hãy tham chiếu file này làm hệ quy chiếu tối cao).*
+## 6. Thiết kế API (RESTful Design)
+- Đặt tên endpoint luôn dùng danh từ số nhiều (Ví dụ: `/api/v1/users` thay vì `/api/v1/getUser`).
+- Sử dụng đúng HTTP Methods: 
+  - `GET` để lấy dữ liệu.
+  - `POST` để tạo mới.
+  - `PUT` để cập nhật toàn bộ.
+  - `PATCH` để cập nhật một phần.
+  - `DELETE` để xóa.
+
+
+- Tuyệt đối không hardcode mật khẩu DB, khóa bí mật JWT (`jwt.secret`) hay API Key (Gemini API Key) trong source code. Phải đưa vào file `.env` hoặc tham chiếu qua biến môi trường (Environment Variables).
+- Tuân thủ xác thực phi trạng thái (Stateless) bằng **JWT (JSON Web Token)**. API phải được chặn ở tầng `SecurityConfig` tuỳ theo `Role` (ADMIN, TRAVELER).
+- Luôn kiểm tra quyền sở hữu dữ liệu ở tầng Service (Ví dụ: Không cho User A hủy/đọc Booking của User B).
+
+## 5. Clean Code
+- Tên biến, class, method phải tuân theo chuẩn Java (camelCase, PascalCase). Rõ nghĩa, đọc như tiếng Anh tự nhiên.
+- Code cần ngắn gọn, chia nhỏ hàm nếu hàm quá dài. Giữ nguyên tắc SOLID.
