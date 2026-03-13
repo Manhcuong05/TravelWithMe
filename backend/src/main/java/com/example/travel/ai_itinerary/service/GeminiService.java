@@ -2,6 +2,7 @@ package com.example.travel.ai_itinerary.service;
 
 import com.example.travel.core.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GeminiService {
 
     @Value("${gemini.api.key}")
@@ -49,6 +51,8 @@ public class GeminiService {
         requestBody.put("generationConfig", generationConfig);
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+        log.info("Calling Gemini API at URL: {}", apiUrl);
+        log.debug("Gemini request body: {}", requestBody);
 
         try {
             Map<String, Object> response = restTemplate.postForObject(url, entity, Map.class);
@@ -65,6 +69,7 @@ public class GeminiService {
             }
             throw new BusinessException("AI_SERVICE_ERROR", "Không tìm thấy nội dung phản hồi từ Gemini");
         } catch (Exception e) {
+            log.error("Gemini API call failed", e);
             throw new BusinessException("AI_SERVICE_ERROR", "Lỗi khi gọi Gemini API: " + e.getMessage());
         }
     }

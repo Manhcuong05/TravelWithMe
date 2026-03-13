@@ -10,6 +10,7 @@ import com.example.travel.review.dto.ReviewResponse;
 import com.example.travel.review.entity.Review;
 import com.example.travel.review.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ReviewService {
 
     private final ReviewRepository reviewRepository;
@@ -37,18 +39,28 @@ public class ReviewService {
                 .comment(request.getComment())
                 .build();
 
-        Review saved = reviewRepository.save(review);
-        return mapToResponse(saved, user.getFullName());
+        try {
+            Review saved = reviewRepository.save(review);
+            return mapToResponse(saved, user.getFullName());
+        } catch (Exception e) {
+            log.error("Error saving review", e);
+            throw e;
+        }
     }
 
     public List<ReviewResponse> getServiceReviews(String serviceId, ServiceType serviceType) {
-        return reviewRepository.findByServiceIdAndServiceType(serviceId, serviceType).stream()
-                .map(review -> {
-                    User user = userRepository.findById(review.getUserId()).orElse(null);
-                    String userName = user != null ? user.getFullName() : "Người dùng TravelWithMe";
-                    return mapToResponse(review, userName);
-                })
-                .collect(Collectors.toList());
+        try {
+            return reviewRepository.findByServiceIdAndServiceType(serviceId, serviceType).stream()
+                    .map(review -> {
+                        User user = userRepository.findById(review.getUserId()).orElse(null);
+                        String userName = user != null ? user.getFullName() : "Người dùng TravelWithMe";
+                        return mapToResponse(review, userName);
+                    })
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error fetching reviews for service: {}, type: {}", serviceId, serviceType, e);
+            throw e;
+        }
     }
 
     private ReviewResponse mapToResponse(Review review, String userName) {

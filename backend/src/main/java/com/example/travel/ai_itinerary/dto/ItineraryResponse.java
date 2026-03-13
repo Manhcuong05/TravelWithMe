@@ -16,10 +16,10 @@ public class ItineraryResponse {
     private String destination;
     private int durationDays;
     private String userPreferences;
-    private ItineraryContent content;
+    private String title;
+    private List<DayPlan> days;
 
     @Data
-    @Builder
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ItineraryContent {
@@ -33,6 +33,17 @@ public class ItineraryResponse {
     @AllArgsConstructor
     public static class DayPlan {
         private int day;
-        private List<String> activities;
+        private List<ActivityDetails> activities;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ActivityDetails {
+        private String time;
+        private String activity;
+        private String location;
+        private String notes;
     }
 }

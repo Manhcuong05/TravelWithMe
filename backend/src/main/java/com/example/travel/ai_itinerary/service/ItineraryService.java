@@ -28,17 +28,23 @@ public class ItineraryService {
         public ItineraryResponse createItinerary(String destination, int days, String preferences) {
                 String userEmail = SecurityUtil.getCurrentUserEmail();
                 User user = userRepository.findByEmail(userEmail)
-                                .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "Người dùng không tồn tại"));
+                                .orElseThrow(() -> {
+                                        log.error("User not found for email: {}", userEmail);
+                                        return new BusinessException("USER_NOT_FOUND", "Người dùng không tồn tại");
+                                });
+
+                log.info("Generating itinerary for destination: {}, days: {}", destination, days);
 
                 String prompt = String.format(
-                                "Bạn là chuyên gia du lịch của TravelWithMe. Hãy lập lịch trình du lịch cho %d ngày tại %s. "
-                                                +
-                                                "Sở thích của tôi: %s. " +
-                                                "Hãy trả về kết quả dưới định dạng JSON có cấu trúc: { \"title\": \"...\", \"days\": [ { \"day\": 1, \"activities\": [...] } ] }",
+                                "Hãy đóng vai một chuyên gia du lịch. Lập lịch trình %d ngày tại %s. " +
+                                                "Sở thích: %s. " +
+                                                "YÊU CẦU: Trả về duy nhất định dạng JSON, không văn bản dư thừa. " +
+                                                "Cấu trúc JSON: { \"title\": \"...\", \"days\": [ { \"day\": 1, \"activities\": [ { \"time\": \"08:00\", \"activity\": \"...\", \"location\": \"...\", \"notes\": \"...\" } ] } ] }",
                                 days, destination, preferences);
 
                 String rawJson = geminiService.generateItinerary(prompt);
-
+                log.info("Gemini raw response length: {}", rawJson != null ? rawJson.length() : 0);
+                log.debug("Gemini raw response: {}", rawJson);
                 // In a real app, you would parse the specific JSON from Gemini's full response.
                 // For this demo, we store the full response as the generated JSON.
 
@@ -64,12 +70,19 @@ public class ItineraryService {
         }
 
         private ItineraryResponse mapToResponse(Itinerary itinerary) {
-                ItineraryResponse.ItineraryContent content = null;
+                String title = null;
+                List<ItineraryResponse.DayPlan> days = null;
                 try {
-                        content = objectMapper.readValue(itinerary.getGeneratedContentJson(),
+                        String cleanJson = extractJson(itinerary.getGeneratedContentJson());
+                        ItineraryResponse.ItineraryContent content = objectMapper.readValue(cleanJson,
                                         ItineraryResponse.ItineraryContent.class);
+                        if (content != null) {
+                                title = content.getTitle();
+                                days = content.getDays();
+                        }
                 } catch (Exception e) {
-                        log.error("Error parsing itinerary JSON", e);
+                        log.error("Error parsing itinerary JSON. Raw content: {}", itinerary.getGeneratedContentJson(),
+                                        e);
                 }
 
                 return ItineraryResponse.builder()
@@ -77,7 +90,30 @@ public class ItineraryService {
                                 .destination(itinerary.getDestination())
                                 .durationDays(itinerary.getDurationDays())
                                 .userPreferences(itinerary.getUserPreferences())
-                                .content(content)
+                                .title(title)
+                                .days(days)
                                 .build();
+        }
+
+        private String extractJson(String raw) {
+                if (raw == null)
+                        return null;
+                String cleaned = raw.trim();
+                if (cleaned.startsWith("```json")) {
+                        cleaned = cleaned.substring(7);
+                } else if (cleaned.startsWith("```")) {
+                        cleaned = cleaned.substring(3);
+                }
+                if (cleaned.endsWith("```")) {
+                        cleaned = cleaned.substring(0, cleaned.length() - 3);
+                }
+                cleaned = cleaned.trim();
+
+                int firstBrace = cleaned.indexOf("{");
+                int lastBrace = cleaned.lastIndexOf("}");
+                if (firstBrace >= 0 && lastBrace > firstBrace) {
+                        return cleaned.substring(firstBrace, lastBrace + 1);
+                }
+                return cleaned;
         }
 }

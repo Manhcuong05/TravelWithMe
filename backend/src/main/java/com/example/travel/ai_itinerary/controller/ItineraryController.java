@@ -1,5 +1,6 @@
 package com.example.travel.ai_itinerary.controller;
 
+import com.example.travel.ai_itinerary.dto.ItineraryRequest;
 import com.example.travel.ai_itinerary.dto.ItineraryResponse;
 import com.example.travel.ai_itinerary.service.ItineraryService;
 import com.example.travel.core.response.ApiResponse;
@@ -18,10 +19,9 @@ public class ItineraryController {
 
     @PostMapping("/generate")
     @PreAuthorize("hasAnyRole('TRAVELER', 'CTV', 'ADMIN')")
-    public ApiResponse<ItineraryResponse> generate(@RequestParam String destination,
-            @RequestParam int days,
-            @RequestParam(required = false) String preferences) {
-        return ApiResponse.success(itineraryService.createItinerary(destination, days, preferences),
+    public ApiResponse<ItineraryResponse> generate(@RequestBody ItineraryRequest request) {
+        return ApiResponse.success(
+                itineraryService.createItinerary(request.getDestination(), request.getDays(), request.getPreferences()),
                 "Đã tạo lịch trình AI thành công");
     }
 
