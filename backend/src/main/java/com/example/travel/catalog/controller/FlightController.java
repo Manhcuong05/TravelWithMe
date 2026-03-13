@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/flights")
+@RequestMapping("/api/flights")
 @RequiredArgsConstructor
 public class FlightController {
 
@@ -20,5 +20,26 @@ public class FlightController {
             @RequestParam(required = false) String departure,
             @RequestParam(required = false) String arrival) {
         return ApiResponse.success(flightService.searchFlights(departure, arrival));
+    }
+
+    @PostMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CTV')")
+    public ApiResponse<FlightResponse> createFlight(
+            @org.springframework.web.bind.annotation.RequestBody com.example.travel.catalog.dto.FlightRequest request) {
+        return ApiResponse.success(flightService.saveFlight(request), "Đã tạo chuyến bay thành công");
+    }
+
+    @PutMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CTV')")
+    public ApiResponse<FlightResponse> updateFlight(@PathVariable String id,
+            @org.springframework.web.bind.annotation.RequestBody com.example.travel.catalog.dto.FlightRequest request) {
+        return ApiResponse.success(flightService.updateFlight(id, request), "Đã cập nhật chuyến bay thành công");
+    }
+
+    @DeleteMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CTV')")
+    public ApiResponse<Void> deleteFlight(@PathVariable String id) {
+        flightService.deleteFlight(id);
+        return ApiResponse.success(null, "Đã xóa chuyến bay thành công");
     }
 }

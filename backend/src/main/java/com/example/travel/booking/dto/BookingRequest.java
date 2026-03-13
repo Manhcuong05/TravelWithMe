@@ -1,6 +1,6 @@
 package com.example.travel.booking.dto;
 
-import com.example.travel.booking.entity.BookingItem;
+import com.example.travel.catalog.dto.ServiceType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,7 +20,7 @@ public class BookingRequest {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ItemRequest {
-        private BookingItem.ServiceType type;
+        private ServiceType type;
         private String serviceId;
         private int quantity;
     }

@@ -1,22 +1,24 @@
 package com.example.travel.ai_itinerary.controller;
 
-import com.example.travel.ai_itinerary.entity.Itinerary;
+import com.example.travel.ai_itinerary.dto.ItineraryResponse;
 import com.example.travel.ai_itinerary.service.ItineraryService;
 import com.example.travel.core.response.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/itineraries")
+@RequestMapping("/api/itineraries")
 @RequiredArgsConstructor
 public class ItineraryController {
 
     private final ItineraryService itineraryService;
 
     @PostMapping("/generate")
-    public ApiResponse<Itinerary> generate(@RequestParam String destination,
+    @PreAuthorize("hasAnyRole('TRAVELER', 'CTV', 'ADMIN')")
+    public ApiResponse<ItineraryResponse> generate(@RequestParam String destination,
             @RequestParam int days,
             @RequestParam(required = false) String preferences) {
         return ApiResponse.success(itineraryService.createItinerary(destination, days, preferences),
@@ -24,7 +26,8 @@ public class ItineraryController {
     }
 
     @GetMapping("/my")
-    public ApiResponse<List<Itinerary>> getMyItineraries() {
+    @PreAuthorize("hasAnyRole('TRAVELER', 'CTV', 'ADMIN')")
+    public ApiResponse<List<ItineraryResponse>> getMyItineraries() {
         return ApiResponse.success(itineraryService.getUserItineraries());
     }
 }

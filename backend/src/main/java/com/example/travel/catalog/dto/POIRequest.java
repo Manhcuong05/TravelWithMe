@@ -1,5 +1,6 @@
 package com.example.travel.catalog.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,14 +12,19 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class HotelResponse {
-    private String id;
+public class POIRequest {
+
+    @NotBlank(message = "Tên địa điểm không được để trống")
     private String name;
+
     private String description;
+    private String category;
     private String address;
     private String city;
-    private double rating;
-    private int starRating;
+
+    private double latitude;
+    private double longitude;
+
     private List<String> images;
-    private List<HotelRoomResponse> rooms;
+    private double averageSpend;
 }

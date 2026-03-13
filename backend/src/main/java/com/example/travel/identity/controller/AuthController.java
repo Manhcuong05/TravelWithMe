@@ -7,13 +7,14 @@ import com.example.travel.identity.dto.RegisterRequest;
 import com.example.travel.identity.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -27,5 +28,10 @@ public class AuthController {
     @PostMapping("/login")
     public ApiResponse<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ApiResponse.success(authService.login(request), "Đăng nhập thành công");
+    }
+
+    @GetMapping("/me")
+    public ApiResponse<AuthResponse.UserResponse> getMe() {
+        return ApiResponse.success(authService.getMe(), "Lấy thông tin cá nhân thành công");
     }
 }

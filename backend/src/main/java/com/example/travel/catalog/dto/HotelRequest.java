@@ -1,5 +1,8 @@
 package com.example.travel.catalog.dto;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,14 +14,19 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class HotelResponse {
-    private String id;
+public class HotelRequest {
+
+    @NotBlank(message = "Tên khách sạn không được để trống")
     private String name;
+
     private String description;
     private String address;
     private String city;
-    private double rating;
+    private String country;
+
+    @Min(value = 1, message = "Star rating tối thiểu là 1")
+    @Max(value = 5, message = "Star rating tối đa là 5")
     private int starRating;
+
     private List<String> images;
-    private List<HotelRoomResponse> rooms;
 }

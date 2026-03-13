@@ -1,5 +1,6 @@
 package com.example.travel.booking.entity;
 
+import com.example.travel.catalog.dto.ServiceType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,10 +31,4 @@ public class BookingItem {
     private int quantity;
 
     private double priceAtBooking; // Snapshot of price at the time of booking
-
-    public enum ServiceType {
-        HOTEL,
-        FLIGHT,
-        TOUR
-    }
 }

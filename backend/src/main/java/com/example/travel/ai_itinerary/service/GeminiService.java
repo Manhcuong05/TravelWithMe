@@ -52,8 +52,18 @@ public class GeminiService {
 
         try {
             Map<String, Object> response = restTemplate.postForObject(url, entity, Map.class);
-            // Extraction logic would go here, simplified for now
-            return response.toString(); // Should extract the "text" field from candidates[0].content.parts[0]
+            if (response != null && response.containsKey("candidates")) {
+                List<Map<String, Object>> candidates = (List<Map<String, Object>>) response.get("candidates");
+                if (!candidates.isEmpty()) {
+                    Map<String, Object> candidate = candidates.get(0);
+                    Map<String, Object> contentMap = (Map<String, Object>) candidate.get("content");
+                    List<Map<String, Object>> parts = (List<Map<String, Object>>) contentMap.get("parts");
+                    if (!parts.isEmpty()) {
+                        return (String) parts.get(0).get("text");
+                    }
+                }
+            }
+            throw new BusinessException("AI_SERVICE_ERROR", "Không tìm thấy nội dung phản hồi từ Gemini");
         } catch (Exception e) {
             throw new BusinessException("AI_SERVICE_ERROR", "Lỗi khi gọi Gemini API: " + e.getMessage());
         }

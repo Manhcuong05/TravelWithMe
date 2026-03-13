@@ -4,18 +4,20 @@ import com.example.travel.core.response.ApiResponse;
 import com.example.travel.interaction.entity.Review;
 import com.example.travel.interaction.service.ReviewService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/reviews")
+@RequestMapping("/api/reviews")
 @RequiredArgsConstructor
 public class ReviewController {
 
     private final ReviewService reviewService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('TRAVELER', 'CTV', 'ADMIN')")
     public ApiResponse<Review> postReview(@RequestParam String serviceId,
             @RequestParam int rating,
             @RequestParam(required = false) String comment) {
