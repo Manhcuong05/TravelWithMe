@@ -145,7 +145,28 @@ Các API này cho phép tìm kiếm thông tin dịch vụ.
 - **URL:** `/api/v1/payments/init/{bookingId}`
 - **Method:** `POST`
 
-### Giả lập thanh toán thành công (Simulate Success)
-- **URL:** `/api/v1/payments/webhook/simulate-success`
+---
+
+## 7. Admin (Quản trị hệ thống)
+*(Chỉ dành cho ADMIN - Sử dụng token của tài khoản admin@travel.com)*
+
+### Tạo tài khoản CTV (Business Manager)
+- **URL:** `/api/v1/admin/ctv`
 - **Method:** `POST`
-- **Params:** `reference` (ID giao dịch)
+- **Body (JSON):** 
+```json
+{
+    "email": "ctv1@travel.com",
+    "password": "password123",
+    "fullName": "Nguyen Manager",
+    "phone": "0987654321"
+}
+```
+
+### Xem danh sách tất cả người dùng
+- **URL:** `/api/v1/admin/users`
+- **Method:** `GET`
+
+### Xóa người dùng
+- **URL:** `/api/v1/admin/users/{id}`
+- **Method:** `DELETE`
