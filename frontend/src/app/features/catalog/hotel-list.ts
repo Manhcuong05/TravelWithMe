@@ -4,44 +4,44 @@ import { RouterLink } from '@angular/router';
 import { HotelService, Hotel } from '../../core/services/hotel.service';
 
 @Component({
-    selector: 'app-hotel-list',
-    standalone: true,
-    imports: [CommonModule, RouterLink],
-    template: `
+  selector: 'app-hotel-list',
+  standalone: true,
+  imports: [CommonModule, RouterLink],
+  template: `
     <section class="catalog-page animate-fade-in">
       <div class="container">
         <div class="page-header">
-          <h1 class="luxury-font">Exquisite Stays</h1>
-          <p>Find your perfect sanctuary in the world's most sought-after destinations.</p>
+          <h1 class="luxury-font">Điểm Đến Thượng Lưu</h1>
+          <p>Tìm kiếm nơi nghỉ dưỡng hoàn hảo tại những điểm đến danh tiếng nhất thế giới.</p>
         </div>
 
         <div class="filters-bar glass-effect">
           <div class="filter-item">
-            <span class="label">Location</span>
+            <span class="label">Điểm đến</span>
             <select (change)="onCityChange($event)">
-              <option value="">All Cities</option>
-              <option value="Da Nang">Da Nang</option>
-              <option value="Hanoi">Hanoi</option>
-              <option value="HCM City">HCM City</option>
+              <option value="">Tất cả thành phố</option>
+              <option value="Da Nang">Đà Nẵng</option>
+              <option value="Hanoi">Hà Nội</option>
+              <option value="HCM City">TP. Hồ Chí Minh</option>
             </select>
           </div>
           <div class="filter-item">
-            <span class="label">Price Range</span>
+            <span class="label">Mức giá</span>
             <select>
-              <option value="">All Prices</option>
-              <option value="0-2000000">Below 2,000,000 VNĐ</option>
-              <option value="2000000+">Above 2,000,000 VNĐ</option>
+              <option value="">Tất cả mức giá</option>
+              <option value="0-2000000">Dưới 2,000,000 VNĐ</option>
+              <option value="2000000+">Trên 2,000,000 VNĐ</option>
             </select>
           </div>
         </div>
 
         <div *ngIf="loading()" class="loading-state">
           <div class="spinner"></div>
-          <p>Curating your collection...</p>
+          <p>Đang chuẩn bị danh sách dành riêng cho bạn...</p>
         </div>
 
         <div *ngIf="!loading() && hotels().length === 0" class="empty-state">
-          <p>No hotels found for your selection.</p>
+          <p>Không tìm thấy khách sạn nào phù hợp với lựa chọn của bạn.</p>
         </div>
 
         <div class="grid" *ngIf="!loading()">
@@ -55,10 +55,10 @@ import { HotelService, Hotel } from '../../core/services/hotel.service';
               <p class="description">{{ hotel.description | slice:0:80 }}...</p>
               <div class="card-footer">
                 <div class="price">
-                  <span class="label">From</span>
-                  <span class="amount">{{ hotel.basePrice | number }} VNĐ</span>
+                  <span class="label">Giá chỉ từ</span>
+                  <span class="amount">{{ getMinPrice(hotel) | number }} VNĐ</span>
                 </div>
-                <a [routerLink]="['/hotels', hotel.id]" class="btn-gold">View Details</a>
+                <a [routerLink]="['/hotels', hotel.id]" class="btn-gold">Xem chi tiết</a>
               </div>
             </div>
           </div>
@@ -66,7 +66,7 @@ import { HotelService, Hotel } from '../../core/services/hotel.service';
       </div>
     </section>
   `,
-    styles: [`
+  styles: [`
     .catalog-page { padding: 150px 0 100px; min-height: 100vh; }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
     .page-header { text-align: center; margin-bottom: 60px; }
@@ -97,28 +97,33 @@ import { HotelService, Hotel } from '../../core/services/hotel.service';
   `]
 })
 export class HotelListComponent implements OnInit {
-    private hotelService = inject(HotelService);
+  private hotelService = inject(HotelService);
 
-    hotels = signal<Hotel[]>([]);
-    loading = signal<boolean>(true);
+  hotels = signal<Hotel[]>([]);
+  loading = signal<boolean>(true);
 
-    ngOnInit() {
-        this.loadHotels();
-    }
+  ngOnInit() {
+    this.loadHotels();
+  }
 
-    loadHotels(city?: string) {
-        this.loading.set(true);
-        this.hotelService.getHotels(city).subscribe({
-            next: (res) => {
-                if (res.success) this.hotels.set(res.data);
-                this.loading.set(false);
-            },
-            error: () => this.loading.set(false)
-        });
-    }
+  loadHotels(city?: string) {
+    this.loading.set(true);
+    this.hotelService.getHotels(city).subscribe({
+      next: (res) => {
+        if (res.success) this.hotels.set(res.data);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false)
+    });
+  }
 
-    onCityChange(event: any) {
-        const city = event.target.value;
-        this.loadHotels(city);
-    }
+  onCityChange(event: any) {
+    const city = event.target.value;
+    this.loadHotels(city);
+  }
+
+  getMinPrice(hotel: Hotel): number {
+    if (!hotel.rooms || hotel.rooms.length === 0) return 0;
+    return Math.min(...hotel.rooms.map(r => r.pricePerNight));
+  }
 }

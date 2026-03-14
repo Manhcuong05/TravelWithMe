@@ -1,18 +1,17 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { CatalogService, Tour } from '../../core/services/catalog.service';
 
 @Component({
-    selector: 'app-tour-list',
-    standalone: true,
-    imports: [CommonModule, RouterLink],
-    template: `
+  selector: 'app-tour-list',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <section class="catalog-page animate-fade-in">
       <div class="container">
         <div class="page-header">
-          <h1 class="luxury-font">Exotic Expeditions</h1>
-          <p>Curated private tours to the most breathtaking corners of the globe.</p>
+          <h1 class="luxury-font">Hành Trình Độc Bản</h1>
+          <p>Các tour du lịch riêng tư được thiết kế cho những góc ngoạn mục nhất của thế giới.</p>
         </div>
 
         <div class="grid" *ngIf="!loading()">
@@ -24,15 +23,15 @@ import { CatalogService, Tour } from '../../core/services/catalog.service';
               <div class="loc-tag">📍 {{ tour.location }}</div>
               <h3>{{ tour.title }}</h3>
               <p class="desc">{{ tour.description | slice:0:100 }}...</p>
-              <div class="price">From <span>{{ tour.price | number }} VNĐ</span></div>
-              <button class="btn-gold w-full mt-20">Book Expedition</button>
+              <div class="price">Giá từ <span>{{ tour.price | number }} VNĐ</span></div>
+              <button class="btn-gold w-full mt-20">Đặt Hành Trình</button>
             </div>
           </div>
         </div>
       </div>
     </section>
   `,
-    styles: [`
+  styles: [`
     .catalog-page { padding: 150px 0 100px; min-height: 100vh; }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
     .page-header { text-align: center; margin-bottom: 60px; }
@@ -51,16 +50,16 @@ import { CatalogService, Tour } from '../../core/services/catalog.service';
   `]
 })
 export class TourListComponent implements OnInit {
-    private service = inject(CatalogService);
-    tours = signal<Tour[]>([]);
-    loading = signal(true);
+  private service = inject(CatalogService);
+  tours = signal<Tour[]>([]);
+  loading = signal(true);
 
-    ngOnInit() {
-        this.service.getTours().subscribe({
-            next: (res) => {
-                if (res.success) this.tours.set(res.data);
-                this.loading.set(false);
-            }
-        });
-    }
+  ngOnInit() {
+    this.service.getTours().subscribe({
+      next: (res) => {
+        if (res.success) this.tours.set(res.data);
+        this.loading.set(false);
+      }
+    });
+  }
 }

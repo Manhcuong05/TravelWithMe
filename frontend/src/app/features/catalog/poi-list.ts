@@ -3,15 +3,15 @@ import { CommonModule } from '@angular/common';
 import { CatalogService, POI } from '../../core/services/catalog.service';
 
 @Component({
-    selector: 'app-poi-list',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-poi-list',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <section class="catalog-page animate-fade-in">
       <div class="container">
         <div class="page-header">
-          <h1 class="luxury-font">Hidden Gems</h1>
-          <p>Iconic landmarks and secret sanctuaries curated for the enlightened traveler.</p>
+          <h1 class="luxury-font">Viên Ngọc Ẩn Giấu</h1>
+          <p>Những danh lam thắng cảnh biểu tượng và thánh địa bí mật dành cho những lữ khách thông thái.</p>
         </div>
 
         <div class="grid" *ngIf="!loading()">
@@ -23,14 +23,14 @@ import { CatalogService, POI } from '../../core/services/catalog.service';
               <div class="city-tag">📍 {{ poi.city }}</div>
               <h3>{{ poi.name }}</h3>
               <p class="desc">{{ poi.description }}</p>
-              <button class="btn-gold-outline w-full mt-20">Discover Story</button>
+              <button class="btn-gold-outline w-full mt-20">Khám Phá Câu Chuyện</button>
             </div>
           </div>
         </div>
       </div>
     </section>
   `,
-    styles: [`
+  styles: [`
     .catalog-page { padding: 150px 0 100px; min-height: 100vh; }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
     .page-header { text-align: center; margin-bottom: 60px; }
@@ -50,16 +50,16 @@ import { CatalogService, POI } from '../../core/services/catalog.service';
   `]
 })
 export class PoiListComponent implements OnInit {
-    private service = inject(CatalogService);
-    pois = signal<POI[]>([]);
-    loading = signal(true);
+  private service = inject(CatalogService);
+  pois = signal<POI[]>([]);
+  loading = signal(true);
 
-    ngOnInit() {
-        this.service.getPOIs().subscribe({
-            next: (res) => {
-                if (res.success) this.pois.set(res.data);
-                this.loading.set(false);
-            }
-        });
-    }
+  ngOnInit() {
+    this.service.getPOIs().subscribe({
+      next: (res) => {
+        if (res.success) this.pois.set(res.data);
+        this.loading.set(false);
+      }
+    });
+  }
 }

@@ -11,29 +11,29 @@ import { AuthService } from '../../core/services/auth.service';
   template: `
     <div class="auth-container">
       <div class="auth-card glass-effect animate-fade-in">
-        <h2 class="luxury-font">Join TravelWithMe</h2>
-        <p class="subtitle">Create an account to start your journey</p>
+        <h2 class="luxury-font">Gia Nhập TravelWithMe</h2>
+        <p class="subtitle">Tạo tài khoản để bắt đầu hành trình của bạn</p>
         
         <form (ngSubmit)="onRegister()" #registerForm="ngForm" class="auth-form">
           <div class="form-row">
             <div class="form-group">
-              <label>Full Name</label>
-              <input type="text" name="fullName" [(ngModel)]="userData.fullName" required placeholder="John Doe">
+              <label>Họ và Tên</label>
+              <input type="text" name="fullName" [(ngModel)]="userData.fullName" required placeholder="VD: Nguyễn Văn A">
             </div>
           </div>
           
           <div class="form-group">
-            <label>Email Address</label>
-            <input type="email" name="email" [(ngModel)]="userData.email" required placeholder="your@email.com">
+            <label>Địa chỉ Email</label>
+            <input type="email" name="email" [(ngModel)]="userData.email" required placeholder="email@cua-ban.com">
           </div>
           
           <div class="form-group">
-            <label>Password</label>
+            <label>Mật khẩu</label>
             <input type="password" name="password" [(ngModel)]="userData.password" required placeholder="••••••••">
           </div>
 
           <div class="form-group">
-            <label>Phone Number</label>
+            <label>Số điện thoại</label>
             <input type="text" name="phone" [(ngModel)]="userData.phone" placeholder="+84 123 456 789">
           </div>
           
@@ -42,12 +42,12 @@ import { AuthService } from '../../core/services/auth.service';
           </div>
           
           <button type="submit" class="btn-gold w-full" [disabled]="loading">
-            {{ loading ? 'Creating Account...' : 'Create Account' }}
+            {{ loading ? 'Đang tạo tài khoản...' : 'Tạo Tài Khoản' }}
           </button>
         </form>
         
         <p class="footer-text">
-          Already have an account? <a routerLink="/auth/login">Sign In</a>
+          Đã có tài khoản? <a routerLink="/auth/login">Đăng nhập</a>
         </p>
       </div>
     </div>
@@ -104,12 +104,12 @@ export class RegisterComponent {
         if (res.success) {
           this.router.navigate(['/auth/login']);
         } else {
-          this.errorMessage = res.message || 'Registration failed.';
+          this.errorMessage = res.message || 'Đăng ký thất bại.';
           this.loading = false;
         }
       },
       error: (err: any) => {
-        this.errorMessage = err.error?.message || 'An error occurred during registration.';
+        this.errorMessage = err.error?.message || 'Đã có lỗi xảy ra trong quá trình đăng ký.';
         this.loading = false;
       }
     });

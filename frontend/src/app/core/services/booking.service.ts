@@ -8,6 +8,9 @@ export interface BookingItem {
     type: string;
     serviceId: string;
     quantity: number;
+    checkInDate?: string;
+    checkOutDate?: string;
+    price?: number;
 }
 
 export interface BookingRequest {
@@ -15,6 +18,8 @@ export interface BookingRequest {
         type: string;
         serviceId: string;
         quantity: number;
+        checkInDate?: string;
+        checkOutDate?: string;
     }[];
 }
 

@@ -2,57 +2,57 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-    selector: 'app-footer',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-footer',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <footer class="footer luxury-bg animate-fade-in">
       <div class="container footer-grid">
         <div class="brand-col">
           <h2 class="luxury-font gold-text">TravelWithMe</h2>
-          <p>Architecting extraordinary journeys for the world's most discerning travelers since 2026.</p>
+          <p>Kiến tạo những hành trình phi thường cho những lữ khách sành điệu nhất từ năm 2026.</p>
         </div>
         
         <div class="links-col">
-          <h4>Experience</h4>
+          <h4>Trải Nghiệm</h4>
           <ul>
-            <li><a>Boutique Hotels</a></li>
-            <li><a>Private Estates</a></li>
-            <li><a>Exotic Tours</a></li>
-            <li><a>AI Butler</a></li>
+            <li><a>Khách Sạn Sang Trọng</a></li>
+            <li><a>Biệt Thự Riêng Tư</a></li>
+            <li><a>Tour Độc Bản</a></li>
+            <li><a>Quản Gia AI</a></li>
           </ul>
         </div>
 
         <div class="links-col">
-          <h4>Company</h4>
+          <h4>Công Ty</h4>
           <ul>
-            <li><a>Our Story</a></li>
-            <li><a>Curation Process</a></li>
-            <li><a>Contact Us</a></li>
+            <li><a>Câu Chuyện Của Chúng Tôi</a></li>
+            <li><a>Quy Trình Tuyển Chọn</a></li>
+            <li><a>Liên Hệ</a></li>
           </ul>
         </div>
 
         <div class="newsletter-col">
-          <h4>The Journal</h4>
-          <p>Subscribe for exclusive travel insights and early access.</p>
+          <h4>Bản Tin</h4>
+          <p>Đăng ký để nhận những thông tin du lịch độc quyền và ưu đãi sớm nhất.</p>
           <div class="input-group">
-            <input type="email" placeholder="Your Email">
-            <button class="btn-gold">Join</button>
+            <input type="email" placeholder="Email của bạn">
+            <button class="btn-gold">Tham gia</button>
           </div>
         </div>
       </div>
       
       <div class="footer-bottom">
         <div class="container">
-          <p>&copy; 2026 TravelWithMe Premium. All rights reserved.</p>
+          <p>&copy; 2026 TravelWithMe Premium. Bảo lưu mọi quyền.</p>
           <div class="social-links">
-            <a>Instagram</a> · <a>LinkedIn</a> · <a>X</a>
+            <a>Instagram</a> · <a>LinkedIn</a> · <a>Facebook</a>
           </div>
         </div>
       </div>
     </footer>
   `,
-    styles: [`
+  styles: [`
     .footer { padding: 100px 0 40px; border-top: 1px solid var(--glass-border); margin-top: 100px; }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
     .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 2fr; gap: 60px; margin-bottom: 80px; }

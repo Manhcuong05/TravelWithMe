@@ -3,6 +3,15 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../../data/models/auth.model';
 
+export interface HotelRoom {
+    id: string;
+    roomType: string;
+    pricePerNight: number;
+    capacity: number;
+    totalRooms: number;
+    amenities: string[];
+}
+
 export interface Hotel {
     id: string;
     name: string;
@@ -10,8 +19,10 @@ export interface Hotel {
     address: string;
     description: string;
     rating: number;
-    basePrice: number;
+    starRating: number;
     imageUrl?: string;
+    images?: string[];
+    rooms?: HotelRoom[];
 }
 
 @Injectable({

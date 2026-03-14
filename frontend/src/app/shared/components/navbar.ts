@@ -4,35 +4,35 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
-    selector: 'app-navbar',
-    standalone: true,
-    imports: [CommonModule, RouterLink, RouterLinkActive],
-    template: `
+  selector: 'app-navbar',
+  standalone: true,
+  imports: [CommonModule, RouterLink, RouterLinkActive],
+  template: `
     <nav class="glass-effect navbar">
       <div class="container">
         <a routerLink="/" class="logo luxury-font">TravelWithMe</a>
         
         <ul class="nav-links">
-          <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Discovery</a></li>
-          <li><a routerLink="/itinerary" routerLinkActive="active">AI Planner</a></li>
-          <li><a routerLink="/hotels" routerLinkActive="active">Hotels</a></li>
-          <li><a routerLink="/tours" routerLinkActive="active">Tours</a></li>
+          <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Khám Phá</a></li>
+          <li><a routerLink="/itinerary" routerLinkActive="active">Lên Kế Hoạch AI</a></li>
+          <li><a routerLink="/hotels" routerLinkActive="active">Khách Sạn</a></li>
+          <li><a routerLink="/tours" routerLinkActive="active">Tour Du Lịch</a></li>
         </ul>
 
         <div class="auth-actions">
           <ng-container *ngIf="authService.isAuthenticated(); else authButtons">
-            <span class="welcome-text">Welcome, {{ authService.currentUser()?.fullName }}</span>
-            <button (click)="logout()" class="btn-logout">Logout</button>
+            <span class="welcome-text">Chào mừng, {{ authService.currentUser()?.fullName }}</span>
+            <button (click)="logout()" class="btn-logout">Đăng xuất</button>
           </ng-container>
           <ng-template #authButtons>
-            <a routerLink="/auth/login" class="login-link">Sign In</a>
-            <a routerLink="/auth/register" class="btn-gold">Join Now</a>
+            <a routerLink="/auth/login" class="login-link">Đăng Nhập</a>
+            <a routerLink="/auth/register" class="btn-gold">Đăng Ký Ngay</a>
           </ng-template>
         </div>
       </div>
     </nav>
   `,
-    styles: [`
+  styles: [`
     .navbar {
       position: fixed;
       top: 20px;
@@ -99,9 +99,9 @@ import { AuthService } from '../../core/services/auth.service';
   `]
 })
 export class NavbarComponent {
-    authService = inject(AuthService);
+  authService = inject(AuthService);
 
-    logout() {
-        this.authService.logout();
-    }
+  logout() {
+    this.authService.logout();
+  }
 }

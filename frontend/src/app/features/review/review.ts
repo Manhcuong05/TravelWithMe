@@ -5,23 +5,23 @@ import { ReviewService, ReviewResponse, ReviewRequest } from '../../core/service
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
-    selector: 'app-reviews',
-    standalone: true,
-    imports: [CommonModule, FormsModule],
-    template: `
+  selector: 'app-reviews',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  template: `
     <div class="reviews-section glass-effect">
-      <h2 class="luxury-font">Guest Experiences</h2>
+      <h2 class="luxury-font">Trải Nghiệm Từ Khách Hàng</h2>
       
       <div *ngIf="authService.isAuthenticated()" class="add-review glass-effect">
-        <h3>Share Your Journey</h3>
+        <h3>Chia sẻ cảm nhận của bạn</h3>
         <div class="rating-input">
           <span *ngFor="let star of [1,2,3,4,5]" 
                 (click)="newReview.rating = star"
                 [class.active]="newReview.rating >= star">★</span>
         </div>
-        <textarea [(ngModel)]="newReview.comment" placeholder="Tell us about your experience..."></textarea>
+        <textarea [(ngModel)]="newReview.comment" placeholder="Bạn cảm thấy thế nào về trải nghiệm này?"></textarea>
         <button (click)="submitReview()" class="btn-gold" [disabled]="submitting()">
-          {{ submitting() ? 'Submitting...' : 'Post Review' }}
+          {{ submitting() ? 'Đang gửi...' : 'Gửi đánh giá' }}
         </button>
       </div>
 
@@ -37,7 +37,7 @@ import { AuthService } from '../../core/services/auth.service';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .reviews-section { padding: 40px; }
     .add-review { padding: 30px; margin-bottom: 40px; border-radius: 16px; }
     .rating-input { font-size: 1.5rem; margin-bottom: 15px; cursor: pointer; color: var(--text-muted); }
@@ -54,42 +54,42 @@ import { AuthService } from '../../core/services/auth.service';
   `]
 })
 export class ReviewsComponent implements OnInit {
-    @Input() serviceId!: string;
-    @Input() serviceType!: string;
+  @Input() serviceId!: string;
+  @Input() serviceType!: string;
 
-    private reviewService = inject(ReviewService);
-    authService = inject(AuthService);
+  private reviewService = inject(ReviewService);
+  authService = inject(AuthService);
 
-    reviews = signal<ReviewResponse[]>([]);
-    submitting = signal<boolean>(false);
-    newReview: ReviewRequest = { serviceId: '', serviceType: '', rating: 5, comment: '' };
+  reviews = signal<ReviewResponse[]>([]);
+  submitting = signal<boolean>(false);
+  newReview: ReviewRequest = { serviceId: '', serviceType: '', rating: 5, comment: '' };
 
-    ngOnInit() {
-        this.newReview.serviceId = this.serviceId;
-        this.newReview.serviceType = this.serviceType;
-        this.loadReviews();
-    }
+  ngOnInit() {
+    this.newReview.serviceId = this.serviceId;
+    this.newReview.serviceType = this.serviceType;
+    this.loadReviews();
+  }
 
-    loadReviews() {
-        this.reviewService.getServiceReviews(this.serviceId, this.serviceType).subscribe({
-            next: (res) => {
-                if (res.success) this.reviews.set(res.data);
-            }
-        });
-    }
+  loadReviews() {
+    this.reviewService.getServiceReviews(this.serviceId, this.serviceType).subscribe({
+      next: (res) => {
+        if (res.success) this.reviews.set(res.data);
+      }
+    });
+  }
 
-    submitReview() {
-        if (!this.newReview.comment) return;
-        this.submitting.set(true);
-        this.reviewService.createReview(this.newReview).subscribe({
-            next: (res) => {
-                if (res.success) {
-                    this.loadReviews();
-                    this.newReview.comment = '';
-                }
-                this.submitting.set(false);
-            },
-            error: () => this.submitting.set(false)
-        });
-    }
+  submitReview() {
+    if (!this.newReview.comment) return;
+    this.submitting.set(true);
+    this.reviewService.createReview(this.newReview).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.loadReviews();
+          this.newReview.comment = '';
+        }
+        this.submitting.set(false);
+      },
+      error: () => this.submitting.set(false)
+    });
+  }
 }

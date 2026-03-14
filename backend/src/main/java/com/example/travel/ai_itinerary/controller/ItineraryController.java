@@ -4,6 +4,7 @@ import com.example.travel.ai_itinerary.dto.ItineraryRequest;
 import com.example.travel.ai_itinerary.dto.ItineraryResponse;
 import com.example.travel.ai_itinerary.service.ItineraryService;
 import com.example.travel.core.response.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ public class ItineraryController {
 
     @PostMapping("/generate")
     @PreAuthorize("hasAnyRole('TRAVELER', 'CTV', 'ADMIN')")
-    public ApiResponse<ItineraryResponse> generate(@RequestBody ItineraryRequest request) {
+    public ApiResponse<ItineraryResponse> generate(@Valid @RequestBody ItineraryRequest request) {
         return ApiResponse.success(
                 itineraryService.createItinerary(request.getDestination(), request.getDays(), request.getPreferences()),
                 "Đã tạo lịch trình AI thành công");

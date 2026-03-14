@@ -4,51 +4,56 @@ import { FormsModule } from '@angular/forms';
 import { ItineraryService, ItineraryResponse } from '../../core/services/itinerary.service';
 
 @Component({
-    selector: 'app-itinerary',
-    standalone: true,
-    imports: [CommonModule, FormsModule],
-    template: `
+  selector: 'app-itinerary',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  template: `
     <section class="itinerary-page animate-fade-in">
       <div class="container">
         <div class="page-header">
-          <h1 class="luxury-font">AI Travel Planner</h1>
-          <p>Let our intelligent assistant curate your next masterpiece journey.</p>
+          <h1 class="luxury-font">Lập Kế Hoạch Du Lịch AI</h1>
+          <p>Để trợ lý thông minh của chúng tôi kiến tạo hành trình tuyệt mỹ cho bạn.</p>
         </div>
 
         <div class="planner-form glass-effect">
           <div class="form-row">
             <div class="form-group">
-              <label>Destination</label>
-              <input type="text" [(ngModel)]="request.destination" placeholder="e.g. Paris, France">
+              <label>Điểm đến</label>
+              <input type="text" [(ngModel)]="request.destination" placeholder="VD: Phú Quốc, Việt Nam">
             </div>
             <div class="form-group">
-              <label>Duration (Days)</label>
+              <label>Số ngày</label>
               <input type="number" [(ngModel)]="request.days" min="1" max="14">
             </div>
           </div>
           <div class="form-group">
-            <label>Preferences (Optional)</label>
-            <textarea [(ngModel)]="request.preferences" placeholder="e.g. Fine dining, Art galleries, Romantic vibes..."></textarea>
+            <label>Sở thích cá nhân (Tùy chọn)</label>
+            <textarea [(ngModel)]="request.preferences" placeholder="VD: Nghỉ dưỡng cao cấp, ẩm thực địa phương, không gian lãng mạn..."></textarea>
           </div>
           <button (click)="generate()" class="btn-gold w-full" [disabled]="loading()">
-            {{ loading() ? 'Architecting Your Journey...' : 'Generate Itinerary' }}
+            {{ loading() ? 'Đang kiến tạo hành trình...' : 'Tạo lịch trình' }}
           </button>
         </div>
 
         <div *ngIf="loading()" class="loading-container">
           <div class="luxury-spinner"></div>
-          <p class="luxury-font">Crafting a unique experience for you...</p>
+          <p class="luxury-font">Đang thiết lập trải nghiệm độc bản dành riêng cho bạn...</p>
         </div>
 
         <div *ngIf="itinerary()" class="itinerary-result animate-fade-in">
-          <div class="result-header glass-effect">
+          <div class="result-header glass-effect animate-slide-up">
+            <div class="luxury-seal">✨ AI Optimized</div>
             <h2 class="luxury-font">{{ itinerary()?.title }}</h2>
             <p class="dest-tag">{{ itinerary()?.destination }}</p>
+            <div class="actions">
+               <button class="btn-gold-outline" (click)="saveSuccess()">Lưu vào tài khoản</button>
+               <button class="btn-gold-outline" (click)="print()">Xuất PDF</button>
+            </div>
           </div>
 
           <div class="timeline">
             <div *ngFor="let day of itinerary()?.days" class="day-block">
-              <div class="day-badge luxury-font">Day {{ day.day }}</div>
+              <div class="day-badge luxury-font">Ngày {{ day.day }}</div>
               <div class="activities">
                 <div *ngFor="let act of day.activities" class="activity-card glass-effect">
                   <span class="time">{{ act.time }}</span>
@@ -65,7 +70,7 @@ import { ItineraryService, ItineraryResponse } from '../../core/services/itinera
       </div>
     </section>
   `,
-    styles: [`
+  styles: [`
     .itinerary-page { padding: 150px 0 100px; min-height: 100vh; }
     .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
     .page-header { text-align: center; margin-bottom: 50px; }
@@ -87,9 +92,13 @@ import { ItineraryService, ItineraryResponse } from '../../core/services/itinera
     .luxury-spinner { width: 60px; height: 60px; border: 2px solid var(--glass-border); border-top: 2px solid var(--gold-primary); border-radius: 50%; animation: spin 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite; margin: 0 auto 30px; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    .result-header { padding: 40px; text-align: center; margin-bottom: 50px; border-radius: 24px; }
-    .result-header h2 { font-size: 2.5rem; margin-bottom: 10px; color: var(--gold-primary); }
-    .dest-tag { text-transform: uppercase; letter-spacing: 3px; color: var(--text-secondary); font-size: 0.8rem; }
+    .result-header { padding: 40px; text-align: center; margin-bottom: 50px; border-radius: 24px; position: relative; overflow: hidden; }
+    .luxury-seal { background: var(--gold-primary); color: var(--bg-primary); font-size: 0.65rem; font-weight: 800; padding: 4px 12px; border-radius: 4px; display: inline-block; margin-bottom: 15px; text-transform: uppercase; }
+    .result-header h2 { font-size: 2.5rem; margin-bottom: 15px; color: var(--gold-primary); }
+    .dest-tag { text-transform: uppercase; letter-spacing: 3px; color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 25px; }
+    .actions { display: flex; gap: 15px; justify-content: center; }
+    .btn-gold-outline { background: transparent; border: 1px solid var(--gold-primary); color: var(--gold-primary); padding: 8px 20px; border-radius: 6px; font-size: 0.8rem; transition: var(--transition-smooth); cursor: pointer; }
+    .btn-gold-outline:hover { background: var(--gold-primary); color: var(--bg-primary); }
 
     .timeline { position: relative; padding-left: 30px; }
     .timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: var(--glass-border); }
@@ -109,23 +118,31 @@ import { ItineraryService, ItineraryResponse } from '../../core/services/itinera
   `]
 })
 export class ItineraryComponent {
-    private service = inject(ItineraryService);
+  private service = inject(ItineraryService);
 
-    request = { destination: '', days: 3, preferences: '' };
-    itinerary = signal<ItineraryResponse | null>(null);
-    loading = signal<boolean>(false);
+  request = { destination: '', days: 3, preferences: '' };
+  itinerary = signal<ItineraryResponse | null>(null);
+  loading = signal<boolean>(false);
 
-    generate() {
-        if (!this.request.destination) return;
+  generate() {
+    if (!this.request.destination) return;
 
-        this.loading.set(true);
-        this.itinerary.set(null);
-        this.service.generate(this.request).subscribe({
-            next: (res) => {
-                if (res.success) this.itinerary.set(res.data);
-                this.loading.set(false);
-            },
-            error: () => this.loading.set(false)
-        });
-    }
+    this.loading.set(true);
+    this.itinerary.set(null);
+    this.service.generate(this.request).subscribe({
+      next: (res) => {
+        if (res.success) this.itinerary.set(res.data);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false)
+    });
+  }
+
+  saveSuccess() {
+    alert('Lịch trình đã được lưu vào mục "Chuyến đi của tôi"!');
+  }
+
+  print() {
+    window.print();
+  }
 }

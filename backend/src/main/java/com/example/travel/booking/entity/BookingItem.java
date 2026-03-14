@@ -4,6 +4,8 @@ import com.example.travel.catalog.dto.ServiceType;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name = "booking_items")
 @Getter
@@ -31,4 +33,8 @@ public class BookingItem {
     private int quantity;
 
     private double priceAtBooking; // Snapshot of price at the time of booking
+
+    private LocalDate checkInDate;
+
+    private LocalDate checkOutDate;
 }

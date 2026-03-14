@@ -4,6 +4,7 @@ import com.example.travel.booking.dto.BookingRequest;
 import com.example.travel.booking.dto.BookingResponse;
 import com.example.travel.booking.service.BookingService;
 import com.example.travel.core.response.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class BookingController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('TRAVELER', 'CTV', 'ADMIN')")
-    public ApiResponse<BookingResponse> createBooking(@RequestBody BookingRequest request) {
+    public ApiResponse<BookingResponse> createBooking(@Valid @RequestBody BookingRequest request) {
         return ApiResponse.success(bookingService.createBooking(request),
                 "Tạo đơn hàng thành công. Vui lòng thanh toán.");
     }

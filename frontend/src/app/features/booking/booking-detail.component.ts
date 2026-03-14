@@ -5,40 +5,43 @@ import { HttpClient } from '@angular/common/http';
 import { BookingService, BookingResponse } from '../../core/services/booking.service';
 
 @Component({
-    selector: 'app-booking-detail',
-    standalone: true,
-    imports: [CommonModule, RouterLink],
-    template: `
+  selector: 'app-booking-detail',
+  standalone: true,
+  imports: [CommonModule, RouterLink],
+  template: `
     <section class="detail-page animate-fade-in" *ngIf="booking()">
       <div class="container">
         <div class="page-header">
-          <h1 class="luxury-font">Reservation Details</h1>
-          <p>Confirmation and payment options for your upcoming journey.</p>
+          <h1 class="luxury-font">Chi Tiết Đơn Hàng</h1>
+          <p>Thông tin xác nhận và phương thức thanh toán cho hành trình sắp tới.</p>
         </div>
 
         <div class="main-grid">
           <div class="info-side">
             <div class="card glass-effect status-card">
-              <div class="label">Booking Status</div>
+              <div class="label">Trạng thái đơn hàng</div>
               <div class="status-val" [attr.data-status]="booking()?.status">
-                {{ booking()?.status }}
+                {{ booking()?.status === 'CONFIRMED' ? 'ĐÃ XÁC NHẬN' : (booking()?.status === 'AWAITING_PAYMENT' ? 'CHỜ THANH TOÁN' : booking()?.status) }}
               </div>
               <p *ngIf="booking()?.status === 'AWAITING_PAYMENT'" class="instruction">
-                Your reservation is held. Please complete payment to confirm.
+                Đơn hàng đã được giữ chỗ. Vui lòng hoàn tất thanh toán để xác nhận.
               </p>
             </div>
 
             <div class="card glass-effect items-card">
-              <h3 class="luxury-font">Order Summary</h3>
+              <h3 class="luxury-font">Tóm Tắt Đơn Hàng</h3>
               <div *ngFor="let item of booking()?.items" class="booking-item">
                 <div class="item-info">
-                  <span class="type-tag">{{ item.type }}</span>
-                  <div class="service-name">Service ID: {{ item.serviceId }}</div>
+                  <span class="type-tag">{{ item.type === 'HOTEL' ? 'KHÁCH SẠN' : (item.type === 'TOUR' ? 'TOUR' : item.type) }}</span>
+                  <div class="service-name">Dịch vụ: {{ item.serviceId }}</div>
+                  <div class="date-range" *ngIf="item.checkInDate">
+                    {{ item.checkInDate | date:'dd/MM/yyyy' }} - {{ item.checkOutDate | date:'dd/MM/yyyy' }}
+                  </div>
                 </div>
-                <div class="item-qty">Qty: {{ item.quantity }}</div>
+                <div class="item-qty">Số lượng: {{ item.quantity }}</div>
               </div>
               <div class="total-row">
-                <span>Total Amount</span>
+                <span>Tổng cộng</span>
                 <span class="amount">{{ booking()?.totalAmount | number }} VNĐ</span>
               </div>
             </div>
@@ -46,8 +49,8 @@ import { BookingService, BookingResponse } from '../../core/services/booking.ser
 
           <div class="payment-side" *ngIf="booking()?.status === 'AWAITING_PAYMENT'">
             <div class="card glass-effect payment-card">
-              <h3 class="luxury-font">Secure Payment</h3>
-              <p>Scan the QR code below using your banking app to complete the transaction.</p>
+              <h3 class="luxury-font">Thanh Toán An Toàn</h3>
+              <p>Quét mã QR dưới đây bằng ứng dụng ngân hàng của bạn để hoàn tất giao dịch.</p>
               
               <div class="qr-container">
                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TravelWithMe-Payment-{{booking()?.id}}" alt="Payment QR">
@@ -55,9 +58,9 @@ import { BookingService, BookingResponse } from '../../core/services/booking.ser
               </div>
 
               <div class="sim-actions">
-                <p class="hint">Simulate payment success for testing:</p>
+                <p class="hint">Mô phỏng thanh toán thành công để kiểm tra:</p>
                 <button (click)="simulatePaymentSuccess()" class="btn-gold w-full" [disabled]="simulating()">
-                  {{ simulating() ? 'Processing...' : 'Simulate Success' }}
+                  {{ simulating() ? 'Đang xử lý...' : 'Xác nhận Đã chuyển khoản' }}
                 </button>
               </div>
             </div>
@@ -66,16 +69,16 @@ import { BookingService, BookingResponse } from '../../core/services/booking.ser
           <div class="payment-side" *ngIf="booking()?.status === 'CONFIRMED'">
             <div class="card glass-effect success-card animate-fade-in">
               <div class="success-icon">✓</div>
-              <h3 class="luxury-font">Payment Confirmed</h3>
-              <p>Your journey is officially architected. A confirmation email has been sent to your account.</p>
-              <button routerLink="/itinerary" class="btn-gold w-full">View My Itineraries</button>
+              <h3 class="luxury-font">Thanh Toán Thành Công</h3>
+              <p>Hành trình của bạn đã chính thức được thiết lập. Một email xác nhận đã được gửi đến bạn.</p>
+              <button routerLink="/itinerary" class="btn-gold w-full">Xem Lịch Trình Của Tôi</button>
             </div>
           </div>
         </div>
       </div>
     </section>
   `,
-    styles: [`
+  styles: [`
     .detail-page { padding: 150px 0 100px; min-height: 100vh; }
     .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
     .page-header { text-align: center; margin-bottom: 60px; }
@@ -111,42 +114,43 @@ import { BookingService, BookingResponse } from '../../core/services/booking.ser
     .success-card h3 { color: #22c55e; margin-bottom: 15px; font-size: 1.8rem; }
     .success-card p { color: var(--text-secondary); margin-bottom: 30px; }
 
+    .date-range { font-size: 0.8rem; color: var(--gold-secondary); margin-top: 5px; }
     .w-full { width: 100%; }
   `]
 })
 export class BookingDetailComponent implements OnInit {
-    private route = inject(ActivatedRoute);
-    private service = inject(BookingService);
-    private http = inject(HttpClient);
+  private route = inject(ActivatedRoute);
+  private service = inject(BookingService);
+  private http = inject(HttpClient);
 
-    booking = signal<BookingResponse | null>(null);
-    simulating = signal<boolean>(false);
+  booking = signal<BookingResponse | null>(null);
+  simulating = signal<boolean>(false);
 
-    ngOnInit() {
-        this.loadBooking();
-    }
+  ngOnInit() {
+    this.loadBooking();
+  }
 
-    loadBooking() {
-        const id = this.route.snapshot.params['id'];
-        this.service.getBooking(id).subscribe({
-            next: (res) => {
-                if (res.success) this.booking.set(res.data);
-            }
-        });
-    }
+  loadBooking() {
+    const id = this.route.snapshot.params['id'];
+    this.service.getBooking(id).subscribe({
+      next: (res) => {
+        if (res.success) this.booking.set(res.data);
+      }
+    });
+  }
 
-    simulatePaymentSuccess() {
-        if (!this.booking()) return;
-        this.simulating.set(true);
+  simulatePaymentSuccess() {
+    if (!this.booking()) return;
+    this.simulating.set(true);
 
-        // Call the backend simulation webhook handler
-        // Based on earlier conversation, the endpoint is /api/payments/webhook/simulate-success?bookingId=...
-        this.http.post<any>(`/api/payments/webhook/simulate-success?bookingId=${this.booking()!.id}`, {}).subscribe({
-            next: () => {
-                this.loadBooking(); // Refresh to show success state
-                this.simulating.set(false);
-            },
-            error: () => this.simulating.set(false)
-        });
-    }
+    // Call the backend simulation webhook handler
+    // Based on earlier conversation, the endpoint is /api/payments/webhook/simulate-success?bookingId=...
+    this.http.post<any>(`/api/payments/webhook/simulate-success?bookingId=${this.booking()!.id}`, {}).subscribe({
+      next: () => {
+        this.loadBooking(); // Refresh to show success state
+        this.simulating.set(false);
+      },
+      error: () => this.simulating.set(false)
+    });
+  }
 }

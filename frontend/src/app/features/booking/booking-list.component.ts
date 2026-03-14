@@ -4,15 +4,15 @@ import { RouterLink } from '@angular/router';
 import { BookingService, BookingResponse } from '../../core/services/booking.service';
 
 @Component({
-    selector: 'app-booking-list',
-    standalone: true,
-    imports: [CommonModule, RouterLink],
-    template: `
+  selector: 'app-booking-list',
+  standalone: true,
+  imports: [CommonModule, RouterLink],
+  template: `
     <section class="booking-page animate-fade-in">
       <div class="container">
         <div class="page-header">
-          <h1 class="luxury-font">My Reservations</h1>
-          <p>Exquisite journeys you've architected with us.</p>
+          <h1 class="luxury-font">Đơn Hàng Của Tôi</h1>
+          <p>Những hành trình tuyệt mỹ bạn đã kiến tạo cùng chúng tôi.</p>
         </div>
 
         <div *ngIf="loading()" class="loading-state">
@@ -20,32 +20,32 @@ import { BookingService, BookingResponse } from '../../core/services/booking.ser
         </div>
 
         <div *ngIf="!loading() && bookings().length === 0" class="empty-state glass-effect">
-          <h2 class="luxury-font">No Journeys Yet</h2>
-          <p>Your luxury collection is waiting to be started.</p>
-          <a routerLink="/" class="btn-gold">Explore Collections</a>
+          <h2 class="luxury-font">Chưa Có Hành Trình Nào</h2>
+          <p>Bộ sưu tập những chuyến đi xa hoa của bạn đang chờ ngày khởi đầu.</p>
+          <a routerLink="/" class="btn-gold">Khám Phá Ngay</a>
         </div>
 
         <div class="booking-grid" *ngIf="!loading()">
           <div *ngFor="let booking of bookings()" class="booking-card glass-effect">
             <div class="card-header">
-              <span class="status-badge" [attr.data-status]="booking.status">{{ booking.status }}</span>
-              <span class="date">{{ booking.createdAt | date:'mediumDate' }}</span>
+              <span class="status-badge" [attr.data-status]="booking.status">{{ booking.status === 'CONFIRMED' ? 'Đã xác nhận' : (booking.status === 'AWAITING_PAYMENT' ? 'Chờ thanh toán' : booking.status) }}</span>
+              <span class="date">{{ booking.createdAt | date:'dd/MM/yyyy' }}</span>
             </div>
             
             <div class="card-body">
-              <div class="booking-id">Order #{{ booking.id.substring(0, 8) }}</div>
+              <div class="booking-id">Mã đơn #{{ booking.id.substring(0, 8) }}</div>
               <div class="amount">{{ booking.totalAmount | number }} VNĐ</div>
             </div>
 
             <div class="card-footer">
-              <a [routerLink]="['/bookings', booking.id]" class="link-gold">View Details →</a>
+              <a [routerLink]="['/bookings', booking.id]" class="link-gold">Xem chi tiết →</a>
             </div>
           </div>
         </div>
       </div>
     </section>
   `,
-    styles: [`
+  styles: [`
     .booking-page { padding: 150px 0 100px; min-height: 100vh; }
     .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
     .page-header { text-align: center; margin-bottom: 60px; }
@@ -77,18 +77,18 @@ import { BookingService, BookingResponse } from '../../core/services/booking.ser
   `]
 })
 export class BookingListComponent implements OnInit {
-    private service = inject(BookingService);
+  private service = inject(BookingService);
 
-    bookings = signal<BookingResponse[]>([]);
-    loading = signal<boolean>(true);
+  bookings = signal<BookingResponse[]>([]);
+  loading = signal<boolean>(true);
 
-    ngOnInit() {
-        this.service.getMyBookings().subscribe({
-            next: (res) => {
-                if (res.success) this.bookings.set(res.data);
-                this.loading.set(false);
-            },
-            error: () => this.loading.set(false)
-        });
-    }
+  ngOnInit() {
+    this.service.getMyBookings().subscribe({
+      next: (res) => {
+        if (res.success) this.bookings.set(res.data);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false)
+    });
+  }
 }

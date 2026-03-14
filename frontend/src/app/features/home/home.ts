@@ -3,61 +3,61 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 @Component({
-    selector: 'app-home',
-    standalone: true,
-    imports: [CommonModule, RouterLink],
-    template: `
+  selector: 'app-home',
+  standalone: true,
+  imports: [CommonModule, RouterLink],
+  template: `
     <section class="hero-section">
       <div class="hero-content animate-fade-in">
-        <h1 class="luxury-font">Discover Extraordinary<br>Journeys With Us</h1>
-        <p class="subtitle">Experience luxury redefined. Curated travel experiences that transcend the ordinary.</p>
+        <h1 class="luxury-font">Khám Phá Những Hành Trình<br>Phi Thường Cùng Chúng Tôi</h1>
+        <p class="subtitle">Trải nghiệm sự sang trọng được định nghĩa lại. Những hành trình được thiết kế riêng vượt xa mọi mong đợi.</p>
         
         <div class="search-box glass-effect">
           <div class="search-item">
-            <label>Destination</label>
-            <input type="text" placeholder="Where to go?">
+            <label>Điểm đến</label>
+            <input type="text" placeholder="Bạn muốn đi đâu?">
           </div>
           <div class="search-item">
-            <label>Check In</label>
+            <label>Ngày nhận phòng</label>
             <input type="date">
           </div>
           <div class="search-item">
-            <label>Guests</label>
+            <label>Khách</label>
             <input type="number" value="2">
           </div>
-          <button class="btn-gold">Explore</button>
+          <button class="btn-gold">Khám Phá</button>
         </div>
       </div>
     </section>
 
     <section class="featured-sections container">
       <div class="section-header">
-        <h2 class="luxury-font">Curated Collections</h2>
-        <p>Hand-picked stays and experiences for the discerning traveler.</p>
+        <h2 class="luxury-font">Bộ Sưu Tập Tuyển Chọn</h2>
+        <p>Những điểm lưu trú và trải nghiệm được chọn lọc kỹ lưỡng cho những lữ khách tinh tế.</p>
       </div>
       
       <div class="grid">
         <div class="card glass-effect animate-fade-in" style="animation-delay: 0.2s">
           <div class="card-img" style="background-image: url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=600')"></div>
           <div class="card-body">
-            <h3>Boutique Hotels</h3>
-            <p>Unique properties with exceptional service.</p>
-            <a routerLink="/hotels" class="link-gold">Browse Stays →</a>
+            <h3>Khách Sạn Boutique</h3>
+            <p>Những không gian độc đáo với dịch vụ xuất sắc.</p>
+            <a routerLink="/hotels" class="link-gold">Xem Khách Sạn →</a>
           </div>
         </div>
         
         <div class="card glass-effect animate-fade-in" style="animation-delay: 0.4s">
           <div class="card-img" style="background-image: url('https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&q=80&w=600')"></div>
           <div class="card-body">
-            <h3>Private Tours</h3>
-            <p>Exclusive access to the world's wonders.</p>
-            <a routerLink="/tours" class="link-gold">View Tours →</a>
+            <h3>Tour Riêng Tư</h3>
+            <p>Đặc quyền khám phá những kỳ quan thế giới.</p>
+            <a routerLink="/tours" class="link-gold">Xem Tour →</a>
           </div>
         </div>
       </div>
     </section>
   `,
-    styles: [`
+  styles: [`
     .hero-section {
       height: 100vh;
       background: linear-gradient(rgba(5, 10, 20, 0.6), rgba(5, 10, 20, 0.9)), url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&q=80&w=1920');

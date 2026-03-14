@@ -5,6 +5,7 @@ import com.example.travel.booking.dto.BookingRequest;
 import com.example.travel.booking.dto.BookingResponse;
 import com.example.travel.booking.entity.Booking;
 import com.example.travel.booking.entity.BookingItem;
+import com.example.travel.booking.repository.BookingItemRepository;
 import com.example.travel.booking.repository.BookingRepository;
 import com.example.travel.catalog.dto.ServiceType;
 import com.example.travel.catalog.entity.Flight;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 public class BookingService {
 
     private final BookingRepository bookingRepository;
+    private final BookingItemRepository bookingItemRepository;
     private final HotelRoomRepository hotelRoomRepository;
     private final FlightRepository flightRepository;
     private final TourRepository tourRepository;
@@ -59,7 +61,21 @@ public class BookingService {
                             .orElseThrow(
                                     () -> new BusinessException("SERVICE_NOT_FOUND", "Không tìm thấy phòng khách sạn"));
 
-                    if (room.getTotalRooms() < itemReq.getQuantity()) {
+                    // Kiểm tra phòng trống theo ngày
+                    if (itemReq.getCheckInDate() != null && itemReq.getCheckOutDate() != null) {
+                        int bookedQuantity = bookingItemRepository.countBookedQuantityInRange(
+                                itemReq.getServiceId(),
+                                ServiceType.HOTEL,
+                                itemReq.getCheckInDate(),
+                                itemReq.getCheckOutDate());
+
+                        if (room.getTotalRooms() - bookedQuantity < itemReq.getQuantity()) {
+                            throw new BusinessException("OUT_OF_STOCK",
+                                    "Khách sạn hiện chỉ còn " + (room.getTotalRooms() - bookedQuantity)
+                                            + " phòng trống loại " + room.getRoomType() + " cho khoảng thời gian này");
+                        }
+                    } else if (room.getTotalRooms() < itemReq.getQuantity()) {
+                        // Fallback cho trường hợp không có ngày
                         throw new BusinessException("OUT_OF_STOCK",
                                 "Khách sạn không còn đủ phòng " + room.getRoomType());
                     }
@@ -87,6 +103,8 @@ public class BookingService {
                     .serviceId(itemReq.getServiceId())
                     .quantity(itemReq.getQuantity())
                     .priceAtBooking(price)
+                    .checkInDate(itemReq.getCheckInDate())
+                    .checkOutDate(itemReq.getCheckOutDate())
                     .build();
 
             items.add(item);
@@ -167,6 +185,8 @@ public class BookingService {
                         .serviceType(item.getServiceType().name())
                         .quantity(item.getQuantity())
                         .price(item.getPriceAtBooking())
+                        .checkInDate(item.getCheckInDate())
+                        .checkOutDate(item.getCheckOutDate())
                         .build()).collect(Collectors.toList()))
                 .build();
     }

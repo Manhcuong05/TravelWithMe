@@ -112,6 +112,7 @@ public class HotelService {
                         .amenities(fromJson(room.getAmenitiesJson(), new TypeReference<List<String>>() {
                         }))
                         .build())
+                .sorted((r1, r2) -> Double.compare(r1.getPricePerNight(), r2.getPricePerNight()))
                 .collect(Collectors.toList()));
 
         return response;

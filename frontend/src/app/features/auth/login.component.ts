@@ -11,22 +11,22 @@ import { AuthService } from '../../core/services/auth.service';
   template: `
     <div class="auth-container">
       <div class="auth-card glass-effect animate-fade-in">
-        <h2 class="luxury-font">Welcome Back</h2>
-        <p class="subtitle">Please enter your details to sign in</p>
+        <h2 class="luxury-font">Chào Mừng Trở Lại</h2>
+        <p class="subtitle">Vui lòng nhập thông tin để đăng nhập</p>
         
         <form (ngSubmit)="onLogin()" #loginForm="ngForm" class="auth-form">
           <div class="form-group">
-            <label>Email Address</label>
+            <label>Địa chỉ Email</label>
             <input 
               type="email" 
               name="email" 
               [(ngModel)]="credentials.email" 
               required 
-              placeholder="your@email.com">
+              placeholder="email@cua-ban.com">
           </div>
           
           <div class="form-group">
-            <label>Password</label>
+            <label>Mật khẩu</label>
             <input 
               type="password" 
               name="password" 
@@ -40,12 +40,12 @@ import { AuthService } from '../../core/services/auth.service';
           </div>
           
           <button type="submit" class="btn-gold w-full" [disabled]="loading">
-            {{ loading ? 'Signing In...' : 'Sign In' }}
+            {{ loading ? 'Đang đăng nhập...' : 'Đăng Nhập' }}
           </button>
         </form>
         
         <p class="footer-text">
-          Don't have an account? <a routerLink="/auth/register">Join Now</a>
+          Chưa có tài khoản? <a routerLink="/auth/register">Đăng ký ngay</a>
         </p>
       </div>
     </div>
@@ -135,12 +135,12 @@ export class LoginComponent {
         if (res.success) {
           this.router.navigate(['/']);
         } else {
-          this.errorMessage = res.message || 'Login failed. Please try again.';
+          this.errorMessage = res.message || 'Đăng nhập thất bại. Vui lòng thử lại.';
           this.loading = false;
         }
       },
       error: (err: any) => {
-        this.errorMessage = err.error?.message || 'An error occurred during login.';
+        this.errorMessage = err.error?.message || 'Đã có lỗi xảy ra trong quá trình đăng nhập.';
         this.loading = false;
       }
     });

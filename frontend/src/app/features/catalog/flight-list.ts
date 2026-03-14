@@ -3,15 +3,15 @@ import { CommonModule } from '@angular/common';
 import { CatalogService, Flight } from '../../core/services/catalog.service';
 
 @Component({
-    selector: 'app-flight-list',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
+  selector: 'app-flight-list',
+  standalone: true,
+  imports: [CommonModule],
+  template: `
     <section class="catalog-page animate-fade-in">
       <div class="container">
         <div class="page-header">
-          <h1 class="luxury-font">First Class Journeys</h1>
-          <p>Luxury air travel with world-renowned airlines and exceptional service.</p>
+          <h1 class="luxury-font">Chuyến Bay Hạng Nhất</h1>
+          <p>Trải nghiệm hàng không đẳng cấp với những hãng bay hàng đầu thế giới.</p>
         </div>
 
         <div class="flight-list" *ngIf="!loading()">
@@ -20,34 +20,34 @@ import { CatalogService, Flight } from '../../core/services/catalog.service';
               <div class="logo luxury-font">{{ flight.airline[0] }}</div>
               <div>
                 <div class="airline-name">{{ flight.airline }}</div>
-                <div class="flight-num">Flight {{ flight.flightNumber }}</div>
+                <div class="flight-num">Chuyến bay {{ flight.flightNumber }}</div>
               </div>
             </div>
             
             <div class="route-info">
               <div class="stop">
-                <div class="time">{{ flight.departureTime | date:'shortTime' }}</div>
+                <div class="time">{{ flight.departureTime | date:'HH:mm' }}</div>
                 <div class="city">{{ flight.departure }}</div>
               </div>
               <div class="path-line">
                 <span>✈</span>
               </div>
               <div class="stop text-right">
-                <div class="time">Arriving</div>
+                <div class="time">Đến</div>
                 <div class="city">{{ flight.arrival }}</div>
               </div>
             </div>
 
             <div class="price-action">
-              <div class="price">From <span>{{ flight.price | number }} VNĐ</span></div>
-              <button class="btn-gold">Select Flight</button>
+              <div class="price">Giá từ <span>{{ flight.price | number }} VNĐ</span></div>
+              <button class="btn-gold">Chọn chuyến bay</button>
             </div>
           </div>
         </div>
       </div>
     </section>
   `,
-    styles: [`
+  styles: [`
     .catalog-page { padding: 150px 0 100px; min-height: 100vh; }
     .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
     .page-header { text-align: center; margin-bottom: 60px; }
@@ -73,16 +73,16 @@ import { CatalogService, Flight } from '../../core/services/catalog.service';
   `]
 })
 export class FlightListComponent implements OnInit {
-    private service = inject(CatalogService);
-    flights = signal<Flight[]>([]);
-    loading = signal(true);
+  private service = inject(CatalogService);
+  flights = signal<Flight[]>([]);
+  loading = signal(true);
 
-    ngOnInit() {
-        this.service.getFlights().subscribe({
-            next: (res) => {
-                if (res.success) this.flights.set(res.data);
-                this.loading.set(false);
-            }
-        });
-    }
+  ngOnInit() {
+    this.service.getFlights().subscribe({
+      next: (res) => {
+        if (res.success) this.flights.set(res.data);
+        this.loading.set(false);
+      }
+    });
+  }
 }
