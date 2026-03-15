@@ -8,6 +8,7 @@ export const routes: Routes = [
     { path: 'hotels', loadComponent: () => import('./features/catalog/hotel-list').then(m => m.HotelListComponent) },
     { path: 'hotels/:id', loadComponent: () => import('./features/catalog/hotel-detail').then(m => m.HotelDetailComponent) },
     { path: 'tours', loadComponent: () => import('./features/catalog/tour-list').then(m => m.TourListComponent) },
+    { path: 'tours/:id', loadComponent: () => import('./features/catalog/tour-detail').then(m => m.TourDetailComponent) },
     { path: 'flights', loadComponent: () => import('./features/catalog/flight-list').then(m => m.FlightListComponent) },
     { path: 'pois', loadComponent: () => import('./features/catalog/poi-list').then(m => m.PoiListComponent) },
     { path: 'bookings', loadComponent: () => import('./features/booking/booking-list.component').then(m => m.BookingListComponent) },

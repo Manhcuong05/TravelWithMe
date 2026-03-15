@@ -39,6 +39,14 @@ public class Tour {
     @Column(columnDefinition = "TEXT")
     private String imagesJson;
 
+    // Combo Features
+    private String hotelId;
+    private String flightId;
+    @Column(columnDefinition = "TEXT")
+    private String poiIds; // Comma-separated or JSON list of POI IDs
+    @Column(columnDefinition = "TEXT")
+    private String aiSuggestions;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 }

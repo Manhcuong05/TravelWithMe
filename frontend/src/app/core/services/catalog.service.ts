@@ -11,6 +11,12 @@ export interface Tour {
     duration: string;
     imageUrl?: string;
     description: string;
+    durationDays?: number;
+    highlights?: string[];
+    hotelId?: string;
+    flightId?: string;
+    poiIds?: string[];
+    aiSuggestions?: string;
 }
 
 export interface Flight {
@@ -42,6 +48,10 @@ export class CatalogService {
         const params: any = {};
         if (location) params.location = location;
         return this.http.get<ApiResponse<Tour[]>>('/api/tours', { params });
+    }
+
+    getTour(id: string): Observable<ApiResponse<Tour>> {
+        return this.http.get<ApiResponse<Tour>>(`/api/tours/item/${id}`);
     }
 
     getFlights(departure?: string, arrival?: string): Observable<ApiResponse<Flight[]>> {

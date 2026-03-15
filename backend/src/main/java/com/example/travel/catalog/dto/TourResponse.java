@@ -18,4 +18,10 @@ public class TourResponse {
     private double price;
     private int durationDays;
     private List<String> highlights;
+
+    // Combo Details
+    private String hotelId;
+    private String flightId;
+    private List<String> poiIds;
+    private String aiSuggestions;
 }

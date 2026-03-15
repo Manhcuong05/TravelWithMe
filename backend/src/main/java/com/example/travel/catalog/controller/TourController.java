@@ -20,6 +20,20 @@ public class TourController {
         return ApiResponse.success(tourService.searchTours(location));
     }
 
+    @GetMapping("/item/{id}")
+    public ApiResponse<TourResponse> getTourById(@PathVariable String id) {
+        System.out.println("DEBUG: Hit getTourById with ID: " + id);
+        try {
+            TourResponse response = tourService.getTourById(id);
+            System.out.println("DEBUG: Successfully found tour: " + response.getTitle());
+            return ApiResponse.success(response);
+        } catch (Exception e) {
+            System.err.println("DEBUG: Error in getTourById: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
     @PostMapping
     @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CTV')")
     public ApiResponse<TourResponse> createTour(

@@ -4,6 +4,7 @@ import com.example.travel.catalog.dto.TourRequest;
 import com.example.travel.catalog.dto.TourResponse;
 import com.example.travel.catalog.entity.Tour;
 import com.example.travel.catalog.repository.TourRepository;
+import com.example.travel.core.exception.BusinessException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -79,15 +80,38 @@ public class TourService {
                 .collect(Collectors.toList());
     }
 
+    public TourResponse getTourById(String id) {
+        log.info("Fetching tour with ID: {}", id);
+        return tourRepository.findById(id)
+                .map(this::mapToResponse)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tour với ID: " + id));
+    }
+
     private TourResponse mapToResponse(Tour tour) {
-        return TourResponse.builder()
-                .id(tour.getId())
-                .title(tour.getTitle())
-                .description(tour.getDescription())
-                .location(tour.getLocation())
-                .price(tour.getPrice())
-                .durationDays(tour.getDurationDays())
-                .highlights(tour.getHighlights() != null ? Arrays.asList(tour.getHighlights().split(",")) : null)
-                .build();
+        log.info("Mapping tour: {}", tour.getId());
+        try {
+            TourResponse response = TourResponse.builder()
+                    .id(tour.getId())
+                    .title(tour.getTitle())
+                    .description(tour.getDescription())
+                    .location(tour.getLocation())
+                    .price(tour.getPrice())
+                    .durationDays(tour.getDurationDays())
+                    .highlights(tour.getHighlights() != null && !tour.getHighlights().isEmpty()
+                            ? Arrays.asList(tour.getHighlights().split(","))
+                            : List.of())
+                    .hotelId(tour.getHotelId())
+                    .flightId(tour.getFlightId())
+                    .poiIds(tour.getPoiIds() != null && !tour.getPoiIds().isEmpty()
+                            ? Arrays.asList(tour.getPoiIds().split(","))
+                            : List.of())
+                    .aiSuggestions(tour.getAiSuggestions())
+                    .build();
+            log.info("Successfully mapped tour {}", tour.getId());
+            return response;
+        } catch (Exception e) {
+            log.error("Error mapping tour {}", tour.getId(), e);
+            throw new RuntimeException("Lỗi hệ thống khi xử lý dữ liệu tour: " + e.getMessage());
+        }
     }
 }

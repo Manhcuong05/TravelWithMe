@@ -1,11 +1,12 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CatalogService, Tour } from '../../core/services/catalog.service';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-tour-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   template: `
     <section class="catalog-page animate-fade-in">
       <div class="container">
@@ -24,7 +25,7 @@ import { CatalogService, Tour } from '../../core/services/catalog.service';
               <h3>{{ tour.title }}</h3>
               <p class="desc">{{ tour.description | slice:0:100 }}...</p>
               <div class="price">Giá từ <span>{{ tour.price | number }} VNĐ</span></div>
-              <button class="btn-gold w-full mt-20">Đặt Hành Trình</button>
+              <button class="btn-gold w-full mt-20" [routerLink]="['/tours', tour.id]">Xem chi tiết</button>
             </div>
           </div>
         </div>
@@ -51,6 +52,7 @@ import { CatalogService, Tour } from '../../core/services/catalog.service';
 })
 export class TourListComponent implements OnInit {
   private service = inject(CatalogService);
+  private router = inject(Router);
   tours = signal<Tour[]>([]);
   loading = signal(true);
 
