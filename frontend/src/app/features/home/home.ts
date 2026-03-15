@@ -54,6 +54,15 @@ import { RouterLink } from '@angular/router';
             <a routerLink="/tours" class="link-gold">Xem Tour →</a>
           </div>
         </div>
+
+        <div class="card glass-effect animate-fade-in" style="animation-delay: 0.6s">
+          <div class="card-img" style="background-image: url('https://images.unsplash.com/photo-1548013146-72479768bbaa?auto=format&fit=crop&q=80&w=600')"></div>
+          <div class="card-body">
+            <h3>Địa Điểm Thượng Lưu</h3>
+            <p>Những danh lam thắng cảnh và thánh địa bí mật.</p>
+            <a routerLink="/pois" class="link-gold">Khám Phá POI →</a>
+          </div>
+        </div>
       </div>
     </section>
   `,

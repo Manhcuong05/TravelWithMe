@@ -35,9 +35,9 @@ import { ReviewsComponent } from '../review/review';
                    class="room-card glass-effect hover-up"
                    [class.selected]="selectedRoomId() === room.id"
                    (click)="selectedRoomId.set(room.id)">
-                
-                <div class="room-badge" *ngIf="i === 0">Giá tốt nhất</div>
-                <div class="room-badge premium" *ngIf="last && i !== 0">Thượng hạng</div>
+                <div class="room-badge" [ngClass]="getBadgeClass(room.classification)" *ngIf="room.classification && room.classification !== 'STANDARD'">
+                  {{ getClassificationLabel(room.classification) }}
+                </div>
 
                 <div class="room-info">
                   <h3>{{ room.roomType }}</h3>
@@ -147,9 +147,9 @@ import { ReviewsComponent } from '../review/review';
     .w-full { width: 100%; }
     .disclaimer { font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 20px; line-height: 1.4; }
     .room-card.selected { border: 2px solid var(--gold-primary); background: rgba(184, 134, 11, 0.15); box-shadow: 0 0 30px rgba(184, 134, 11, 0.2); }
-    
     .room-badge { position: absolute; top: -12px; left: 20px; background: #2e7d32; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-    .room-badge.premium { background: var(--gold-gradient); color: var(--bg-primary); }
+    .room-badge.premium { background: var(--bg-accent); color: var(--gold-secondary); border: 1px solid rgba(212, 175, 55, 0.3); }
+    .room-badge.luxury { background: var(--gold-gradient); color: var(--bg-primary); }
 
     .capacity-info { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px; }
     .separator { color: var(--glass-border); padding: 0 5px; }
@@ -217,5 +217,22 @@ export class HotelDetailComponent implements OnInit {
         }
       }
     });
+  }
+
+  getClassificationLabel(classification: string | undefined): string {
+    switch (classification) {
+      case 'BEST_VALUE': return 'Giá tốt nhất';
+      case 'PREMIUM': return 'Cao cấp';
+      case 'LUXURY': return 'Thượng hạng';
+      default: return '';
+    }
+  }
+
+  getBadgeClass(classification: string | undefined): string {
+    switch (classification) {
+      case 'PREMIUM': return 'premium';
+      case 'LUXURY': return 'luxury';
+      default: return ''; // BEST_VALUE uses default green
+    }
   }
 }

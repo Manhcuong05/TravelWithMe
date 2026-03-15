@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { BookingService, BookingResponse } from '../../core/services/booking.service';
+import { PaymentService } from '../../core/services/payment.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-booking-detail',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   template: `
     <section class="detail-page animate-fade-in" *ngIf="booking()">
       <div class="container">
@@ -53,8 +55,30 @@ import { BookingService, BookingResponse } from '../../core/services/booking.ser
               <p>Quét mã QR dưới đây bằng ứng dụng ngân hàng của bạn để hoàn tất giao dịch.</p>
               
               <div class="qr-container">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=TravelWithMe-Payment-{{booking()?.id}}" alt="Payment QR">
+                <img [src]="getVietQRUrl()" alt="Payment QR">
                 <div class="qr-overlay luxury-font">VIETQR</div>
+              </div>
+
+              <!-- Promo Code Section -->
+              <div class="promo-section" *ngIf="!promoApplied()">
+                <div class="input-group">
+                  <input type="text" [(ngModel)]="promoCode" placeholder="Nhập mã khuyến mãi" class="promo-input">
+                  <button (click)="applyPromo()" class="btn-apply" [disabled]="!promoCode() || applyingPromo()">
+                    {{ applyingPromo() ? 'Đang áp dụng...' : 'Áp dụng' }}
+                  </button>
+                </div>
+                <div class="promo-error" *ngIf="promoError()">{{ promoError() }}</div>
+              </div>
+              <div class="promo-success" *ngIf="promoApplied()">
+                <div class="success-header">
+                  <div class="icon">✓</div>
+                  Mã Khuyến Mãi Đã Được Áp Dụng
+                </div>
+                <div class="discount-calculation" *ngIf="originalTotal()">
+                  <div class="calc-row">Số tiền gốc: <span class="calc-val">{{ originalTotal() | number }} đ</span></div>
+                  <div class="calc-row text-green">Giảm giá: <span class="calc-val">- {{ originalTotal()! - booking()!.totalAmount | number }} đ</span></div>
+                  <div class="calc-row final">Còn lại: <span class="calc-val text-gold">{{ booking()!.totalAmount | number }} đ</span></div>
+                </div>
               </div>
 
               <div class="sim-actions">
@@ -103,11 +127,30 @@ import { BookingService, BookingResponse } from '../../core/services/booking.ser
     .payment-card { text-align: center; position: sticky; top: 120px; }
     .payment-card h3 { margin-bottom: 20px; font-size: 1.5rem; }
     .payment-card p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 30px; line-height: 1.5; }
-    .qr-container { padding: 20px; background: white; border-radius: 16px; display: inline-block; margin-bottom: 30px; position: relative; }
+    .qr-container { padding: 20px; background: white; border-radius: 16px; display: inline-block; margin-bottom: 30px; position: relative; width: 100%; max-width: 300px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .qr-container img { width: 100%; height: auto; display: block; border-radius: 8px; }
     .qr-overlay { position: absolute; bottom: 5px; right: 5px; font-size: 10px; color: #ccc; }
     
-    .sim-actions { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--glass-border); }
+    .sim-actions { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--glass-border); text-align: left; }
     .hint { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px; }
+
+    .promo-section { margin-bottom: 20px; text-align: left;}
+    .input-group { display: flex; gap: 10px; }
+    .promo-input { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px 15px; color: white; outline: none; transition: border-color 0.2s; font-family: monospace; text-transform: uppercase;}
+    .promo-input:focus { border-color: var(--gold-primary); }
+    .btn-apply { background: rgba(212, 175, 55, 0.1); color: var(--gold-primary); border: 1px solid rgba(212, 175, 55, 0.3); padding: 0 20px; border-radius: 10px; cursor: pointer; transition: all 0.2s; font-weight: 600; }
+    .btn-apply:hover:not([disabled]) { background: rgba(212, 175, 55, 0.2); border-color: var(--gold-primary); }
+    .btn-apply[disabled] { opacity: 0.5; cursor: not-allowed; }
+    .promo-error { color: #ef4444; font-size: 0.8rem; margin-top: 5px; }
+    .promo-success { background: rgba(16, 185, 129, 0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.2); margin-bottom: 20px; font-size: 0.9rem; }
+    .success-header { display: flex; align-items: center; gap: 8px; justify-content: center; color: #10b981; font-weight: 600; margin-bottom: 12px; }
+    .success-header .icon { background: #10b981; color: #000; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.7rem; }
+    .discount-calculation { border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 10px; }
+    .calc-row { display: flex; justify-content: space-between; margin-bottom: 8px; color: var(--text-secondary); }
+    .calc-val { font-weight: 600; color: white; }
+    .text-green { color: #10b981; }
+    .text-gold { color: var(--gold-primary); }
+    .calc-row.final { border-top: 1px solid rgba(255,255,255,0.05); padding-top: 8px; margin-top: 5px; color: white; }
 
     .success-card { text-align: center; border-color: #22c55e; }
     .success-icon { width: 60px; height: 60px; background: #22c55e; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 25px; }
@@ -121,10 +164,15 @@ import { BookingService, BookingResponse } from '../../core/services/booking.ser
 export class BookingDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private service = inject(BookingService);
-  private http = inject(HttpClient);
+  private paymentService = inject(PaymentService);
 
   booking = signal<BookingResponse | null>(null);
   simulating = signal<boolean>(false);
+  promoCode = signal<string>('');
+  applyingPromo = signal<boolean>(false);
+  promoError = signal<string>('');
+  promoApplied = signal<boolean>(false);
+  originalTotal = signal<number | null>(null);
 
   ngOnInit() {
     this.loadBooking();
@@ -139,18 +187,65 @@ export class BookingDetailComponent implements OnInit {
     });
   }
 
+  getVietQRUrl(): string {
+    const b = this.booking();
+    if (!b) return '';
+
+    const bankId = 'ICB'; // VietinBank
+    const accountNo = '101880779992';
+    const template = 'compact2';
+    const amount = b.totalAmount;
+    const description = `Thanh Toan Booking ${b.id}`;
+    const accountName = 'TravelWithMe';
+
+    return `https://img.vietqr.io/image/${bankId}-${accountNo}-${template}.png?amount=${amount}&addInfo=${encodeURIComponent(description)}&accountName=${encodeURIComponent(accountName)}`;
+  }
+
+  applyPromo() {
+    if (!this.booking() || !this.promoCode()) return;
+    this.applyingPromo.set(true);
+    this.promoError.set('');
+
+    const currentTotal = this.booking()!.totalAmount;
+
+    this.paymentService.applyPromotion(this.booking()!.id, this.promoCode().toUpperCase()).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.originalTotal.set(currentTotal);
+          this.promoApplied.set(true);
+          this.loadBooking(); // Reload booking to get new price
+        }
+        this.applyingPromo.set(false);
+      },
+      error: (err) => {
+        this.promoError.set(err.error?.message || 'Mã không hợp lệ hoặc đã hết hạn.');
+        this.applyingPromo.set(false);
+      }
+    });
+  }
+
   simulatePaymentSuccess() {
     if (!this.booking()) return;
     this.simulating.set(true);
 
-    // Call the backend simulation webhook handler
-    // Based on earlier conversation, the endpoint is /api/payments/webhook/simulate-success?bookingId=...
-    this.http.post<any>(`/api/payments/webhook/simulate-success?bookingId=${this.booking()!.id}`, {}).subscribe({
-      next: () => {
-        this.loadBooking(); // Refresh to show success state
+    const data = {
+      bookingId: this.booking()!.id,
+      amount: this.booking()!.totalAmount,
+      paymentMethod: 'VietQR'
+    };
+
+    this.paymentService.processPayment(data).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.loadBooking(); // Refresh to show success state
+        }
         this.simulating.set(false);
       },
-      error: () => this.simulating.set(false)
+      error: (err) => {
+        console.error("Lỗi giao dịch", err);
+        alert(err.error?.message || 'Có lỗi xảy ra trong quá trình thanh toán.');
+        this.simulating.set(false);
+      }
     });
   }
 }

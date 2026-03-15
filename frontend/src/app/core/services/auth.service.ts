@@ -9,6 +9,7 @@ import { ApiResponse, AuthResponse, User } from '../../data/models/auth.model';
 export class AuthService {
     private readonly AUTH_URL = '/api/auth';
     private readonly TOKEN_KEY = 'accessToken';
+    private readonly USER_KEY = 'currentUser';
 
     public currentUser = signal<User | null>(null);
     public isAuthenticated = signal<boolean>(false);
@@ -19,9 +20,14 @@ export class AuthService {
 
     private loadSession() {
         const token = localStorage.getItem(this.TOKEN_KEY);
-        if (token) {
+        const userJson = localStorage.getItem(this.USER_KEY);
+        if (token && userJson) {
             this.isAuthenticated.set(true);
-            // In a real app, we might want to fetch user profile here
+            try {
+                this.currentUser.set(JSON.parse(userJson));
+            } catch (e) {
+                this.logout();
+            }
         }
     }
 
@@ -30,8 +36,11 @@ export class AuthService {
             tap(res => {
                 if (res.success && res.data.accessToken) {
                     localStorage.setItem(this.TOKEN_KEY, res.data.accessToken);
+                    if (res.data.user) {
+                        localStorage.setItem(this.USER_KEY, JSON.stringify(res.data.user));
+                        this.currentUser.set(res.data.user);
+                    }
                     this.isAuthenticated.set(true);
-                    if (res.data.user) this.currentUser.set(res.data.user);
                 }
             })
         );
@@ -43,6 +52,7 @@ export class AuthService {
 
     logout() {
         localStorage.removeItem(this.TOKEN_KEY);
+        localStorage.removeItem(this.USER_KEY);
         this.isAuthenticated.set(false);
         this.currentUser.set(null);
     }

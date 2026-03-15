@@ -109,6 +109,7 @@ public class HotelService {
                         .pricePerNight(room.getPricePerNight())
                         .capacity(room.getCapacity())
                         .totalRooms(room.getTotalRooms())
+                        .classification(room.getClassification())
                         .amenities(fromJson(room.getAmenitiesJson(), new TypeReference<List<String>>() {
                         }))
                         .build())

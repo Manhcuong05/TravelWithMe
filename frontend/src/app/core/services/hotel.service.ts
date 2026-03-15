@@ -10,6 +10,7 @@ export interface HotelRoom {
     capacity: number;
     totalRooms: number;
     amenities: string[];
+    classification?: string;
 }
 
 export interface Hotel {
@@ -41,5 +42,29 @@ export class HotelService {
 
     getHotel(id: string): Observable<ApiResponse<Hotel>> {
         return this.http.get<ApiResponse<Hotel>>(`${this.API_URL}/${id}`);
+    }
+
+    createHotel(hotel: any): Observable<ApiResponse<Hotel>> {
+        return this.http.post<ApiResponse<Hotel>>(this.API_URL, hotel);
+    }
+
+    updateHotel(id: string, hotel: any): Observable<ApiResponse<Hotel>> {
+        return this.http.put<ApiResponse<Hotel>>(`${this.API_URL}/${id}`, hotel);
+    }
+
+    deleteHotel(id: string): Observable<ApiResponse<void>> {
+        return this.http.delete<ApiResponse<void>>(`${this.API_URL}/${id}`);
+    }
+
+    addRoom(hotelId: string, room: any): Observable<ApiResponse<HotelRoom>> {
+        return this.http.post<ApiResponse<HotelRoom>>(`${this.API_URL}/${hotelId}/rooms`, room);
+    }
+
+    updateRoom(roomId: string, room: any): Observable<ApiResponse<HotelRoom>> {
+        return this.http.put<ApiResponse<HotelRoom>>(`/api/rooms/${roomId}`, room);
+    }
+
+    deleteRoom(roomId: string): Observable<ApiResponse<void>> {
+        return this.http.delete<ApiResponse<void>>(`/api/rooms/${roomId}`);
     }
 }

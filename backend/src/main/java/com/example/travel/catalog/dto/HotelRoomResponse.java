@@ -18,4 +18,5 @@ public class HotelRoomResponse {
     private int capacity;
     private int totalRooms;
     private List<String> amenities;
+    private String classification;
 }

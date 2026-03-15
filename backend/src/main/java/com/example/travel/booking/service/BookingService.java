@@ -61,8 +61,15 @@ public class BookingService {
                             .orElseThrow(
                                     () -> new BusinessException("SERVICE_NOT_FOUND", "Không tìm thấy phòng khách sạn"));
 
+                    long nights = 1;
                     // Kiểm tra phòng trống theo ngày
                     if (itemReq.getCheckInDate() != null && itemReq.getCheckOutDate() != null) {
+                        nights = java.time.temporal.ChronoUnit.DAYS.between(itemReq.getCheckInDate(),
+                                itemReq.getCheckOutDate());
+                        if (nights <= 0) {
+                            throw new BusinessException("INVALID_DATES", "Ngày trả phòng phải sau ngày nhận phòng");
+                        }
+
                         int bookedQuantity = bookingItemRepository.countBookedQuantityInRange(
                                 itemReq.getServiceId(),
                                 ServiceType.HOTEL,
@@ -80,7 +87,7 @@ public class BookingService {
                                 "Khách sạn không còn đủ phòng " + room.getRoomType());
                     }
 
-                    price = room.getPricePerNight();
+                    price = room.getPricePerNight() * nights;
                     break;
                 case FLIGHT:
                     Flight flight = flightRepository.findById(itemReq.getServiceId())

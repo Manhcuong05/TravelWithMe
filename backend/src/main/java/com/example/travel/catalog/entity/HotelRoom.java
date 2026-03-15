@@ -31,4 +31,7 @@ public class HotelRoom {
 
     @Column(columnDefinition = "TEXT")
     private String amenitiesJson; // wifi, breakfast, air_con, etc.
+
+    @Column(name = "classification")
+    private String classification; // STANDARD, BEST_VALUE, PREMIUM, LUXURY
 }

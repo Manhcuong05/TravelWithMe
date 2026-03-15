@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +36,7 @@ public class HotelRoomService {
                 .pricePerNight(request.getPricePerNight())
                 .capacity(request.getCapacity())
                 .totalRooms(request.getTotalRooms())
+                .classification(request.getClassification())
                 .amenitiesJson(toJson(request.getAmenities()))
                 .build();
 
@@ -52,6 +52,7 @@ public class HotelRoomService {
         room.setPricePerNight(request.getPricePerNight());
         room.setCapacity(request.getCapacity());
         room.setTotalRooms(request.getTotalRooms());
+        room.setClassification(request.getClassification());
         room.setAmenitiesJson(toJson(request.getAmenities()));
 
         return mapToResponse(hotelRoomRepository.save(room));
@@ -93,6 +94,7 @@ public class HotelRoomService {
                 .pricePerNight(room.getPricePerNight())
                 .capacity(room.getCapacity())
                 .totalRooms(room.getTotalRooms())
+                .classification(room.getClassification())
                 .amenities(fromJson(room.getAmenitiesJson(), new TypeReference<List<String>>() {
                 }))
                 .build();

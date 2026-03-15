@@ -4,7 +4,6 @@ import com.example.travel.catalog.dto.TourRequest;
 import com.example.travel.catalog.dto.TourResponse;
 import com.example.travel.catalog.entity.Tour;
 import com.example.travel.catalog.repository.TourRepository;
-import com.example.travel.core.exception.BusinessException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

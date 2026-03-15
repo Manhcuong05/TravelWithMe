@@ -23,20 +23,33 @@ export interface Flight {
     id: string;
     flightNumber: string;
     airline: string;
-    departure: string;
-    arrival: string;
-    price: number;
+    departureCity: string;
+    arrivalCity: string;
+    basePrice: number;
     departureTime: string;
+    arrivalTime: string;
+    aircraft?: string;
+    departureAirport?: string;
+    arrivalAirport?: string;
 }
 
 export interface POI {
     id: string;
     name: string;
-    city: string;
     description: string;
     category: string;
+    city: string;
+    address?: string;
+    latitude?: number;
+    longitude?: number;
+    averageSpend?: number;
     imageUrl?: string;
+    rating?: number;
 }
+
+export type PointOfInterest = POI;
+
+export type { Hotel } from './hotel.service';
 
 @Injectable({
     providedIn: 'root'
@@ -65,5 +78,42 @@ export class CatalogService {
         const params: any = {};
         if (city) params.city = city;
         return this.http.get<ApiResponse<POI[]>>('/api/pois', { params });
+    }
+
+    // Management Methods
+    createTour(tour: any): Observable<ApiResponse<Tour>> {
+        return this.http.post<ApiResponse<Tour>>('/api/tours', tour);
+    }
+
+    updateTour(id: string, tour: any): Observable<ApiResponse<Tour>> {
+        return this.http.put<ApiResponse<Tour>>(`/api/tours/${id}`, tour);
+    }
+
+    deleteTour(id: string): Observable<ApiResponse<void>> {
+        return this.http.delete<ApiResponse<void>>(`/api/tours/${id}`);
+    }
+
+    createFlight(flight: any): Observable<ApiResponse<Flight>> {
+        return this.http.post<ApiResponse<Flight>>('/api/flights', flight);
+    }
+
+    updateFlight(id: string, flight: any): Observable<ApiResponse<Flight>> {
+        return this.http.put<ApiResponse<Flight>>(`/api/flights/${id}`, flight);
+    }
+
+    deleteFlight(id: string): Observable<ApiResponse<void>> {
+        return this.http.delete<ApiResponse<void>>(`/api/flights/${id}`);
+    }
+
+    createPOI(poi: any): Observable<ApiResponse<POI>> {
+        return this.http.post<ApiResponse<POI>>('/api/pois', poi);
+    }
+
+    updatePOI(id: string, poi: any): Observable<ApiResponse<POI>> {
+        return this.http.put<ApiResponse<POI>>(`/api/pois/${id}`, poi);
+    }
+
+    deletePOI(id: string): Observable<ApiResponse<void>> {
+        return this.http.delete<ApiResponse<void>>(`/api/pois/${id}`);
     }
 }

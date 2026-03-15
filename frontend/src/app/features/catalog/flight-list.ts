@@ -27,19 +27,19 @@ import { CatalogService, Flight } from '../../core/services/catalog.service';
             <div class="route-info">
               <div class="stop">
                 <div class="time">{{ flight.departureTime | date:'HH:mm' }}</div>
-                <div class="city">{{ flight.departure }}</div>
+                <div class="city">{{ flight.departureCity }}</div>
               </div>
               <div class="path-line">
                 <span>✈</span>
               </div>
               <div class="stop text-right">
                 <div class="time">Đến</div>
-                <div class="city">{{ flight.arrival }}</div>
+                <div class="city">{{ flight.arrivalCity }}</div>
               </div>
             </div>
 
             <div class="price-action">
-              <div class="price">Giá từ <span>{{ flight.price | number }} VNĐ</span></div>
+              <div class="price">Giá từ <span>{{ flight.basePrice | number }} VNĐ</span></div>
               <button class="btn-gold">Chọn chuyến bay</button>
             </div>
           </div>

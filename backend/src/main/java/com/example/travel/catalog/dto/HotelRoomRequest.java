@@ -26,4 +26,5 @@ public class HotelRoomRequest {
 
     private int totalRooms;
     private List<String> amenities;
+    private String classification;
 }

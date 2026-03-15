@@ -17,6 +17,19 @@ import { AuthService } from '../../core/services/auth.service';
           <li><a routerLink="/itinerary" routerLinkActive="active">Lên Kế Hoạch AI</a></li>
           <li><a routerLink="/hotels" routerLinkActive="active">Khách Sạn</a></li>
           <li><a routerLink="/tours" routerLinkActive="active">Tour Du Lịch</a></li>
+          
+          <!-- Dropdown cho các mục thêm sau -->
+          <li class="dropdown" (mouseenter)="showDropdown = true" (mouseleave)="showDropdown = false">
+            <a href="javascript:void(0)" class="dropdown-toggle" [class.active]="showDropdown">Khác ☰</a>
+            <ul class="dropdown-menu" *ngIf="showDropdown">
+              <li><a routerLink="/flights" routerLinkActive="active">Vé Máy Bay</a></li>
+              <li><a routerLink="/pois" routerLinkActive="active">Địa Điểm (POI)</a></li>
+            </ul>
+          </li>
+          
+          <li *ngIf="authService.currentUser()?.role === 'ADMIN' || authService.currentUser()?.role === 'CTV'">
+            <a routerLink="/management" class="mgmt-link">Quản Trị</a>
+          </li>
         </ul>
 
         <div class="auth-actions">
@@ -87,6 +100,18 @@ import { AuthService } from '../../core/services/auth.service';
       font-size: 0.85rem;
       color: var(--text-secondary);
     }
+    .mgmt-link {
+        color: var(--gold-secondary) !important;
+        font-weight: 700 !important;
+        border: 1px solid rgba(212,175,55,0.3);
+        padding: 5px 12px;
+        border-radius: 15px;
+        background: rgba(212,175,55,0.05);
+    }
+    .mgmt-link:hover {
+        background: rgba(212,175,55,0.15);
+        border-color: var(--gold-primary);
+    }
     .btn-logout {
       background: transparent;
       border: 1px solid var(--glass-border);
@@ -96,10 +121,40 @@ import { AuthService } from '../../core/services/auth.service';
       cursor: pointer;
       font-size: 0.8rem;
     }
+
+    /* Dropdown Styles */
+    .dropdown { position: relative; }
+    .dropdown-toggle { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+    .dropdown-menu {
+      position: absolute;
+      top: 120%;
+      right: -20px;
+      background: rgba(10, 10, 12, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      border-radius: 12px;
+      padding: 10px 0;
+      min-width: 180px;
+      list-style: none;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      animation: fadeInDown 0.2s ease forwards;
+    }
+    .dropdown-menu::before {
+      content: ''; position: absolute; top: -6px; right: 30px;
+      width: 12px; height: 12px; background: rgba(10, 10, 12, 0.95);
+      border-top: 1px solid rgba(212, 175, 55, 0.2);
+      border-left: 1px solid rgba(212, 175, 55, 0.2);
+      transform: rotate(45deg);
+    }
+    .dropdown-menu li { padding: 0; }
+    .dropdown-menu a { display: block; padding: 12px 20px; color: var(--text-secondary); font-size: 0.85rem; }
+    .dropdown-menu a:hover, .dropdown-menu a.active { background: rgba(255,255,255,0.03); color: var(--gold-primary); padding-left: 25px; }
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   `]
 })
 export class NavbarComponent {
   authService = inject(AuthService);
+  showDropdown = false;
 
   logout() {
     this.authService.logout();
