@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,7 +26,7 @@ public class ItineraryService {
         private final UserRepository userRepository;
         private final ObjectMapper objectMapper;
 
-        public ItineraryResponse createItinerary(String destination, int days, String preferences) {
+        public ItineraryResponse createItinerary(String destination, Integer days, String preferences) {
                 String userEmail = SecurityUtil.getCurrentUserEmail();
                 User user = userRepository.findByEmail(userEmail)
                                 .orElseThrow(() -> {
@@ -45,8 +46,6 @@ public class ItineraryService {
                 String rawJson = geminiService.generateItinerary(prompt);
                 log.info("Gemini raw response length: {}", rawJson != null ? rawJson.length() : 0);
                 log.debug("Gemini raw response: {}", rawJson);
-                // In a real app, you would parse the specific JSON from Gemini's full response.
-                // For this demo, we store the full response as the generated JSON.
 
                 Itinerary itinerary = Itinerary.builder()
                                 .userId(user.getId())
@@ -54,6 +53,7 @@ public class ItineraryService {
                                 .durationDays(days)
                                 .userPreferences(preferences)
                                 .generatedContentJson(rawJson)
+                                .saved(false)
                                 .build();
 
                 Itinerary saved = itineraryRepository.save(itinerary);
@@ -65,8 +65,17 @@ public class ItineraryService {
                 User user = userRepository.findByEmail(userEmail)
                                 .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "Người dùng không tồn tại"));
                 return itineraryRepository.findByUserId(user.getId()).stream()
+                                .filter(it -> it.getSaved() != null && it.getSaved())
                                 .map(this::mapToResponse)
                                 .collect(Collectors.toList());
+        }
+
+        @Transactional
+        public ItineraryResponse saveItinerary(String id) {
+                Itinerary itinerary = itineraryRepository.findById(id)
+                                .orElseThrow(() -> new BusinessException("NOT_FOUND", "Không tìm thấy lịch trình"));
+                itinerary.setSaved(true);
+                return mapToResponse(itineraryRepository.save(itinerary));
         }
 
         private ItineraryResponse mapToResponse(Itinerary itinerary) {

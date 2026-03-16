@@ -78,6 +78,7 @@ public class AuthService {
                                 .fullName(user.getFullName())
                                 .role(user.getRole())
                                 .phone(user.getPhone())
+                                .avatarUrl(user.getAvatarUrl())
                                 .build();
         }
 
@@ -90,6 +91,7 @@ public class AuthService {
                                                 .fullName(user.getFullName())
                                                 .role(user.getRole())
                                                 .phone(user.getPhone())
+                                                .avatarUrl(user.getAvatarUrl())
                                                 .build())
                                 .build();
         }

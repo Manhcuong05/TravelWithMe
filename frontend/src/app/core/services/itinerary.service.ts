@@ -14,8 +14,11 @@ export interface ItineraryDay {
 }
 
 export interface ItineraryResponse {
+    id?: string;
     title: string;
     destination: string;
+    durationDays: number;
+    userPreferences?: string;
     days: ItineraryDay[];
 }
 
@@ -33,5 +36,9 @@ export class ItineraryService {
 
     getMyItineraries(): Observable<ApiResponse<ItineraryResponse[]>> {
         return this.http.get<ApiResponse<ItineraryResponse[]>>(`${this.API_URL}/my`);
+    }
+
+    save(id: string): Observable<ApiResponse<ItineraryResponse>> {
+        return this.http.put<ApiResponse<ItineraryResponse>>(`${this.API_URL}/${id}/save`, {});
     }
 }

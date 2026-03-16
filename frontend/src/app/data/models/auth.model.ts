@@ -4,6 +4,7 @@ export interface User {
     fullName: string;
     role: 'ADMIN' | 'CTV' | 'TRAVELER';
     phone?: string;
+    avatarUrl?: string;
 }
 
 export interface AuthResponse {

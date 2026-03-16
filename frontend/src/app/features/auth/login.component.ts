@@ -132,16 +132,20 @@ export class LoginComponent {
 
     this.authService.login(this.credentials).subscribe({
       next: (res: any) => {
-        if (res.success) {
-          this.router.navigate(['/']);
-        } else {
-          this.errorMessage = res.message || 'Đăng nhập thất bại. Vui lòng thử lại.';
-          this.loading = false;
-        }
+        setTimeout(() => {
+          if (res.success) {
+            this.router.navigate(['/']);
+          } else {
+            this.errorMessage = res.message || 'Đăng nhập thất bại. Vui lòng thử lại.';
+            this.loading = false;
+          }
+        });
       },
       error: (err: any) => {
-        this.errorMessage = err.error?.message || 'Đã có lỗi xảy ra trong quá trình đăng nhập.';
-        this.loading = false;
+        setTimeout(() => {
+          this.errorMessage = err.error?.message || 'Đã có lỗi xảy ra trong quá trình đăng nhập.';
+          this.loading = false;
+        });
       }
     });
   }

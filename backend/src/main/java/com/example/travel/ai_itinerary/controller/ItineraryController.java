@@ -31,4 +31,10 @@ public class ItineraryController {
     public ApiResponse<List<ItineraryResponse>> getMyItineraries() {
         return ApiResponse.success(itineraryService.getUserItineraries());
     }
+
+    @PutMapping("/{id}/save")
+    @PreAuthorize("hasAnyRole('TRAVELER', 'CTV', 'ADMIN')")
+    public ApiResponse<ItineraryResponse> save(@PathVariable String id) {
+        return ApiResponse.success(itineraryService.saveItinerary(id), "Đã lưu vào danh sách yêu thích");
+    }
 }

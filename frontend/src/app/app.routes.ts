@@ -15,6 +15,8 @@ export const routes: Routes = [
     { path: "bookings", loadComponent: () => import("./features/booking/booking-list.component").then(m => m.BookingListComponent) },
     { path: "bookings/:id", loadComponent: () => import("./features/booking/booking-detail.component").then(m => m.BookingDetailComponent) },
     { path: "itinerary", loadComponent: () => import("./features/itinerary/itinerary").then(m => m.ItineraryComponent) },
+    { path: "profile", loadComponent: () => import("./features/auth/profile").then(m => m.ProfileComponent) },
+    { path: "favorites", loadComponent: () => import("./features/favorites/favorites").then(m => m.FavoritesComponent) },
     {
         path: "management",
         loadComponent: () => import("./features/admin/layout/admin-layout").then(m => m.AdminLayoutComponent),

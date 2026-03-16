@@ -24,13 +24,16 @@ public class Itinerary {
 
     private String destination;
 
-    private int durationDays;
+    private Integer durationDays;
 
     @Column(columnDefinition = "TEXT")
     private String userPreferences; // User's custom request/preferences
 
     @Column(columnDefinition = "TEXT")
     private String generatedContentJson; // The JSON itinerary returned by Gemini
+
+    @Builder.Default
+    private Boolean saved = false;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

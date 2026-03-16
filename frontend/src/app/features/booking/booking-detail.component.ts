@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { BookingService, BookingResponse } from '../../core/services/booking.service';
 import { PaymentService } from '../../core/services/payment.service';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-booking-detail',
@@ -81,8 +82,8 @@ import { FormsModule } from '@angular/forms';
                 </div>
               </div>
 
-              <div class="sim-actions">
-                <p class="hint">Mô phỏng thanh toán thành công để kiểm tra:</p>
+              <div class="sim-actions" *ngIf="authService.currentUser()?.role === 'ADMIN' || authService.currentUser()?.role === 'CTV'">
+                <p class="hint">Mô phỏng thanh toán thành công để kiểm tra (Chỉ dành cho Admin/CTV):</p>
                 <button (click)="simulatePaymentSuccess()" class="btn-gold w-full" [disabled]="simulating()">
                   {{ simulating() ? 'Đang xử lý...' : 'Xác nhận Đã chuyển khoản' }}
                 </button>
@@ -165,6 +166,7 @@ export class BookingDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private service = inject(BookingService);
   private paymentService = inject(PaymentService);
+  public authService = inject(AuthService);
 
   booking = signal<BookingResponse | null>(null);
   simulating = signal<boolean>(false);

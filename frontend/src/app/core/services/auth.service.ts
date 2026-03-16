@@ -57,6 +57,16 @@ export class AuthService {
         this.currentUser.set(null);
     }
 
+    updateProfile(data: any): Observable<ApiResponse<User>> {
+        return this.http.put<ApiResponse<User>>('/api/users/profile', data).pipe(
+            tap(res => {
+                if (res.success) {
+                    this.currentUser.set(res.data);
+                }
+            })
+        );
+    }
+
     getToken(): string | null {
         return localStorage.getItem(this.TOKEN_KEY);
     }

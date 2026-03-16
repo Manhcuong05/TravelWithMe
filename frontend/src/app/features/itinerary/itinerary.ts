@@ -139,7 +139,18 @@ export class ItineraryComponent {
   }
 
   saveSuccess() {
-    alert('Lịch trình đã được lưu vào mục "Chuyến đi của tôi"!');
+    const current = this.itinerary();
+    if (current && current.id) {
+      this.service.save(current.id).subscribe({
+        next: (res) => {
+          if (res.success) {
+            alert('Lịch trình đã được lưu vào mục yêu thích của bạn!');
+          }
+        }
+      });
+    } else {
+      alert('Không thể lưu lịch trình này.');
+    }
   }
 
   print() {

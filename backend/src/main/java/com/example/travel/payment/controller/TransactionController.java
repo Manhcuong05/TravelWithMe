@@ -25,6 +25,7 @@ public class TransactionController {
     }
 
     @PostMapping("/process")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CTV')")
     public ApiResponse<TransactionResponse> processPayment(@Valid @RequestBody TransactionRequest request) {
         return ApiResponse.success(transactionService.processPayment(request), "Thanh toán thành công");
     }
