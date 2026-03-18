@@ -1,130 +1,75 @@
-# 🌍 TravelWithMe - Personalized Travel Suggestion & Booking System
+# 🧪 Dự án Kiểm thử Hệ thống TravelWithMe
 
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Angular](https://img.shields.io/badge/Angular-21-red.svg)](https://angular.io/)
-[![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://www.oracle.com/java/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-
-**TravelWithMe** is a premium, all-in-one travel platform designed to provide personalized travel suggestions and a seamless booking experience. From finding luxury tours to booking flights and hotels, the system integrates advanced AI planning with a robust booking engine.
+Chào mừng bạn đến với kho lưu trữ chính thức của bộ kiểm thử toàn diện cho hệ thống **TravelWithMe**. Repository này đã được tinh chỉnh để tập trung hoàn toàn vào các tài liệu báo cáo, kịch bản kiểm thử và mã nguồn Unit Test, đáp ứng đầy đủ các yêu cầu chuyên sâu về kiểm thử phần mềm.
 
 ---
 
-## ✨ Key Features
+## 📂 Cấu trúc Dự án Kiểm thử
 
-### 🔐 Identity & Security
-- **Secure Authentication:** JWT-based login and registration.
-- **Social Login:** Integrated with Google OAuth2 for a frictionless experience.
-- **Role-based Access Control:** Distinct permissions for Customers and Administrators.
-
-### 🏨 Booking & Catalog
-- **Multi-Service Catalog:** Extensive listings for Tours, Hotels, and Flights.
-- **Advanced Search:** Filter by location, price, rating, and availability.
-- **Dynamic Booking Engine:** Real-time availability checks and instant confirmations.
-
-### 💳 Payments & Notifications
-- **VNPay Integration:** Secure payment gateway for domestic and international cards.
-- **Voucher System:** Apply promotional codes to get discounts on bookings.
-- **Automatic Status Sync:** Real-time updates on booking states (Confirmed, Cancelled, Completed).
-
-### 🤖 AI-Powered Itinerary
-- **AI Itinerary Planner:** Personalized trip planning based on user preferences and historical data.
-
----
-
-## 🛠 Technology Stack
-
-### Backend (Spring Boot)
-- **Framework:** Spring Boot 3.2.5 (Java 17)
-- **Security:** Spring Security & OAuth2 (JWT)
-- **Database:** PostgreSQL with Spring Data JPA
-- **Mapping:** MapStruct for efficient DTO-Entity conversion
-- **Utilities:** Lombok, Dotenv-Java, Hibernate Validator
-- **Testing:** JUnit 5, Mockito, JaCoCo
-
-### Frontend (Angular)
-- **Framework:** Angular 18/19+ (TypeScript)
-- **Styling:** Premium Vanilla CSS / Modern UI components
-- **Testing:** Vitest, JSDom
-- **Formatting:** Prettier, ESLint
-
----
-
-## 📂 Project Structure
+Dự án được tổ chức gọn gàng để dễ dàng tra cứu và đối chiếu:
 
 ```text
 TravelWithMe/
-├── backend/                # Spring Boot Application
-│   ├── src/main/java       # Source code (Controllers, Services, Repos)
-│   ├── src/test/java       # Unit & Integration Tests
-│   └── pom.xml             # Maven dependencies
-├── frontend/               # Angular Workspace
-│   ├── src/app             # Components, Modules, Services
-│   └── package.json        # Frontend dependencies
-├── api_documentation.md    # API Reference & Endpoints
-├── travel_with_me.postman_collection.json # API Testing Collection
-└── seed_data.sql           # Initial Database setup script
+├── testing/                    # 📄 Tòa bộ báo cáo và kịch bản (Phần A - G)
+│   ├── 01_BlackBox_Testing/    # Test cases Hộp đen (EP, BVA, Decision Table)
+│   ├── 02_WhiteBox_Testing/    # Báo cáo kỹ thuật Hộp trắng
+│   ├── 03_Static_Testing/      # Rà soát mã nguồn (Code Review & SRS)
+│   ├── 04_NonFunctional_Testing/# Kịch bản kiểm thử hiệu năng (JMeter)
+│   ├── 06_Bug_Management/      # Nhật ký quản lý lỗi (Bug Log)
+│   ├── 07_Quality_Metrics/     # Chỉ số độ phủ (JaCoCo)
+│   └── 08_Manual_vs_Automation/# Phân tích chiến lược kiểm thử
+├── backend/src/test/java/...   # 💻 Mã nguồn 47 Unit Tests (JUnit 5 + Mockito)
+└── README.md                   # 📘 Tài liệu hướng dẫn này
 ```
 
 ---
 
-## 🚀 Getting Started
+## 📘 Khớp Nội dung với Yêu cầu (Đề bài)
 
-### Prerequisites
-- JDK 17 or higher
-- Node.js & npm (latest LTS recommended)
-- PostgreSQL
-- Maven
+Dưới đây là bảng đối chiếu giữa các mục trong kho lưu trữ này với các yêu cầu thực tế:
 
-### 1. Database Setup
-1. Create a database named `travel_with_me`.
-2. Execute the `seed_data.sql` script to initialize dummy data.
-
-### 2. Backend Configuration
-1. Navigate to `backend/`.
-2. Create a `.env` file or update `src/main/resources/application.yml` with your credentials:
-   ```env
-   DB_URL=jdbc:postgresql://localhost:5432/travel_with_me
-   DB_USERNAME=your_username
-   DB_PASSWORD=your_password
-   JWT_SECRET=your_jwt_secret
-   ```
-3. Run the application:
-   ```bash
-   mvn spring-boot:run
-   ```
-
-### 3. Frontend Setup
-1. Navigate to `frontend/`.
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the development server:
-   ```bash
-   npm start
-   ```
-   The app will be available at `http://localhost:4200`.
+| Yêu cầu đề bài | Vị trí tài liệu / Mã nguồn | Kỹ thuật & Giải trình |
+|:--- |:--- |:--- |
+| **Phần A: Black Box** | [`testing/01_BlackBox_Testing/`](file:///home/ngcuong/Data/TraveWithMe/testing/01_BlackBox_Testing/test_cases.md) | Áp dụng EP (Phân vùng tương đương), BVA (Giá trị biên), Decision Table và Use Case cho 5 tính năng cốt lõi. |
+| **Phần B: White Box** | [`backend/src/test/java/...`](file:///home/ngcuong/Data/TraveWithMe/backend/src/test/java/com/example/travel/) | 47 Unit Tests sử dụng **JUnit 5 & Mockito**. Tập trung phủ các đường dẫn tới hạn (Critical Paths) và xử lý ngoại lệ. |
+| **Phần C: Metrics** | [`testing/07_Quality_Metrics/`](file:///home/ngcuong/Data/TraveWithMe/testing/07_Quality_Metrics/quality_report.md) | Sử dụng **JaCoCo** để đo Instruction/Branch Coverage. Các Service chính đạt độ phủ >80%. |
+| **Phần D: Non-Functional**| [`testing/04_NonFunctional_Testing/`](file:///home/ngcuong/Data/TraveWithMe/testing/04_NonFunctional_Testing/performance_test_plan.md) | Xây dựng kịch bản **Apache JMeter** giả lập 50 người dùng đồng thời để kiểm tra độ trễ (Avg Latency). |
+| **Phần E: Static** | [`testing/03_Static_Testing/`](file:///home/ngcuong/Data/TraveWithMe/testing/03_Static_Testing/code_review_report.md) | Rà soát lỗi bảo mật (Hardcoded JWT Secret) và thiết kế DB (thiếu trường phân loại phòng). |
+| **Phần F: Bug Log** | [`testing/06_Bug_Management/`](file:///home/ngcuong/Data/TraveWithMe/testing/06_Bug_Management/bug_log.md) | Theo dõi 8 lỗi thực tế phát hiện được qua kiểm thử, phân loại theo mức độ nghiêm trọng. |
+| **Phần G: Strategy** | [`testing/08_Manual_vs_Automation/`](file:///home/ngcuong/Data/TraveWithMe/testing/08_Manual_vs_Automation/strategy.md) | Giải trình chiến lược kết hợp (Hybrid): Manual cho UX/UI và Automation cho Regression/Core Logic. |
 
 ---
 
-## 🧪 Quality & Testing
-We prioritize system stability through multiple testing layers:
-- **Unit Testing:** Comprehensive logic verification for Services.
-- **White-box Testing:** Focused on Statement and Branch coverage using JaCoCo.
-- **Manual QA:** Detailed bug tracking via GitHub Issues and Jira.
-- **Performance:** Load testing using Apache JMeter.
+## � Giải trình & Giải thích Kiểm thử (Test Rationale)
+
+### 1. Tại sao chọn JUnit 5 & Mockito?
+- **JUnit 5:** Là framework chuẩn nhất cho Java, cung cấp các Assertion mạnh mẽ (như `assertThrows`).
+- **Mockito:** Cho phép "cô lập" logic của Service. Chúng ta không cần database thật hay server đang chạy, giúp tốc độ thực thi test cực nhanh (47 tests trong < 10 giây).
+
+### 2. Kỹ thuật Hộp trắng (White-box)
+Chúng tôi tập trung vào **Branch Coverage** và **Exception Coverage**. Điều này đảm bảo rằng không chỉ các luồng "Happy Path" (thành công) được test, mà cả các trường hợp dữ liệu sai, lỗi hệ thống cũng được xử lý an toàn, tránh treo ứng dụng.
+
+### 3. Chỉ số JaCoCo
+Chúng tôi chọn JaCoCo vì nó tích hợp sâu vào Maven Build. Kết quả trực quan với các màu xanh/đỏ giúp lập trình viên biết ngay dòng code nào đang "nguy hiểm" vì chưa được kiểm thử.
 
 ---
 
-## 🤝 Contributors
-Developed with ❤️ by **Nhóm SOFT2 - BIT23**
-- [Nguyễn Mạnh Cường](https://github.com/Manhcuong05)
-- [Nguyễn Hoàng Duy]
-- [Vũ Minh Hiển]
-- [Bùi Xuân Quân]
-- [Chu Văn Sơn]
+## 🚀 Hướng dẫn Chạy Kiểm thử
+
+Để tái hiện lại các kết quả trong báo cáo, bạn cần có Java 17+ và thực hiện:
+
+1. **Chạy toàn bộ Unit Test:**
+   ```bash
+   mvn test
+   ```
+
+2. **Sinh báo cáo độ phủ (HTML):**
+   ```bash
+   mvn jacoco:report
+   ```
+   Sau đó mở tệp: `backend/target/site/jacoco/index.html`
 
 ---
 
-## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+*Hệ thống kiểm thử được thực hiện bởi Nhóm SOFT2 - BIT23*  
+*Người thực hiện: Nguyễn Mạnh Cường và đồng đội.*
