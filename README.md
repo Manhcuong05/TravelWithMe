@@ -40,7 +40,7 @@ Dưới đây là bảng đối chiếu giữa các mục trong kho lưu trữ n
 
 ---
 
-## � Giải trình & Giải thích Kiểm thử (Test Rationale)
+##  Giải trình & Giải thích Kiểm thử (Test Rationale)
 
 ### 1. Tại sao chọn JUnit 5 & Mockito?
 - **JUnit 5:** Là framework chuẩn nhất cho Java, cung cấp các Assertion mạnh mẽ (như `assertThrows`).
