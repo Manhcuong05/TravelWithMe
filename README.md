@@ -33,9 +33,9 @@ Dưới đây là bảng đối chiếu giữa các mục trong kho lưu trữ n
 | **Phần A: Black Box** | [`testing/01_BlackBox_Testing/`](file:///home/ngcuong/Data/TraveWithMe/testing/01_BlackBox_Testing/test_cases.md) | Áp dụng EP (Phân vùng tương đương), BVA (Giá trị biên), Decision Table và Use Case cho 5 tính năng cốt lõi. |
 | **Phần B: White Box** | [`backend/src/test/java/...`](file:///home/ngcuong/Data/TraveWithMe/backend/src/test/java/com/example/travel/) | 47 Unit Tests sử dụng **JUnit 5 & Mockito**. Tập trung phủ các đường dẫn tới hạn (Critical Paths) và xử lý ngoại lệ. |
 | **Phần C: Metrics** | [`testing/07_Quality_Metrics/`](file:///home/ngcuong/Data/TraveWithMe/testing/07_Quality_Metrics/quality_report.md) | Sử dụng **JaCoCo** để đo Instruction/Branch Coverage. Các Service chính đạt độ phủ >80%. |
-| **Phần D: Non-Functional**| [`testing/04_NonFunctional_Testing/`](file:///home/ngcuong/Data/TraveWithMe/testing/04_NonFunctional_Testing/performance_test_plan.md) | Xây dựng kịch bản **Apache JMeter** giả lập 50 người dùng đồng thời để kiểm tra độ trễ (Avg Latency). |
+| **Phần D: Quản lý lỗi**| [`testing/04_Bug_Management/`](file:///home/ngcuong/Data/TraveWithMe/testing/04_Bug_Management/bug_log.md) | Quản lý đa nền tảng (**GitHub Tags & Jira Software**) với quy trình Workflow doanh nghiệp (RCA). |
 | **Phần E: Static** | [`testing/03_Static_Testing/`](file:///home/ngcuong/Data/TraveWithMe/testing/03_Static_Testing/code_review_report.md) | Rà soát lỗi bảo mật (Hardcoded JWT Secret) và thiết kế DB (thiếu trường phân loại phòng). |
-| **Phần F: Bug Log** | [`testing/06_Bug_Management/`](file:///home/ngcuong/Data/TraveWithMe/testing/06_Bug_Management/bug_log.md) | Theo dõi 8 lỗi thực tế phát hiện được qua kiểm thử, phân loại theo mức độ nghiêm trọng. |
+| **Phần F: Hiệu năng** | [`testing/06_NonFunctional_Testing/`](file:///home/ngcuong/Data/TraveWithMe/testing/06_NonFunctional_Testing/performance_test_plan.md) | Xây dựng kịch bản **Apache JMeter** giả lập 50 người dùng đồng thời để kiểm tra độ trễ (Avg Latency). |
 | **Phần G: Strategy** | [`testing/08_Manual_vs_Automation/`](file:///home/ngcuong/Data/TraveWithMe/testing/08_Manual_vs_Automation/strategy.md) | Giải trình chiến lược kết hợp (Hybrid): Manual cho UX/UI và Automation cho Regression/Core Logic. |
 
 ---
