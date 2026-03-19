@@ -46,6 +46,21 @@ export class AuthService {
         );
     }
 
+    loginWithGoogle(idToken: string): Observable<ApiResponse<AuthResponse>> {
+        return this.http.post<ApiResponse<AuthResponse>>(`${this.AUTH_URL}/google`, { idToken }).pipe(
+            tap(res => {
+                if (res.success && res.data.accessToken) {
+                    localStorage.setItem(this.TOKEN_KEY, res.data.accessToken);
+                    if (res.data.user) {
+                        localStorage.setItem(this.USER_KEY, JSON.stringify(res.data.user));
+                        this.currentUser.set(res.data.user);
+                    }
+                    this.isAuthenticated.set(true);
+                }
+            })
+        );
+    }
+
     register(userData: any): Observable<ApiResponse<any>> {
         return this.http.post<ApiResponse<any>>(`${this.AUTH_URL}/register`, userData);
     }

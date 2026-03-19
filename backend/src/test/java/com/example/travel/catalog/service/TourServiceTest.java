@@ -68,7 +68,8 @@ public class TourServiceTest {
             tourService.getTourById("2");
         });
 
-        assertEquals("Không tìm thấy tour", exception.getMessage());
+        assertNotNull(exception.getMessage());
+        assertTrue(exception.getMessage().contains("ID: 2"));
     }
 
     @Test

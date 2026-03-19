@@ -1,0 +1,71 @@
+
+> frontend@0.0.0 start
+> ng serve --host 0.0.0.0 --port 4200 --proxy-config proxy.local.conf.json
+
+[1m[33m
+Warning: This is a simple server for use in testing or debugging Angular applications
+locally. It hasn't been reviewed for security issues.
+
+Binding this server to an open connection can result in compromising your application or
+computer. Using a different host than the one passed to the "--host" flag might result in
+websocket connection issues.
+    [39m[22m
+[33m❯[39m Building...
+[32m✔[39m Building...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m                   [2m | [22m [1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m                    [2m | [22m [36m36.91 kB[39m[2m | [22m
+[32mchunk-LFSJ55WQ.js[39m  [2m | [22m[2m-[22m                       [2m | [22m  [36m2.38 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m                  [2m | [22m  [36m2.19 kB[39m[2m | [22m
+[32mchunk-VUJOFXKG.js[39m  [2m | [22m[2m-[22m                       [2m | [22m[36m938 bytes[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m           [2m | [22m [1m42.42 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m                   [2m | [22m [1mRaw size[22m
+[32mchunk-72D6OODI.js[39m  [2m | [22m[2mhotel-room-mgmt[22m         [2m | [22m [36m42.24 kB[39m[2m | [22m
+[32mchunk-VBRGUZSN.js[39m  [2m | [22m[2mpromotion-mgmt[22m          [2m | [22m [36m42.06 kB[39m[2m | [22m
+[32mchunk-WSH2FRAF.js[39m  [2m | [22m[2mbooking-detail-component[22m[2m | [22m [36m38.15 kB[39m[2m | [22m
+[32mchunk-7OXA6XET.js[39m  [2m | [22m[2mhotel-list[22m              [2m | [22m [36m34.63 kB[39m[2m | [22m
+[32mchunk-JCZUWVCV.js[39m  [2m | [22m[2mhotel-detail[22m            [2m | [22m [36m34.32 kB[39m[2m | [22m
+[32mchunk-PSCOJSOS.js[39m  [2m | [22m[2muser-list[22m               [2m | [22m [36m32.30 kB[39m[2m | [22m
+[32mchunk-ZH4UHCMH.js[39m  [2m | [22m[2mtour-detail[22m             [2m | [22m [36m29.13 kB[39m[2m | [22m
+[32mchunk-HGAGFRVD.js[39m  [2m | [22m[2mitinerary[22m               [2m | [22m [36m25.99 kB[39m[2m | [22m
+[32mchunk-UGYU3NHZ.js[39m  [2m | [22m[2madmin-layout[22m            [2m | [22m [36m24.58 kB[39m[2m | [22m
+[32mchunk-CJXFCF7A.js[39m  [2m | [22m[2mbooking-mgmt[22m            [2m | [22m [36m17.66 kB[39m[2m | [22m
+[32mchunk-FTL2WITI.js[39m  [2m | [22m[2mflight-mgmt[22m             [2m | [22m [36m17.58 kB[39m[2m | [22m
+[32mchunk-PKA2DB7A.js[39m  [2m | [22m[2mpoi-mgmt[22m                [2m | [22m [36m17.28 kB[39m[2m | [22m
+[32mchunk-X5PB4N7N.js[39m  [2m | [22m[2mhotel-mgmt[22m              [2m | [22m [36m17.28 kB[39m[2m | [22m
+[32mchunk-VQ6ULTI4.js[39m  [2m | [22m[2mtransaction-mgmt[22m        [2m | [22m [36m17.01 kB[39m[2m | [22m
+[32mchunk-JJIMAC77.js[39m  [2m | [22m[2mtour-mgmt[22m               [2m | [22m [36m16.69 kB[39m[2m | [22m
+[2m...and 15 more lazy chunks files. Use "--verbose" to show all the files.[22m
+
+Application bundle generation complete. [4.361 seconds] - 2026-03-16T01:08:22.191Z
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m4200[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.139.1:[1m4200[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://192.168.198.1:[1m4200[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://172.17.152.252:[1m4200[22m/[39m
+[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+[33m❯[39m Changes detected. Rebuilding...
+[32m✔[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m                   [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m                    [2m | [22m[36m45.75 kB[39m[2m | [22m
+[32mchunk-CAJ2VAEM.js[39m  [2m | [22m[2m-[22m                       [2m | [22m [36m2.56 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m                   [2m | [22m[1mRaw size[22m
+[32mchunk-Z7QUVABO.js[39m  [2m | [22m[2mbooking-detail-component[22m[2m | [22m[36m38.98 kB[39m[2m | [22m
+[32mchunk-JRXTKLHM.js[39m  [2m | [22m[2mhotel-detail[22m            [2m | [22m[36m34.32 kB[39m[2m | [22m
+[32mchunk-ITESBIJF.js[39m  [2m | [22m[2mtour-detail[22m             [2m | [22m[36m29.13 kB[39m[2m | [22m
+[32mchunk-NFIXUUYB.js[39m  [2m | [22m[2mitinerary[22m               [2m | [22m[36m25.12 kB[39m[2m | [22m
+[32mchunk-W5RXE5OT.js[39m  [2m | [22m[2madmin-layout[22m            [2m | [22m[36m24.58 kB[39m[2m | [22m
+[32mchunk-U5Q2X7N5.js[39m  [2m | [22m[2mprofile[22m                 [2m | [22m[36m16.53 kB[39m[2m | [22m
+[32mchunk-CVLZV67R.js[39m  [2m | [22m[2mregister-component[22m      [2m | [22m[36m14.92 kB[39m[2m | [22m
+[32mchunk-WMKP4RE5.js[39m  [2m | [22m[2mfavorites[22m               [2m | [22m[36m14.49 kB[39m[2m | [22m
+[32mchunk-3B75JK3X.js[39m  [2m | [22m[2m-[22m                       [2m | [22m[36m14.37 kB[39m[2m | [22m
+[32mchunk-NGM222MM.js[39m  [2m | [22m[2mlogin-component[22m         [2m | [22m[36m12.87 kB[39m[2m | [22m
+[32mchunk-OK2Q5PZV.js[39m  [2m | [22m[2m-[22m                       [2m | [22m [36m1.19 kB[39m[2m | [22m
+
+Application bundle generation complete. [6.276 seconds] - 2026-03-16T01:18:44.855Z
+
+Page reload sent to client(s).

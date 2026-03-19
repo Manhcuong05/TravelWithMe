@@ -4,13 +4,18 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:pg": "ng serve --proxy-config proxy.local.conf.json",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "test:unit": "ng test --watch=false",
+    "test:e2e:install": "playwright install chromium",
+    "test:e2e": "playwright test"
   },
   "private": true,
   "packageManager": "npm@10.8.2",
   "dependencies": {
+    "@abacritt/angularx-social-login": "^2.5.1",
     "@angular/animations": "^21.2.4",
     "@angular/common": "^21.2.0",
     "@angular/compiler": "^21.2.0",
@@ -18,6 +23,8 @@
     "@angular/forms": "^21.2.0",
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
+    "@studio-freight/lenis": "^1.0.42",
+    "gsap": "^3.14.2",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -25,6 +32,7 @@
     "@angular/build": "^21.2.2",
     "@angular/cli": "^21.2.2",
     "@angular/compiler-cli": "^21.2.0",
+    "@playwright/test": "^1.58.2",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
     "typescript": "~5.9.2",

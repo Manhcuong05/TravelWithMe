@@ -14,6 +14,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
+
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +29,9 @@ public class AuthService {
         private final PasswordEncoder passwordEncoder;
         private final JwtUtil jwtUtil;
         private final AuthenticationManager authenticationManager;
+
+        @Value("${google.client.id}")
+        private String googleClientId;
 
         @Transactional
         public AuthResponse register(RegisterRequest request) {
@@ -64,6 +73,46 @@ public class AuthService {
                                                                 "ROLE_" + user.getRole().name()))));
 
                 return buildAuthResponse(user, jwtToken);
+        }
+
+        @Transactional
+        public AuthResponse loginWithGoogle(com.example.travel.identity.dto.GoogleLoginRequest request) {
+                try {
+                        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance())
+                                .setAudience(java.util.Collections.singletonList(googleClientId))
+                                .build();
+
+                        GoogleIdToken idToken = verifier.verify(request.getIdToken());
+                        if (idToken == null) {
+                                throw new BusinessException("INVALID_TOKEN", "Google ID token không hợp lệ");
+                        }
+
+                        GoogleIdToken.Payload payload = idToken.getPayload();
+                        String email = payload.getEmail();
+                        String name = (String) payload.get("name");
+                        String pictureUrl = (String) payload.get("picture");
+
+                        User user = userRepository.findByEmail(email).orElseGet(() -> {
+                                User newUser = User.builder()
+                                        .email(email)
+                                        .password(passwordEncoder.encode(java.util.UUID.randomUUID().toString()))
+                                        .fullName(name)
+                                        .avatarUrl(pictureUrl)
+                                        .role(Role.TRAVELER)
+                                        .build();
+                                return userRepository.save(newUser);
+                        });
+
+                        String jwtToken = jwtUtil.generateToken(new org.springframework.security.core.userdetails.User(
+                                user.getEmail(), user.getPassword(),
+                                java.util.Collections.singletonList(
+                                                new org.springframework.security.core.authority.SimpleGrantedAuthority(
+                                                                "ROLE_" + user.getRole().name()))));
+
+                        return buildAuthResponse(user, jwtToken);
+                } catch (Exception e) {
+                        throw new BusinessException("GOOGLE_AUTH_FAILED", "Xác thực Google thất bại: " + e.getMessage());
+                }
         }
 
         public AuthResponse.UserResponse getMe() {

@@ -30,6 +30,11 @@ public class AuthController {
         return ApiResponse.success(authService.login(request), "Đăng nhập thành công");
     }
 
+    @PostMapping("/google")
+    public ApiResponse<AuthResponse> loginWithGoogle(@Valid @RequestBody com.example.travel.identity.dto.GoogleLoginRequest request) {
+        return ApiResponse.success(authService.loginWithGoogle(request), "Đăng nhập Google thành công");
+    }
+
     @GetMapping("/me")
     public ApiResponse<AuthResponse.UserResponse> getMe() {
         return ApiResponse.success(authService.getMe(), "Lấy thông tin cá nhân thành công");

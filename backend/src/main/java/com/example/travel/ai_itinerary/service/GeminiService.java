@@ -8,6 +8,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
@@ -74,6 +75,9 @@ public class GeminiService {
                 }
             }
             throw new BusinessException("AI_SERVICE_ERROR", "Không tìm thấy nội dung phản hồi từ Gemini");
+        } catch (HttpClientErrorException e) {
+            log.error("Gemini API returned error - Status: {}, Body: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new BusinessException("AI_SERVICE_ERROR", "Gemini API lỗi " + e.getStatusCode() + ": " + e.getResponseBodyAsString());
         } catch (Exception e) {
             log.error("Gemini API call failed", e);
             throw new BusinessException("AI_SERVICE_ERROR", "Lỗi khi gọi Gemini API: " + e.getMessage());

@@ -1,19 +1,28 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { GoogleSigninButtonModule, SocialAuthService } from '@abacritt/angularx-social-login';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, GoogleSigninButtonModule],
   template: `
     <div class="auth-container">
       <div class="auth-card glass-effect animate-fade-in">
         <h2 class="luxury-font">Chào Mừng Trở Lại</h2>
         <p class="subtitle">Vui lòng nhập thông tin để đăng nhập</p>
         
+        <div class="google-login-wrapper">
+          <asl-google-signin-button type="standard" size="large" [width]="350" theme="filled_black"></asl-google-signin-button>
+        </div>
+        
+        <div class="divider">
+          <span>Hoặc đăng nhập bằng Email</span>
+        </div>
+
         <form (ngSubmit)="onLogin()" #loginForm="ngForm" class="auth-form">
           <div class="form-group">
             <label>Địa chỉ Email</label>
@@ -100,6 +109,30 @@ import { AuthService } from '../../core/services/auth.service';
       background: rgba(255, 255, 255, 0.08);
     }
     .w-full { width: 100%; }
+    .google-login-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 20px 0;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .divider:not(:empty)::before {
+      margin-right: .75em;
+    }
+    .divider:not(:empty)::after {
+      margin-left: .75em;
+    }
     .footer-text {
       margin-top: 30px;
       font-size: 0.9rem;
@@ -118,13 +151,36 @@ import { AuthService } from '../../core/services/auth.service';
     }
   `]
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   credentials = { email: '', password: '' };
   loading = false;
   errorMessage = '';
 
   private authService = inject(AuthService);
   private router = inject(Router);
+  private socialAuthService = inject(SocialAuthService);
+
+  ngOnInit() {
+    this.socialAuthService.authState.subscribe((user: any) => {
+      if (user) {
+        this.loading = true;
+        this.authService.loginWithGoogle(user.idToken).subscribe({
+          next: (res: any) => {
+            if (res.success) {
+              this.router.navigate(['/']);
+            } else {
+              this.errorMessage = res.message || 'Đăng nhập Google thất bại.';
+              this.loading = false;
+            }
+          },
+          error: (err: any) => {
+            this.errorMessage = err.error?.message || 'Có lỗi khi xác thực tài khoản Google.';
+            this.loading = false;
+          }
+        });
+      }
+    });
+  }
 
   onLogin() {
     this.loading = true;
