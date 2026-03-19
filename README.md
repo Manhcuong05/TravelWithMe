@@ -10,14 +10,14 @@ Dự án được tổ chức gọn gàng để dễ dàng tra cứu và đối 
 
 ```text
 TravelWithMe/
-├── testing-report/             # 📄 Tòa bộ báo cáo và kịch bản (Phần A - G)
+├── testing/                    # 📄 Tòa bộ báo cáo và kịch bản (Phần A - G)
 │   ├── 01_BlackBox_Testing/    # Test cases Hộp đen (EP, BVA, Decision Table)
 │   ├── 02_WhiteBox_Testing/    # Báo cáo kỹ thuật Hộp trắng
 │   ├── 03_Static_Testing/      # Rà soát mã nguồn (Code Review & SRS)
-│   ├── 04_Bug_Management/      # Nhật ký quản lý lỗi (Bug Log)
-│   ├── 06_NonFunctional_Testing/# Kịch bản kiểm thử hiệu năng (JMeter)
+│   ├── 04_NonFunctional_Testing/# Kịch bản kiểm thử hiệu năng (JMeter)
+│   ├── 06_Bug_Management/      # Nhật ký quản lý lỗi (Bug Log)
 │   ├── 07_Quality_Metrics/     # Chỉ số độ phủ (JaCoCo)
-│   └── 08_Manual_vs_Automation/# Báo cáo thực thi & Đánh giá tự động
+│   └── 08_Manual_vs_Automation/# Phân tích chiến lược kiểm thử
 ├── backend/src/test/java/...   # 💻 Mã nguồn 47 Unit Tests (JUnit 5 + Mockito)
 └── README.md                   # 📘 Tài liệu hướng dẫn này
 ```
@@ -30,13 +30,13 @@ Dưới đây là bảng đối chiếu giữa các mục trong kho lưu trữ n
 
 | Yêu cầu đề bài | Vị trí tài liệu / Mã nguồn | Kỹ thuật & Giải trình |
 |:--- |:--- |:--- |
-| **Phần A: Black Box** | [`testing-report/01_BlackBox_Testing/`](file:///home/ngcuong/Data/TraveWithMe/testing-report/01_BlackBox_Testing/test_cases.md) | Áp dụng EP (Phân vùng tương đương), BVA (Giá trị biên), Decision Table và Use Case cho 5 tính năng cốt lõi. |
+| **Phần A: Black Box** | [`testing/01_BlackBox_Testing/`](file:///home/ngcuong/Data/TraveWithMe/testing/01_BlackBox_Testing/test_cases.md) | Áp dụng EP (Phân vùng tương đương), BVA (Giá trị biên), Decision Table và Use Case cho 5 tính năng cốt lõi. |
 | **Phần B: White Box** | [`backend/src/test/java/...`](file:///home/ngcuong/Data/TraveWithMe/backend/src/test/java/com/example/travel/) | 47 Unit Tests sử dụng **JUnit 5 & Mockito**. Tập trung phủ các đường dẫn tới hạn (Critical Paths) và xử lý ngoại lệ. |
-| **Phần C: Metrics** | [`testing-report/07_Quality_Metrics/`](file:///home/ngcuong/Data/TraveWithMe/testing-report/07_Quality_Metrics/quality_report.md) | Sử dụng **JaCoCo** để đo Instruction/Branch Coverage. Các Service chính đạt độ phủ >80%. |
-| **Phần D: Quản lý lỗi**| [`testing-report/04_Bug_Management/`](file:///home/ngcuong/Data/TraveWithMe/testing-report/04_Bug_Management/bug_log.md) | Quản lý đa nền tảng (**GitHub Tags & Jira Software**) với quy trình Workflow doanh nghiệp (RCA). |
-| **Phần E: Static** | [`testing-report/03_Static_Testing/`](file:///home/ngcuong/Data/TraveWithMe/testing-report/03_Static_Testing/code_review_report.md) | Rà soát lỗi bảo mật (Hardcoded JWT Secret) và thiết kế DB (thiếu trường phân loại phòng). |
-| **Phần F: Hiệu năng** | [`testing-report/06_NonFunctional_Testing/`](file:///home/ngcuong/Data/TraveWithMe/testing-report/06_NonFunctional_Testing/performance_test_plan.md) | Xây dựng kịch bản **Apache JMeter** giả lập 50 người dùng đồng thời để kiểm tra độ trễ (Avg Latency). |
-| **Phần G: Kiểm thử tự động & Đánh giá** | [`testing-report/08_Manual_vs_Automation/`](file:///home/ngcuong/Data/TraveWithMe/testing-report/08_Manual_vs_Automation/strategy.md) | **Thực thi 47 Unit Tests 100% Pass** và mô phỏng kịch bản UI tự động bằng Playwright. Đánh giá hiệu năng hệ thống. |
+| **Phần C: Metrics** | [`testing/07_Quality_Metrics/`](file:///home/ngcuong/Data/TraveWithMe/testing/07_Quality_Metrics/quality_report.md) | Sử dụng **JaCoCo** để đo Instruction/Branch Coverage. Các Service chính đạt độ phủ >80%. |
+| **Phần D: Quản lý lỗi**| [`testing/04_Bug_Management/`](file:///home/ngcuong/Data/TraveWithMe/testing/04_Bug_Management/bug_log.md) | Quản lý đa nền tảng (**GitHub Tags & Jira Software**) với quy trình Workflow doanh nghiệp (RCA). |
+| **Phần E: Static** | [`testing/03_Static_Testing/`](file:///home/ngcuong/Data/TraveWithMe/testing/03_Static_Testing/code_review_report.md) | Rà soát lỗi bảo mật (Hardcoded JWT Secret) và thiết kế DB (thiếu trường phân loại phòng). |
+| **Phần F: Hiệu năng** | [`testing/06_NonFunctional_Testing/`](file:///home/ngcuong/Data/TraveWithMe/testing/06_NonFunctional_Testing/performance_test_plan.md) | Xây dựng kịch bản **Apache JMeter** giả lập 50 người dùng đồng thời để kiểm tra độ trễ (Avg Latency). |
+| **Phần G: Thực hiện & Đánh giá** | [`testing/08_Manual_vs_Automation/`](file:///home/ngcuong/Data/TraveWithMe/testing/08_Manual_vs_Automation/) | Bao gồm **Chiến lược** (strategy.md) và **Báo cáo thực thi 47 Tests** (evaluation_report.md). |
 
 ---
 
