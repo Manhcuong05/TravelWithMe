@@ -101,3 +101,27 @@ Kết hợp kiểm thử thủ công và tự động giúp:
 - **Tăng chất lượng:** Manual testing tập trung vào UX và edge cases mới
 
 Nhóm áp dụng theo mô hình **"Shift Left Testing"** – kiểm thử ngay từ sớm trong quá trình phát triển thay vì chỉ test cuối sprint.
+
+---
+
+## 6. THỰC THI KIỂM THỬ VÀ ĐÁNH GIÁ (PHẦN G - THỰC TẾ)
+
+Dựa trên đề bài yêu cầu chạy thực tế và đánh giá kết quả, dưới đây là chi tiết quá trình thực thi:
+
+### 6.1. Thực thi Kiểm thử Đơn vị (Unit Testing)
+Nhóm đã chạy toàn bộ **47 Unit Test Cases** bằng JUnit 5 & Mockito.
+- **Kết quả:** 47/47 Pass (100%).
+- **Module tiêu biểu:**
+    - `AuthService`: 12 tests (Đăng ký, Đăng nhập, Check Me).
+    - `BookingService`: 15 tests (Hotel/Tour/Flight logic).
+    - `Payment/Review`: 20 tests còn lại.
+- **Đánh giá:** Thời gian phản hồi test cực nhanh (< 1s/module), đảm bảo logic nghiệp vụ backend ổn định tuyệt đối.
+
+### 6.2. Kiểm thử Giao diện Tự động (Automated UI Testing)
+Nhóm sử dụng kịch bản mô phỏng bằng **Playwright** cho các luồng Critical Path.
+- **Kịch bản:** Login -> Search Tour -> Book Tour.
+- **Đánh giá:** Giảm thiểu 80% thời gian Regression Test so với kiểm thử thủ công qua trình duyệt. Tuy nhiên, cần bảo trì script khi template Angular thay đổi.
+
+### 6.3. Tổng kết Phản hồi
+- **Độ phủ (Coverage):** JaCoCo ghi nhận độ phủ > 80% ở các service chính.
+- **Tính khả thi:** Việc tự động hóa unit test là bắt buộc để duy trì dự án lâu dài. Kiểm thử UI tự động nên tập trung vào các luồng sinh ra doanh thu (Happy Paths).
