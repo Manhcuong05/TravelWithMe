@@ -152,7 +152,7 @@ import { BookingService } from '../../core/services/booking.service';
 
       <!-- Ticket Class Selection Drawer -->
       <div class="drawer-overlay" *ngIf="selectedFlight()" (click)="closeDrawer()"></div>
-      <div class="ticket-drawer glass-effect" [class.open]="selectedFlight()">
+      <div class="ticket-drawer glass-effect" *ngIf="selectedFlight()">
          <div class="drawer-header">
            <div class="drawer-header-inner">
              <h2 class="luxury-font text-gold title-drawer">Chọn loại vé</h2>
@@ -435,9 +435,11 @@ import { BookingService } from '../../core/services/booking.service';
     .btn-link:hover { color: var(--gold-primary); }
     
     /* Ticket Drawer Redesign */
-    .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 100; }
-    .ticket-drawer { position: fixed; bottom: -100%; left: 0; width: 100%; height: 90vh; display: flex; flex-direction: column; background: #0B0F19; z-index: 101; border-radius: 20px 20px 0 0; border-top: 1px solid rgba(212,175,55,0.3); transition: bottom 0.4s ease; box-shadow: 0 -10px 40px rgba(0,0,0,0.8); overflow: hidden; }
-    .ticket-drawer.open { bottom: 0; }
+    .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 100; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    
+    .ticket-drawer { position: fixed; bottom: 0; left: 0; width: 100%; height: 90vh; display: flex; flex-direction: column; background: #0B0F19; z-index: 101; border-radius: 20px 20px 0 0; border-top: 1px solid rgba(212,175,55,0.3); box-shadow: 0 -10px 40px rgba(0,0,0,0.8); overflow: hidden; animation: slideUpDrawer 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+    @keyframes slideUpDrawer { from { transform: translateY(100vh); } to { transform: translateY(0); } }
     
     .drawer-header { padding: 20px 30px 0 30px; border-bottom: 2px solid rgba(255,255,255,0.05); flex-shrink: 0; background: rgba(255,255,255,0.02); }
     .drawer-header-inner { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
