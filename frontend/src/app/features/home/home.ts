@@ -231,7 +231,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit() {
     // 1. Smooth Inertia Scroll (Lenis)
     this.lenis = new Lenis({
-      duration: 1.5,
+      duration: 1.0,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
     });
@@ -251,8 +251,8 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       // 2. On-load Animation "Hero Fade-in"
       const tl = gsap.timeline();
       tl.from('.hero-bg', { scale: 1.05, duration: 2, ease: 'power2.out' })
-        .from('.hero-content h1', { y: 40, opacity: 0, duration: 1, ease: 'power3.out' }, '-=1.5')
-        .from('.hero-content .subtitle', { y: 20, opacity: 0, duration: 1, ease: 'power3.out' }, '-=1.2');
+        .from('.hero-content h1', { y: 40, opacity: 0, duration: 0.8, ease: 'power3.out' }, '-=1.5')
+        .from('.hero-content .subtitle', { y: 20, opacity: 0, duration: 0.8, ease: 'power3.out' }, '-=1.2');
 
       // 3. Parallax Layering for Hero Background
       gsap.to('.hero-bg', {
@@ -274,22 +274,21 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
         ease: 'power2.out',
         scrollTrigger: {
           trigger: '.featured-sections',
-          start: 'top 95%', // Triggers almost instantly when reaching section
+          start: 'top bottom+=400', // Triggers way before entering screen
           toggleActions: "play none none reverse"
         }
       });
 
-      // 4. Scroll-triggered Animations "Snappy Emerging Motion"
+      // 4. Scroll-triggered Animations "Earlier Emerging Motion"
       gsap.from('.card', {
         y: 40,
         opacity: 0,
-        duration: 1,
+        duration: 0.7,
         stagger: 0.1,
-        delay: 0.1, // Small delay after header starts
         ease: 'power2.out',
         scrollTrigger: {
           trigger: '.featured-sections',
-          start: 'top 75%', // Triggers snappily
+          start: 'top bottom+=300', // Triggers earlier so it's ready when visible
           toggleActions: "play none none reverse"
         }
       });

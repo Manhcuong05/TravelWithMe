@@ -60,7 +60,8 @@ public class FlightService {
     public List<FlightResponse> searchFlights(String departure, String arrival) {
         List<Flight> flights;
         if (departure != null && arrival != null) {
-            flights = flightRepository.findByDepartureCityAndArrivalCity(departure, arrival);
+            flights = flightRepository
+                    .findByDepartureCityContainingIgnoreCaseAndArrivalCityContainingIgnoreCase(departure, arrival);
         } else {
             flights = flightRepository.findAll();
         }

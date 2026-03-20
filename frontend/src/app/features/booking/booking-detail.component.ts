@@ -15,8 +15,8 @@ import { AuthService } from '../../core/services/auth.service';
     <section class="detail-page animate-fade-in" *ngIf="booking()">
       <div class="container">
         <div class="page-header">
-          <h1 class="luxury-font">Chi Tiết Đơn Hàng</h1>
-          <p>Thông tin xác nhận và phương thức thanh toán cho hành trình sắp tới.</p>
+          <h1 class="luxury-font">{{ isTour() ? 'Thanh Toán Combo Nghỉ Dưỡng' : 'Chi Tiết Đơn Hàng' }}</h1>
+          <p>{{ isTour() ? 'Xác nhận thông tin hành trình và hoàn tất thanh toán cho combo trọn gói.' : 'Thông tin xác nhận và phương thức thanh toán cho hành trình sắp tới.' }}</p>
         </div>
 
         <div class="main-grid">
@@ -31,8 +31,11 @@ import { AuthService } from '../../core/services/auth.service';
               </p>
             </div>
 
-            <div class="card glass-effect items-card">
-              <h3 class="luxury-font">Tóm Tắt Đơn Hàng</h3>
+            <div class="card glass-effect items-card" [class.tour-theme]="isTour()">
+              <div class="card-header-with-icon">
+                 <span class="header-icon">{{ isTour() ? '🌟' : '🏨' }}</span>
+                 <h3 class="luxury-font">Tóm Tắt Đơn Hàng</h3>
+              </div>
               <div *ngFor="let item of booking()?.items" class="booking-item">
                 <div class="item-info">
                   <span class="type-tag">{{ item.type === 'HOTEL' ? 'KHÁCH SẠN' : (item.type === 'TOUR' ? 'TOUR' : item.type) }}</span>
@@ -160,6 +163,15 @@ import { AuthService } from '../../core/services/auth.service';
 
     .date-range { font-size: 0.8rem; color: var(--gold-secondary); margin-top: 5px; }
     .w-full { width: 100%; }
+
+    /* Theme specific styles */
+    .card-header-with-icon { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+    .card-header-with-icon h3 { margin-bottom: 0; font-size: 1.5rem; }
+    .header-icon { font-size: 1.8rem; background: rgba(212, 175, 55, 0.1); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+    
+    .tour-theme { border: 1px solid rgba(212, 175, 55, 0.3); background: linear-gradient(145deg, rgba(20,25,30,0.95), rgba(10,15,20,0.95)); position: relative; overflow: hidden; }
+    .tour-theme::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #d4af37, #f3e5ab, #d4af37); }
+    .tour-theme .type-tag { background: rgba(212, 175, 55, 0.2); color: #f3e5ab; }
   `]
 })
 export class BookingDetailComponent implements OnInit {
@@ -187,6 +199,11 @@ export class BookingDetailComponent implements OnInit {
         if (res.success) this.booking.set(res.data);
       }
     });
+  }
+
+  isTour(): boolean {
+    const b = this.booking();
+    return b?.items?.some(item => item.type === 'TOUR') || false;
   }
 
   getVietQRUrl(): string {

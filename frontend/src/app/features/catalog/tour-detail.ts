@@ -181,9 +181,26 @@ export class TourDetailComponent implements OnInit {
   }
 
   onBook() {
-    if (!this.tour()) return;
-    // For now, redirect to search or a general booking page
-    // In a full app, this would open a booking dialog
-    this.router.navigate(['/bookings']);
+    const currentTour = this.tour();
+    if (!currentTour) return;
+
+    this.bookingService.createBooking({
+      items: [
+        {
+          type: 'TOUR',
+          serviceId: currentTour.id,
+          quantity: 1, // Defaulting to 1 for the combo
+        }
+      ]
+    }).subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.router.navigate(['/bookings', res.data.id]);
+        }
+      },
+      error: (err) => {
+        console.error('Failed to create tour booking', err);
+      }
+    });
   }
 }
