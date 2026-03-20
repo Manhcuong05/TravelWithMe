@@ -226,7 +226,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   private lenis: any;
   private ctx: any;
 
-  constructor(private el: ElementRef) {}
+  constructor(private el: ElementRef) { }
 
   ngAfterViewInit() {
     // 1. Smooth Inertia Scroll (Lenis)
@@ -244,10 +244,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
     // GSAP Setup
     gsap.registerPlugin(ScrollTrigger);
-    
+
     // Create a GSAP Context allows easy cleanup
     this.ctx = gsap.context(() => {
-      
+
       // 2. On-load Animation "Hero Fade-in"
       const tl = gsap.timeline();
       tl.from('.hero-bg', { scale: 1.05, duration: 2, ease: 'power2.out' })
@@ -265,17 +265,31 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
           scrub: true
         }
       });
-      
-      // 4. Scroll-triggered Animations "Emerging Motion"
-      gsap.from('.card', {
-        y: 40, // 30px-40px translate Y
+
+      // Entrance animation for header
+      gsap.from('.section-header', {
+        y: 20,
         opacity: 0,
-        duration: 1,
-        stagger: 0.15, // 100ms-150ms nhịp
-        ease: 'power3.out',
+        duration: 0.8,
+        ease: 'power2.out',
         scrollTrigger: {
           trigger: '.featured-sections',
-          start: 'top 75%', // trigger when section is at 75% of viewport
+          start: 'top 95%', // Triggers almost instantly when reaching section
+          toggleActions: "play none none reverse"
+        }
+      });
+
+      // 4. Scroll-triggered Animations "Snappy Emerging Motion"
+      gsap.from('.card', {
+        y: 40,
+        opacity: 0,
+        duration: 1,
+        stagger: 0.1,
+        delay: 0.1, // Small delay after header starts
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.featured-sections',
+          start: 'top 75%', // Triggers snappily
           toggleActions: "play none none reverse"
         }
       });
