@@ -10,7 +10,7 @@ import { BookingService } from '../../core/services/booking.service';
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <section class="flight-page animate-fade-in">
+    <section class="flight-page">
       <!-- Hero & Search Widget -->
       <div class="search-hero">
         <div class="hero-bg"></div>
@@ -26,7 +26,6 @@ import { BookingService } from '../../core/services/booking.service';
                 <button class="type-btn">Nhiều thành phố</button>
               </div>
               <div class="passenger-class">
-                <span>1 Người lớn, 0 Trẻ em</span>
                 <span class="pc-divider">|</span>
                 <span>Phổ thông</span>
               </div>
@@ -191,10 +190,6 @@ import { BookingService } from '../../core/services/booking.service';
                        <strong>{{ selectedFlight()?.arrivalTime | date:'HH:mm' }}</strong>
                        <small>Điểm đến</small>
                     </div>
-                 </div>
-                 
-                 <div class="sd-action">
-                    <button class="btn-link">Chi tiết</button>
                  </div>
               </div>
            </div>
@@ -435,10 +430,10 @@ import { BookingService } from '../../core/services/booking.service';
     .btn-link:hover { color: var(--gold-primary); }
     
     /* Ticket Drawer Redesign */
-    .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 100; animation: fadeIn 0.3s ease; }
+    .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 9998; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     
-    .ticket-drawer { position: fixed; bottom: 0; left: 0; width: 100%; height: 90vh; display: flex; flex-direction: column; background: #0B0F19; z-index: 101; border-radius: 20px 20px 0 0; border-top: 1px solid rgba(212,175,55,0.3); box-shadow: 0 -10px 40px rgba(0,0,0,0.8); overflow: hidden; animation: slideUpDrawer 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+    .ticket-drawer { position: fixed; bottom: 0; left: 0; width: 100%; height: 90vh; display: flex; flex-direction: column; background: #0B0F19; z-index: 9999; border-radius: 20px 20px 0 0; border-top: 1px solid rgba(212,175,55,0.3); box-shadow: 0 -10px 40px rgba(0,0,0,0.8); overflow: hidden; animation: slideUpDrawer 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
     @keyframes slideUpDrawer { from { transform: translateY(100vh); } to { transform: translateY(0); } }
     
     .drawer-header { padding: 20px 30px 0 30px; border-bottom: 2px solid rgba(255,255,255,0.05); flex-shrink: 0; background: rgba(255,255,255,0.02); }
