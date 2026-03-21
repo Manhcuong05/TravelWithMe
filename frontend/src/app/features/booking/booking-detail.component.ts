@@ -15,8 +15,8 @@ import { AuthService } from '../../core/services/auth.service';
     <section class="detail-page animate-fade-in" *ngIf="booking()">
       <div class="container">
         <div class="page-header">
-          <h1 class="luxury-font">{{ isTour() ? 'Thanh Toán Combo Nghỉ Dưỡng' : 'Chi Tiết Đơn Hàng' }}</h1>
-          <p>{{ isTour() ? 'Xác nhận thông tin hành trình và hoàn tất thanh toán cho combo trọn gói.' : 'Thông tin xác nhận và phương thức thanh toán cho hành trình sắp tới.' }}</p>
+          <h1 class="luxury-font">{{ isTour() ? 'Thanh Toán Combo Nghỉ Dưỡng' : (isFlight() ? 'Thanh Toán Vé Máy Bay' : 'Chi Tiết Đơn Hàng') }}</h1>
+          <p>{{ isTour() ? 'Xác nhận thông tin hành trình và hoàn tất thanh toán cho combo trọn gói.' : (isFlight() ? 'Hoàn tất thanh toán để giữ chỗ và xuất vé cho hành trình của bạn.' : 'Thông tin xác nhận và phương thức thanh toán cho hành trình sắp tới.') }}</p>
         </div>
 
         <div class="main-grid">
@@ -33,12 +33,12 @@ import { AuthService } from '../../core/services/auth.service';
 
             <div class="card glass-effect items-card" [class.tour-theme]="isTour()">
               <div class="card-header-with-icon">
-                 <span class="header-icon">{{ isTour() ? '🌟' : '🏨' }}</span>
+                 <span class="header-icon">{{ isTour() ? '🌟' : (isFlight() ? '✈️' : '🏨') }}</span>
                  <h3 class="luxury-font">Tóm Tắt Đơn Hàng</h3>
               </div>
               <div *ngFor="let item of booking()?.items" class="booking-item">
                 <div class="item-info">
-                  <span class="type-tag">{{ item.type === 'HOTEL' ? 'KHÁCH SẠN' : (item.type === 'TOUR' ? 'TOUR' : item.type) }}</span>
+                  <span class="type-tag">{{ item.type === 'HOTEL' ? 'KHÁCH SẠN' : (item.type === 'TOUR' ? 'TOUR' : (item.type === 'FLIGHT' ? 'VÉ MÁY BAY' : item.type)) }}</span>
                   <div class="service-name">Dịch vụ: {{ item.serviceId }}</div>
                   <div class="date-range" *ngIf="item.checkInDate">
                     {{ item.checkInDate | date:'dd/MM/yyyy' }} - {{ item.checkOutDate | date:'dd/MM/yyyy' }}
@@ -206,18 +206,16 @@ export class BookingDetailComponent implements OnInit {
     return b?.items?.some(item => item.type === 'TOUR') || false;
   }
 
+  isFlight(): boolean {
+    return this.booking()?.items.some(i => i.type === 'FLIGHT') || false;
+  }
+
   getVietQRUrl(): string {
-    const b = this.booking();
-    if (!b) return '';
-
-    const bankId = 'ICB'; // VietinBank
-    const accountNo = '101880779992';
-    const template = 'compact2';
-    const amount = b.totalAmount;
-    const description = `Thanh Toan Booking ${b.id}`;
-    const accountName = 'TravelWithMe';
-
-    return `https://img.vietqr.io/image/${bankId}-${accountNo}-${template}.png?amount=${amount}&addInfo=${encodeURIComponent(description)}&accountName=${encodeURIComponent(accountName)}`;
+    const acct = '0905123456';
+    const bank = 'MB';
+    const amount = this.booking()?.totalAmount || 0;
+    const info = `THANH TOAN DH ${this.booking()?.id || ''}`;
+    return `https://img.vietqr.io/image/${bank}-${acct}-compact.png?amount=${amount}&addInfo=${encodeURIComponent(info)}`;
   }
 
   applyPromo() {

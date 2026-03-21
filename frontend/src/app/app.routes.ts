@@ -11,6 +11,7 @@ export const routes: Routes = [
     { path: "tours", loadComponent: () => import("./features/catalog/tour-list").then(m => m.TourListComponent) },
     { path: "tours/:id", loadComponent: () => import("./features/catalog/tour-detail").then(m => m.TourDetailComponent) },
     { path: "flights", loadComponent: () => import("./features/catalog/flight-list").then(m => m.FlightListComponent) },
+    { path: "flights/checkout", loadComponent: () => import("./features/catalog/flight-checkout").then(m => m.FlightCheckoutComponent) },
     { path: "pois", loadComponent: () => import("./features/catalog/poi-list").then(m => m.PoiListComponent) },
     { path: "bookings", loadComponent: () => import("./features/booking/booking-list.component").then(m => m.BookingListComponent) },
     { path: "bookings/:id", loadComponent: () => import("./features/booking/booking-detail.component").then(m => m.BookingDetailComponent) },

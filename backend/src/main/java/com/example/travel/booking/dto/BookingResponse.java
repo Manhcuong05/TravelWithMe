@@ -19,7 +19,31 @@ public class BookingResponse {
     private double totalAmount;
     private Booking.BookingStatus status;
     private LocalDateTime createdAt;
+    private ContactResponse contact;
+    private List<PassengerResponse> passengers;
     private List<ItemResponse> items;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ContactResponse {
+        private String name;
+        private String phone;
+        private String email;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PassengerResponse {
+        private String title;
+        private String lastName;
+        private String firstName;
+        private String dob;
+        private String nationality;
+    }
 
     @Data
     @Builder

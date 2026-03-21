@@ -633,15 +633,7 @@ export class FlightListComponent implements OnInit {
   }
 
   bookFlight(flightId: string, ticketClass: string = 'ECONOMY') {
-    this.bookingService.createBooking({
-      items: [{ type: 'FLIGHT', serviceId: flightId, quantity: 1 }]
-    }).subscribe({
-      next: (res) => {
-        if (res.success && res.data) {
-          this.router.navigate(['/bookings', res.data.id]);
-        }
-      }
-    });
+    this.router.navigate(['/flights/checkout'], { queryParams: { flightId, class: ticketClass } });
   }
 }
 

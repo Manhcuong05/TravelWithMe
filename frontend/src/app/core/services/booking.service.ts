@@ -21,6 +21,24 @@ export interface BookingRequest {
         checkInDate?: string;
         checkOutDate?: string;
     }[];
+    contact?: {
+        name: string;
+        phone: string;
+        email: string;
+    };
+    passengers?: {
+        title: string;
+        lastName: string;
+        firstName: string;
+        dob?: string;
+        nationality: string;
+    }[];
+    addons?: {
+        baggage: number;
+        meals: boolean;
+        seat: boolean;
+        insurance: boolean;
+    };
 }
 
 export interface BookingResponse {

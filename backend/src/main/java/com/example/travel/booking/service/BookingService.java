@@ -14,6 +14,9 @@ import com.example.travel.catalog.entity.Tour;
 import com.example.travel.catalog.repository.FlightRepository;
 import com.example.travel.catalog.repository.HotelRoomRepository;
 import com.example.travel.catalog.repository.TourRepository;
+import com.example.travel.booking.entity.BookingContact;
+import com.example.travel.booking.entity.BookingPassenger;
+import java.time.LocalDate;
 import com.example.travel.core.exception.BusinessException;
 import com.example.travel.core.util.SecurityUtil;
 import com.example.travel.identity.entity.User;
@@ -48,10 +51,52 @@ public class BookingService {
                 .status(Booking.BookingStatus.AWAITING_PAYMENT)
                 .totalAmount(0)
                 .items(new ArrayList<>())
+                .passengers(new ArrayList<>())
                 .build();
+
+        if (request.getContact() != null) {
+            BookingContact contact = BookingContact.builder()
+                    .booking(booking)
+                    .fullName(request.getContact().getName())
+                    .phone(request.getContact().getPhone())
+                    .email(request.getContact().getEmail())
+                    .build();
+            booking.setContact(contact);
+        }
+
+        if (request.getPassengers() != null) {
+            List<BookingPassenger> passengers = request.getPassengers().stream()
+                    .map(pReq -> BookingPassenger.builder()
+                            .booking(booking)
+                            .title(pReq.getTitle())
+                            .firstName(pReq.getFirstName())
+                            .lastName(pReq.getLastName())
+                            .dob(pReq.getDob() != null && !pReq.getDob().isEmpty() ? LocalDate.parse(pReq.getDob())
+                                    : LocalDate.now())
+                            .nationality(pReq.getNationality())
+                            .build())
+                    .collect(Collectors.toList());
+            booking.setPassengers(passengers);
+        }
 
         double totalAmount = 0;
         List<BookingItem> items = new ArrayList<>();
+
+        if (request.getAddons() != null) {
+            if (request.getAddons().getBaggage() == 15)
+                totalAmount += 250000;
+            else if (request.getAddons().getBaggage() == 20)
+                totalAmount += 320000;
+            else if (request.getAddons().getBaggage() == 30)
+                totalAmount += 450000;
+
+            if (request.getAddons().isMeals())
+                totalAmount += 120000;
+            if (request.getAddons().isSeat())
+                totalAmount += 42000;
+            if (request.getAddons().isInsurance())
+                totalAmount += 60500;
+        }
 
         for (BookingRequest.ItemRequest itemReq : request.getItems()) {
             double price = 0;
@@ -182,7 +227,7 @@ public class BookingService {
     }
 
     private BookingResponse mapToResponse(Booking booking) {
-        return BookingResponse.builder()
+        BookingResponse response = BookingResponse.builder()
                 .id(booking.getId())
                 .totalAmount(booking.getTotalAmount())
                 .status(booking.getStatus())
@@ -196,5 +241,25 @@ public class BookingService {
                         .checkOutDate(item.getCheckOutDate())
                         .build()).collect(Collectors.toList()))
                 .build();
+
+        if (booking.getContact() != null) {
+            response.setContact(BookingResponse.ContactResponse.builder()
+                    .name(booking.getContact().getFullName())
+                    .phone(booking.getContact().getPhone())
+                    .email(booking.getContact().getEmail())
+                    .build());
+        }
+
+        if (booking.getPassengers() != null) {
+            response.setPassengers(booking.getPassengers().stream().map(p -> BookingResponse.PassengerResponse.builder()
+                    .title(p.getTitle())
+                    .lastName(p.getLastName())
+                    .firstName(p.getFirstName())
+                    .dob(p.getDob() != null ? p.getDob().toString() : null)
+                    .nationality(p.getNationality())
+                    .build()).collect(Collectors.toList()));
+        }
+
+        return response;
     }
 }

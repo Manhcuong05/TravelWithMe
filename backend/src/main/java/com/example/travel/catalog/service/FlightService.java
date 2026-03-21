@@ -57,6 +57,12 @@ public class FlightService {
         flightRepository.deleteById(id);
     }
 
+    public FlightResponse getFlight(String id) {
+        Flight flight = flightRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy chuyến bay"));
+        return mapToResponse(flight);
+    }
+
     public List<FlightResponse> searchFlights(String departure, String arrival) {
         List<Flight> flights;
         if (departure != null && arrival != null) {

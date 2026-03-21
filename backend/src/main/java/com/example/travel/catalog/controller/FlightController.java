@@ -22,6 +22,11 @@ public class FlightController {
         return ApiResponse.success(flightService.searchFlights(departure, arrival));
     }
 
+    @GetMapping("/{id}")
+    public ApiResponse<FlightResponse> getFlight(@PathVariable String id) {
+        return ApiResponse.success(flightService.getFlight(id));
+    }
+
     @PostMapping
     @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CTV')")
     public ApiResponse<FlightResponse> createFlight(

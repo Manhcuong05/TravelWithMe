@@ -74,6 +74,10 @@ export class CatalogService {
         return this.http.get<ApiResponse<Flight[]>>('/api/flights', { params });
     }
 
+    getFlight(id: string): Observable<ApiResponse<Flight>> {
+        return this.http.get<ApiResponse<Flight>>(`/api/flights/${id}`);
+    }
+
     getPOIs(city?: string): Observable<ApiResponse<POI[]>> {
         const params: any = {};
         if (city) params.city = city;
