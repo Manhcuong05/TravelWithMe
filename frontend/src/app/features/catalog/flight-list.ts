@@ -521,6 +521,23 @@ import { BookingService } from '../../core/services/booking.service';
        box-shadow: inset 0 0 10px rgba(212,175,55,0.1);
     }
     .class-chip:hover:not(.active) { background: rgba(255,255,255,0.08); color: white; }
+
+    .btn-primary { 
+      background: linear-gradient(135deg, #dfc15a 0%, #c49a20 100%); 
+      color: #0b0f19; 
+      border: none; 
+      border-radius: 12px; 
+      font-weight: 800; 
+      text-transform: uppercase; 
+      letter-spacing: 1px; 
+      cursor: pointer; 
+      transition: all 0.3s;
+      box-shadow: 0 10px 20px rgba(212,175,55,0.2);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(212,175,55,0.4); }
+    .btn-primary:active { transform: translateY(0); }
+    .w-full { width: 100%; }
+
     /* Page Layout */
     .main-layout { 
       display: grid; 
