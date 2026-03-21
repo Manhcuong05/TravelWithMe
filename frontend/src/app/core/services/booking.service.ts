@@ -5,7 +5,8 @@ import { ApiResponse } from '../../data/models/auth.model';
 
 export interface BookingItem {
     id: string;
-    type: string;
+    type?: string;
+    serviceType?: string;
     serviceId: string;
     quantity: number;
     checkInDate?: string;
@@ -48,6 +49,18 @@ export interface BookingResponse {
     status: string;
     items: BookingItem[];
     createdAt: string;
+    contact?: {
+        name: string;
+        phone: string;
+        email: string;
+    };
+    passengers?: {
+        title: string;
+        lastName: string;
+        firstName: string;
+        dob: string;
+        nationality: string;
+    }[];
 }
 
 @Injectable({
