@@ -88,6 +88,11 @@ public class BookingRequest {
         @Min(value = 1, message = "Số lượng phải ít nhất là 1")
         private int quantity;
 
+        private int adults;
+        private int children;
+        private int infants;
+        private String subServiceId; // specific variant ID, like FlightClass.id
+
         private LocalDate checkInDate;
         private LocalDate checkOutDate;
     }

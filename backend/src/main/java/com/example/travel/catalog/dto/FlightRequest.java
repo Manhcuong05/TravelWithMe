@@ -1,6 +1,5 @@
 package com.example.travel.catalog.dto;
 
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,8 +28,7 @@ public class FlightRequest {
     private LocalDateTime departureTime;
     private LocalDateTime arrivalTime;
 
-    @Min(value = 0, message = "Giá vé không được nhỏ hơn 0")
-    private double basePrice;
+    private java.util.List<FlightClassDto> flightClasses;
 
     private String aircraft;
 }

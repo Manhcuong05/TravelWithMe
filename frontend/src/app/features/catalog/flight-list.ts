@@ -25,28 +25,96 @@ import { BookingService } from '../../core/services/booking.service';
                 <button class="type-btn">Khứ hồi</button>
                 <button class="type-btn">Nhiều thành phố</button>
               </div>
-              <div class="passenger-class">
-                <span class="pc-divider">|</span>
-                <span>Phổ thông</span>
-              </div>
             </div>
             
             <div class="widget-body">
               <div class="search-inputs">
-                <div class="input-group">
-                  <label>Từ</label>
-                  <input type="text" placeholder="Thành phố đi..." [(ngModel)]="searchDeparture">
+                <div class="input-group flex-2">
+                  <div class="input-label-row"><i class="fas fa-plane-departure mr-2 text-gold"></i> Từ</div>
+                  <input type="text" placeholder="Thành phố đi..." [(ngModel)]="searchDeparture" class="luxury-input">
                 </div>
-                <div class="swap-icon" (click)="swapLocations()">⇄</div>
-                <div class="input-group">
-                  <label>Đến</label>
-                  <input type="text" placeholder="Thành phố đến..." [(ngModel)]="searchArrival">
+                <div class="swap-icon-container">
+                  <div class="swap-icon" (click)="swapLocations()">⇄</div>
                 </div>
-                <div class="input-group">
-                  <label>Ngày khởi hành</label>
-                  <input type="date" [(ngModel)]="searchDate">
+                <div class="input-group flex-2">
+                  <div class="input-label-row"><i class="fas fa-plane-arrival mr-2 text-gold"></i> Đến</div>
+                  <input type="text" placeholder="Thành phố đến..." [(ngModel)]="searchArrival" class="luxury-input">
                 </div>
-                <button class="btn-search luxury-font" (click)="search()">Tìm Kiếm</button>
+                <div class="input-group flex-1">
+                  <div class="input-label-row"><i class="fas fa-calendar-alt mr-2 text-gold"></i> Ngày đi</div>
+                  <input type="date" [(ngModel)]="searchDate" class="luxury-input">
+                </div>
+                
+                <!-- Passenger & Class Integrated -->
+                <div class="input-group flex-2 relative passenger-trigger" (click)="showPassengerDropdown.set(!showPassengerDropdown())">
+                  <div class="input-label-row"><i class="fas fa-user-friends mr-2 text-gold"></i> Khách & Hạng ghế</div>
+                  <div class="display-value luxury-input flex items-center justify-between">
+                    <span class="truncate">
+                      <strong>{{ adults() + children() + infants() }} Khách</strong>, {{ seatClass() === 'ECONOMY' ? 'Phổ thông' : 'Thương gia' }}
+                    </span>
+                    <i class="fas fa-chevron-down text-xs ml-2"></i>
+                  </div>
+                  
+                  <!-- Pax Dropdown -->
+                  <div class="pax-dropdown-menu luxury-pax-dropdown" *ngIf="showPassengerDropdown()" (click)="$event.stopPropagation()">
+                     <div class="pax-header border-bottom mb-4 pb-2">
+                       <h4 class="luxury-font">Số lượng hành khách</h4>
+                       <div class="text-dim">Cấu hình tìm kiếm cho chuyến bay</div>
+                     </div>
+                     
+                     <div class="pax-row">
+                        <div class="pax-info">
+                          <strong>Người lớn</strong>
+                          <div class="text-dim">Từ 12 tuổi</div>
+                        </div>
+                        <div class="pax-controls">
+                          <button class="p-btn" (click)="adults.set(Math.max(1, adults() - 1))" [disabled]="adults() <= 1" title="Giảm">-</button>
+                          <span class="pax-val">{{ adults() }}</span>
+                          <button class="p-btn" (click)="adults.set(adults() + 1)" title="Tăng">+</button>
+                        </div>
+                     </div>
+                     <div class="pax-row mt-4">
+                        <div class="pax-info">
+                          <strong>Trẻ em</strong>
+                          <div class="text-dim">Hành khách từ 2 - 11 tuổi</div>
+                        </div>
+                        <div class="pax-controls">
+                          <button class="p-btn" (click)="children.set(Math.max(0, children() - 1))" [disabled]="children() <= 0" title="Giảm">-</button>
+                          <span class="pax-val">{{ children() }}</span>
+                          <button class="p-btn" (click)="children.set(children() + 1)" title="Tăng">+</button>
+                        </div>
+                     </div>
+                     <div class="pax-row mt-4">
+                        <div class="pax-info">
+                          <strong>Em bé</strong>
+                          <div class="text-dim">Dưới 2 tuổi</div>
+                        </div>
+                        <div class="pax-controls">
+                          <button class="p-btn" (click)="infants.set(Math.max(0, infants() - 1))" [disabled]="infants() <= 0" title="Giảm">-</button>
+                          <span class="pax-val">{{ infants() }}</span>
+                          <button class="p-btn" (click)="infants.set(infants() + 1)" title="Tăng">+</button>
+                        </div>
+                     </div>
+                     
+                     <div class="class-selector mt-5 pt-4 border-top-dashed">
+                        <label class="text-dim mb-3 block">Hàng ghế mong muốn</label>
+                        <div class="class-chips">
+                          <div class="class-chip" [class.active]="seatClass() === 'ECONOMY'" (click)="seatClass.set('ECONOMY')">Phổ thông</div>
+                          <div class="class-chip" [class.active]="seatClass() === 'BUSINESS'" (click)="seatClass.set('BUSINESS')">Thương gia</div>
+                        </div>
+                     </div>
+                     
+                     <div class="pax-footer mt-5">
+                       <button class="btn-primary w-full py-3 luxury-font" (click)="showPassengerDropdown.set(false); search()">XÁC NHẬN</button>
+                     </div>
+                  </div>
+                </div>
+
+                <div class="search-btn-container">
+                   <button class="btn-search luxury-font" (click)="search()">
+                     <i class="fas fa-search mr-2"></i> Tìm Kiếm
+                   </button>
+                </div>
               </div>
             </div>
           </div>
@@ -134,15 +202,13 @@ import { BookingService } from '../../core/services/booking.service';
                     </div>
                     
                     <div class="fc-action">
-                        <div class="fc-price">{{ flight.basePrice | number }} <small>VNĐ</small></div>
+                        <div class="fc-price">{{ getLowestPrice(flight) | number }} <small>VNĐ</small></div>
                         <button class="btn-select" (click)="selectFlight(flight)">Chọn</button>
                     </div>
                  </div>
                  <div class="fc-footer">
                     <button class="btn-link">Chi tiết</button>
-                    <button class="btn-link">Các lợi ích đi kèm</button>
-                    <button class="btn-link">Hoàn vé</button>
-                    <button class="btn-link">Đổi lịch</button>
+                    <button class="btn-link">Chính sách hành lý & hoàn hủy</button>
                  </div>
               </div>
             </div>
@@ -198,103 +264,39 @@ import { BookingService } from '../../core/services/booking.service';
            <div class="drawer-tabs">
               <button class="tab-btn" [class.active]="drawerTab() === 'ECONOMY'" (click)="drawerTab.set('ECONOMY')">Phổ thông</button>
               <button class="tab-btn text-gold" [class.active]="drawerTab() === 'BUSINESS'" (click)="drawerTab.set('BUSINESS')">
-                 Thương gia <small *ngIf="selectedFlight()">(Từ {{ (selectedFlight()!.basePrice * 2.8) | number }} VNĐ)</small>
+                 Thương gia
               </button>
            </div>
          </div>
          
          <div class="drawer-content" *ngIf="selectedFlight()">
-            <!-- ECONOMY TIER CARDS -->
-            <div class="class-cards-wrapper" *ngIf="drawerTab() === 'ECONOMY'">
+            <div class="class-cards-wrapper">
                
-               <!-- Economy Basic -->
-               <div class="cc-card">
-                  <div class="cc-header border-bottom">
-                     <h3 class="cc-title">Phổ thông (Basic)</h3>
-                     <div class="cc-price">{{ selectedFlight()?.basePrice | number }} <small>VNĐ</small></div>
-                  </div>
-                  <ul class="cc-features">
-                     <li><span class="cc-icon">💼</span> Hành lý xách tay 7 kg</li>
-                     <li class="disabled"><span class="cc-icon">🧳</span> Không hành lý ký gửi</li>
-                     <li class="disabled"><span class="cc-icon">🔄</span> Không được đổi vé</li>
-                     <li class="disabled"><span class="cc-icon">❌</span> Không áp dụng hoàn vé</li>
-                     <li><span class="cc-icon">📄</span> Có thể cung cấp hóa đơn VAT</li>
-                  </ul>
-                  <button class="btn-select-class secondary" (click)="bookFlight(selectedFlight()!.id)">Chọn</button>
-                  <button class="btn-link text-center mt-3 text-sm">Tìm hiểu thêm</button>
-               </div>
-               
-               <!-- Economy Flex -->
-               <div class="cc-card highlight shadow-gold">
-                  <div class="cc-badge">BÁN CHẠY NHẤT</div>
-                  <div class="cc-header border-bottom">
-                     <h3 class="cc-title text-gold">Phổ thông linh hoạt</h3>
-                     <div class="cc-price text-gold">{{ (selectedFlight()!.basePrice * 1.3) | number }} <small>VNĐ</small></div>
-                  </div>
-                  <ul class="cc-features">
-                     <li><span class="cc-icon">💼</span> Hành lý xách tay 7 kg</li>
-                     <li><span class="cc-icon">🧳</span> Hành lý ký gửi 20 kg</li>
-                     <li><span class="cc-icon">🔄</span> Phí đổi lịch dự kiến từ 400.000 VNĐ</li>
-                     <li><span class="cc-icon">✅</span> Hoàn vé mất phí</li>
-                     <li><span class="cc-icon">📄</span> Có thể cung cấp hóa đơn VAT</li>
-                  </ul>
-                  <button class="btn-select-class primary" (click)="bookFlight(selectedFlight()!.id, 'ECONOMY_FLEX')">Chọn</button>
-                  <button class="btn-link text-center mt-3 text-sm">Tìm hiểu thêm</button>
-               </div>
-               
-               <!-- Economy Premium (Deluxe) -->
-               <div class="cc-card">
-                  <div class="cc-header border-bottom">
-                     <h3 class="cc-title text-gold">Phổ thông Deluxe</h3>
-                     <div class="cc-price text-gold">{{ (selectedFlight()!.basePrice * 1.8) | number }} <small>VNĐ</small></div>
-                  </div>
-                  <ul class="cc-features">
-                     <li><span class="cc-icon">💼</span> Hành lý xách tay 7 kg</li>
-                     <li><span class="cc-icon">🧳</span> Hành lý ký gửi 30 kg</li>
-                     <li><span class="cc-icon">💺</span> Ghế tiêu chuẩn (khoảng cách ghế 28 inch)</li>
-                     <li><span class="cc-icon">🔄</span> Miễn phí đổi vé 1 lần (trước 24h)</li>
-                     <li><span class="cc-icon">✅</span> Hoàn vé linh hoạt một phần</li>
-                  </ul>
-                  <button class="btn-select-class secondary" (click)="bookFlight(selectedFlight()!.id, 'ECONOMY_DELUXE')">Chọn</button>
-                  <button class="btn-link text-center mt-3 text-sm">Tìm hiểu thêm</button>
-               </div>
+               <!-- Dynamic Classes Loop -->
+               <ng-container *ngFor="let fc of selectedFlight()?.flightClasses">
+                 <div class="cc-card" [class.premium]="fc.className === 'BUSINESS'" [class.gradient-bg]="fc.className === 'BUSINESS'" *ngIf="fc.className === drawerTab()">
+                    <div class="cc-header border-bottom">
+                       <h3 class="cc-title" [class.text-gold]="fc.className === 'BUSINESS'">{{ drawerTab() === 'ECONOMY' ? 'Hạng Phổ Thông' : 'Hạng Thương Gia' }}</h3>
+                       <div class="text-xs text-gray mt-1">Hành lý: {{ fc.baggageAllowanceKg }}kg | Còn: {{ fc.availableSeats }} ghế</div>
+                       <div class="cc-price mt-2">{{ calculateClassPrice(fc) | number }} <small>VNĐ</small></div>
+                    </div>
+                    <ul class="cc-features">
+                       <li><span class="cc-icon">💼</span> Hành lý xách tay 7 kg</li>
+                       <li><span class="cc-icon">🧳</span> Hành lý ký gửi {{ fc.baggageAllowanceKg }} kg</li>
+                       <li *ngIf="fc.className === 'BUSINESS'"><span class="cc-icon">👑</span> Phòng chờ thương gia VIP</li>
+                       <li *ngIf="fc.className === 'BUSINESS'"><span class="cc-icon">🍽️</span> Suất ăn miễn phí</li>
+                       <li><span class="cc-icon">🔄</span> Đổi lịch theo vé hệ thống</li>
+                    </ul>
+                    <button class="btn-select-class" [class.primary]="fc.className === 'ECONOMY'" [class.white-btn]="fc.className === 'BUSINESS'" (click)="bookFlight(selectedFlight()!.id, fc.id)">Chọn Vé</button>
+                 </div>
+               </ng-container>
 
-            </div>
-
-            <!-- BUSINESS TIER CARDS -->
-            <div class="class-cards-wrapper" *ngIf="drawerTab() === 'BUSINESS'">
-               <!-- Business Class -->
-               <div class="cc-card premium gradient-bg">
-                  <div class="cc-header border-bottom">
-                     <h3 class="cc-title">Thương gia</h3>
-                     <div class="cc-price">{{ (selectedFlight()!.basePrice * 2.8) | number }} <small>VNĐ</small></div>
-                  </div>
-                  <ul class="cc-features">
-                     <li><span class="cc-icon">💼</span> Hành lý xách tay 14 kg</li>
-                     <li><span class="cc-icon">🧳</span> Hành lý ký gửi 40 kg</li>
-                     <li><span class="cc-icon">👑</span> Phòng chờ thương gia</li>
-                     <li><span class="cc-icon">🔄</span> Đổi lịch miễn phí</li>
-                     <li><span class="cc-icon">✅</span> Hoàn vé linh hoạt 100%</li>
-                  </ul>
-                  <button class="btn-select-class white-btn" (click)="bookFlight(selectedFlight()!.id, 'BUSINESS')">Chọn</button>
+               <!-- Empty State fallback -->
+               <div *ngIf="getClassesByTab(drawerTab()).length === 0" class="text-center w-full py-5 text-gray mt-5">
+                 <i class="fas fa-ticket-alt text-4xl mb-3 opacity-50"></i>
+                 <p>Hiện tại chuyến bay này chưa cấu hình Hạng vé {{ drawerTab() === 'ECONOMY' ? 'Phổ thông' : 'Thương gia' }} hoặc đã hết chỗ.</p>
                </div>
                
-               <!-- Premium Business SkyBoss -->
-               <div class="cc-card premium gradient-bg-gold">
-                  <div class="cc-badge">ĐẶC QUYỀN VIP</div>
-                  <div class="cc-header border-bottom">
-                     <h3 class="cc-title text-dark">Thương gia SkyBoss</h3>
-                     <div class="cc-price text-dark">{{ (selectedFlight()!.basePrice * 4.5) | number }} <small>VNĐ</small></div>
-                  </div>
-                  <ul class="cc-features text-dark" style="color: #222 !important">
-                     <li style="color: #333"><span class="cc-icon">💼</span> Hành lý xách tay 18 kg</li>
-                     <li style="color: #333"><span class="cc-icon">🧳</span> Hành lý ký gửi 50 kg + Dụng cụ Golf</li>
-                     <li style="color: #333"><span class="cc-icon">🍽️</span> Suất ăn nóng miễn phí trên máy bay</li>
-                     <li style="color: #333"><span class="cc-icon">👑</span> Sử dụng phòng chờ thương gia toàn cầu</li>
-                     <li style="color: #333"><span class="cc-icon">🚗</span> Xe đưa đón sân bay riêng</li>
-                  </ul>
-                  <button class="btn-select-class bg-dark text-gold border-none" (click)="bookFlight(selectedFlight()!.id, 'BUSINESS_SKYBOSS')">Chọn thẻ VIP</button>
-               </div>
             </div>
          </div>
       </div>
@@ -307,61 +309,218 @@ import { BookingService } from '../../core/services/booking.service';
       --gold-light: #f3e5ab;
     }
     
-    .text-gold { color: var(--gold-primary); }
-    
-    .search-hero { position: relative; background: var(--bg-dark); }
+    /* Utilities */
+    .flex-1 { flex: 1; }
+    .flex-2 { flex: 2; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .relative { position: relative; }
+    .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ml-2 { margin-left: 0.5rem; }
+    .mr-2 { margin-right: 0.5rem; }
+    .mt-4 { margin-top: 1rem; }
+    .mt-5 { margin-top: 1.25rem; }
+    .mb-3 { margin-bottom: 0.75rem; }
+    .pb-2 { padding-bottom: 0.5rem; }
+    .pt-4 { padding-top: 1rem; }
+    .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+
+    .search-hero { position: relative; background: var(--bg-dark); z-index: 100; }
     .hero-bg { position: absolute; inset: 0; background: url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&q=80&w=1920') center/cover; opacity: 0.3; }
     
     .hero-content {
-      padding-top: 150px;
-      padding-bottom: 80px;
+      padding-top: 140px;
+      padding-bottom: 60px;
+      max-width: 1400px;
+      margin: 0 auto;
+      z-index: 110;
     }
     
     .hero-title {
       text-align: center;
       color: white;
       margin-bottom: 40px;
-      font-size: 2.5rem;
+      font-size: 2.8rem;
+      letter-spacing: -1px;
+      text-shadow: 0 4px 10px rgba(0,0,0,0.5);
     }
 
-    /* Search Widget */
+    /* Search Widget Professional Redesign */
     .search-widget { 
-      background: rgba(15, 20, 30, 0.85); 
-      border-radius: 20px; 
-      padding: 30px; 
-      border: 1px solid rgba(255,255,255,0.1); 
-      backdrop-filter: blur(10px); 
+      background: #0f172a; 
+      border-radius: 24px; 
+      padding: 0; 
+      border: 1px solid rgba(212, 175, 55, 0.2); 
+      backdrop-filter: blur(25px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      overflow: visible;
+      z-index: 120;
     }
     .widget-header { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      border-bottom: 1px solid rgba(255,255,255,0.1); 
-      padding-bottom: 20px; 
-      margin-bottom: 20px; 
+      padding: 20px 30px;
+      border-bottom: 1px solid rgba(255,255,255,0.06); 
+      display: flex;
+      align-items: center;
     }
-    .trip-types { display: flex; gap: 20px; }
-    .type-btn { background: none; border: none; font-size: 1rem; color: #888; cursor: pointer; font-weight: 500; transition: color 0.3s; position: relative; }
-    .type-btn.active { color: white; }
-    .type-btn.active::after { content: ''; position: absolute; bottom: -21px; left: 0; width: 100%; height: 2px; background: var(--gold-primary); }
+    .trip-types { display: flex; gap: 30px; }
+    .type-btn { background: none; border: none; font-size: 0.9rem; color: #8b9bb4; cursor: pointer; font-weight: 600; transition: all 0.3s; position: relative; padding: 5px 0; text-transform: uppercase; letter-spacing: 1px; }
+    .type-btn.active { color: var(--gold-primary); }
+    .type-btn.active::after { content: ''; position: absolute; bottom: -21px; left: 0; width: 100%; height: 3px; background: var(--gold-primary); border-radius: 3px 3px 0 0; }
     .type-btn:hover { color: white; }
     
-    .passenger-class { font-size: 0.85rem; color: #ccc; }
-    .pc-divider { margin: 0 15px; color: #555; }
+    .widget-body { padding: 25px 30px 35px 30px; }
     
     .search-inputs { 
-      display: grid; 
-      grid-template-columns: 1fr auto 1fr 1fr auto; 
-      gap: 20px; 
-      align-items: flex-end; 
+      display: flex;
+      gap: 12px;
+      background: rgba(255,255,255,0.03);
+      padding: 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.05);
+      align-items: stretch;
     }
-    .input-group label { display: block; font-size: 0.85rem; color: #aaa; margin-bottom: 8px; text-transform: uppercase; }
-    .input-group input { width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 15px 20px; color: white; outline: none; transition: border-color 0.3s; font-size: 1rem; box-sizing: border-box;}
-    .input-group input:focus { border-color: var(--gold-primary); }
-    .swap-icon { font-size: 1.5rem; padding-bottom: 12px; cursor: pointer; color: var(--gold-primary);}
-    .btn-search { background: var(--gold-primary); cursor: pointer; color: black; border-radius: 10px; padding: 15px 30px; font-size: 1.1rem; font-weight: 700; transition: transform 0.2s, box-shadow 0.2s; border: none; box-shadow: 0 5px 15px rgba(212,175,55,0.3); }
-    .btn-search:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(212,175,55,0.4); }
 
+    .input-group { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 5px; 
+      padding: 10px 15px;
+      border-radius: 14px;
+      transition: background 0.2s;
+    }
+    .input-group:hover { background: rgba(255,255,255,0.04); }
+    
+    .input-label-row { 
+      font-size: 0.7rem; 
+      color: #8b9bb4; 
+      text-transform: uppercase; 
+      font-weight: 800; 
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+    }
+
+    .luxury-input { 
+      width: 100%; 
+      background: transparent; 
+      border: none; 
+      color: white; 
+      outline: none; 
+      font-size: 1.1rem; 
+      font-weight: 700;
+      padding: 5px 0;
+      cursor: pointer;
+    }
+    .luxury-input::placeholder { color: #4b5563; }
+    
+    input[type="date"].luxury-input { color-scheme: dark; }
+
+    .display-value { height: 32px; }
+
+    .swap-icon-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+    }
+    .swap-icon { 
+      width: 36px; 
+      height: 36px; 
+      background: rgba(212, 175, 55, 0.1); 
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      color: var(--gold-primary);
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 1.2rem;
+    }
+    .swap-icon:hover { background: var(--gold-primary); color: black; transform: rotate(180deg); }
+
+    .search-btn-container {
+      display: flex;
+      align-items: stretch;
+      padding-left: 10px;
+    }
+    .btn-search { 
+      background: linear-gradient(135deg, #dfc15a 0%, #c49a20 100%); 
+      cursor: pointer; 
+      color: #0b0f19; 
+      border-radius: 16px; 
+      padding: 0 35px; 
+      font-size: 1.1rem; 
+      font-weight: 800; 
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+      border: none; 
+      box-shadow: 0 10px 20px rgba(212,175,55,0.25);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .btn-search:hover { transform: scale(1.02); box-shadow: 0 15px 30px rgba(212,175,55,0.4); }
+
+    /* Luxury Pax Dropdown */
+    .passenger-trigger { cursor: pointer; }
+    .luxury-pax-dropdown { 
+      position: absolute; 
+      top: 100%; 
+      right: 0;
+      width: 320px; 
+      background: #111827; 
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      box-shadow: 0 30px 60px rgba(0,0,0,1);
+      z-index: 1000;
+      padding: 24px;
+      border-radius: 16px;
+      margin-top: 12px;
+    }
+
+    .pax-header h4 { font-size: 1.1rem; color: white; margin-bottom: 4px; }
+    .text-gray { color: #94a3b8; }
+    .text-dim { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    .pax-row { display: flex; justify-content: space-between; align-items: center; }
+    .pax-info strong { display: block; color: white; font-size: 0.95rem; }
+    .pax-val { font-size: 1.1rem; font-weight: 700; color: white; min-width: 25px; text-align: center; }
+    
+    .p-btn { 
+      width: 32px; 
+      height: 32px; 
+      border-radius: 50%; 
+      background: rgba(255,255,255,0.05); 
+      border: 1px solid rgba(255,255,255,0.1); 
+      color: white; 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .p-btn:hover:not(:disabled) { background: var(--gold-primary); color: black; border-color: var(--gold-primary); }
+    .p-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+
+    .class-chips { display: flex; gap: 10px; }
+    .class-chip { 
+      flex: 1; 
+      padding: 12px; 
+      text-align: center; 
+      background: rgba(255,255,255,0.03); 
+      border: 1px solid rgba(255,255,255,0.08); 
+      border-radius: 12px; 
+      font-size: 0.85rem; 
+      font-weight: 700; 
+      cursor: pointer; 
+      transition: all 0.3s;
+      color: #8b9bb4;
+    }
+    .class-chip.active { 
+       background: rgba(212, 175, 55, 0.1); 
+       border-color: var(--gold-primary); 
+       color: var(--gold-primary);
+       box-shadow: inset 0 0 10px rgba(212,175,55,0.1);
+    }
+    .class-chip:hover:not(.active) { background: rgba(255,255,255,0.08); color: white; }
     /* Page Layout */
     .main-layout { 
       display: grid; 
@@ -509,6 +668,16 @@ export class FlightListComponent implements OnInit {
   selectedFlight = signal<Flight | null>(null);
   drawerTab = signal<'ECONOMY' | 'BUSINESS'>('ECONOMY');
 
+  // Custom Math helper for template
+  Math = Math;
+
+  // Passenger State
+  adults = signal(1);
+  children = signal(0);
+  infants = signal(0);
+  seatClass = signal<'ECONOMY' | 'BUSINESS'>('ECONOMY');
+  showPassengerDropdown = signal(false);
+
   // Search State
   searchDeparture = signal('');
   searchArrival = signal('');
@@ -532,21 +701,27 @@ export class FlightListComponent implements OnInit {
     let result = this.flights();
     const airlines = this.selectedAirlines();
     const stops = this.selectedStops();
+    const requiredSeats = this.adults() + this.children();
+
+    // Filter by available seats and requested class
+    result = result.filter(f => {
+      if (!f.flightClasses) return false;
+      const validClasses = f.flightClasses.filter(c => c.className === this.seatClass() && c.availableSeats >= requiredSeats);
+      return validClasses.length > 0;
+    });
 
     if (airlines.size > 0) {
       result = result.filter(f => airlines.has(f.airline));
     }
 
     if (stops.size > 0) {
-      // For now, all mocked data is direct.
-      // E.g 'DIRECT' vs '1_STOP'
       result = result.filter(f => stops.has('DIRECT'));
     }
 
     // Sorting
     result = [...result].sort((a, b) => {
       if (this.sortOption() === 'PRICE') {
-        return a.basePrice - b.basePrice;
+        return this.getLowestPrice(a) - this.getLowestPrice(b);
       } else {
         const da = new Date(a.arrivalTime).getTime() - new Date(a.departureTime).getTime();
         const db = new Date(b.arrivalTime).getTime() - new Date(b.departureTime).getTime();
@@ -557,9 +732,38 @@ export class FlightListComponent implements OnInit {
     return result;
   });
 
+  getLowestPrice(flight: Flight): number {
+    if (!flight.flightClasses || flight.flightClasses.length === 0) return 0;
+
+    // Only look at the currently searched class
+    const available = flight.flightClasses.filter(c => c.className === this.seatClass());
+    if (available.length === 0) return 0;
+
+    let min = Infinity;
+    available.forEach(c => {
+      const px = this.calculateClassPrice(c);
+      if (px < min) min = px;
+    });
+
+    return min === Infinity ? 0 : min;
+  }
+
+  calculateClassPrice(fc: any): number {
+    return (this.adults() * fc.priceAdult) +
+      (this.children() * fc.priceChild) +
+      (this.infants() * fc.priceInfant);
+  }
+
+  getClassesByTab(tab: string) {
+    if (!this.selectedFlight()) return [];
+    return this.selectedFlight()!.flightClasses?.filter(c => c.className === tab && c.availableSeats >= (this.adults() + this.children())) || [];
+  }
+
   lowestPrice = computed(() => {
     const f = this.filteredFlights();
-    return f.length ? Math.min(...f.map((x: Flight) => x.basePrice)) : 0;
+    if (!f.length) return 0;
+    const minPrices = f.map(x => this.getLowestPrice(x)).filter(p => p > 0);
+    return minPrices.length ? Math.min(...minPrices) : 0;
   });
 
   shortestDuration = computed(() => {
@@ -629,11 +833,19 @@ export class FlightListComponent implements OnInit {
 
   closeDrawer() {
     this.selectedFlight.set(null);
-    this.drawerTab.set('ECONOMY');
+    this.drawerTab.set(this.seatClass()); // Sync drawer tab with searched class initially
   }
 
-  bookFlight(flightId: string, ticketClass: string = 'ECONOMY') {
-    this.router.navigate(['/flights/checkout'], { queryParams: { flightId, class: ticketClass } });
+  bookFlight(flightId: string, flightClassId: string) {
+    this.router.navigate(['/flights/checkout'], {
+      queryParams: {
+        flightId,
+        classId: flightClassId,
+        adults: this.adults(),
+        children: this.children(),
+        infants: this.infants()
+      }
+    });
   }
 }
 

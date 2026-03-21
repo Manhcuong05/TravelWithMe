@@ -51,9 +51,20 @@ public class BookingResponse {
     @AllArgsConstructor
     public static class ItemResponse {
         private String serviceId;
+        private String serviceName;
+        private String subServiceId;
+        private String subServiceName;
         private String serviceType;
         private int quantity;
         private double price;
+        private int adults;
+        private int children;
+        private int infants;
+        private String airline;
+        private String departureCity;
+        private String arrivalCity;
+        private LocalDateTime departureTime;
+        private LocalDateTime arrivalTime;
         private LocalDate checkInDate;
         private LocalDate checkOutDate;
     }

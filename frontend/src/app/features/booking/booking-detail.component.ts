@@ -97,14 +97,36 @@ import { AuthService } from '../../core/services/auth.service';
                      </div>
                      <div class="flex-1">
                         <span class="type-tag">{{ item.serviceType === 'HOTEL' ? 'KHÁCH SẠN' : (item.serviceType === 'TOUR' ? 'TOUR' : (item.serviceType === 'FLIGHT' ? 'VÉ MÁY BAY' : item.serviceType)) }}</span>
-                        <div class="service-name text-white font-bold mt-1 text-lg">Mã Dịch Vụ: {{ item.serviceId }}</div>
-                        <div class="date-range text-sm text-gray mt-1" *ngIf="item.checkInDate">
-                          <i class="far fa-calendar-alt text-gold mr-1"></i> {{ item.checkInDate | date:'dd/MM/yyyy' }} - {{ item.checkOutDate | date:'dd/MM/yyyy' }}
-                        </div>
+                        
+                        <!-- Flight Specific Info -->
+                        <ng-container *ngIf="item.serviceType === 'FLIGHT'">
+                          <div class="service-name text-white font-bold mt-1 text-lg">{{ item.airline }} - {{ item.subServiceName }}</div>
+                          <div class="flight-route-summary text-sm text-gold mt-1 font-medium">
+                            {{ item.departureCity }} ({{ item.departureTime | date:'HH:mm' }}) 
+                            <i class="fas fa-long-arrow-alt-right mx-2"></i> 
+                            {{ item.arrivalCity }} ({{ item.arrivalTime | date:'HH:mm' }})
+                          </div>
+                          <div class="text-xs text-gray mt-1">
+                            <i class="far fa-calendar-alt mr-1"></i> {{ item.departureTime | date:'dd/MM/yyyy' }}
+                          </div>
+                          <div class="pax-counts text-xs text-gray mt-2 flex gap-3">
+                            <span *ngIf="item.adults"><i class="fas fa-user mr-1"></i> {{ item.adults }} Lớn</span>
+                            <span *ngIf="item.children"><i class="fas fa-child mr-1"></i> {{ item.children }} Trẻ</span>
+                            <span *ngIf="item.infants"><i class="fas fa-baby mr-1"></i> {{ item.infants }} Bé</span>
+                          </div>
+                        </ng-container>
+
+                        <!-- Non-Flight Info -->
+                        <ng-container *ngIf="item.serviceType !== 'FLIGHT'">
+                          <div class="service-name text-white font-bold mt-1 text-lg">{{ item.serviceName || 'Chi tiết dịch vụ' }}</div>
+                          <div class="date-range text-sm text-gray mt-1" *ngIf="item.checkInDate">
+                            <i class="far fa-calendar-alt text-gold mr-1"></i> {{ item.checkInDate | date:'dd/MM/yyyy' }} - {{ item.checkOutDate | date:'dd/MM/yyyy' }}
+                          </div>
+                        </ng-container>
                      </div>
                      <div class="item-qty flex flex-col items-end">
-                        <span class="text-xs text-gray uppercase tracking-widest">Số Lượng</span>
-                        <span class="text-xl text-white font-bold">x{{ item.quantity }}</span>
+                        <span class="text-xs text-gray uppercase tracking-widest">Giá mỗi vé</span>
+                        <span class="text-lg text-white font-bold">{{ item.price | number }} đ</span>
                      </div>
                   </div>
                 </div>

@@ -31,7 +31,9 @@ public class Flight {
     private LocalDateTime departureTime;
     private LocalDateTime arrivalTime;
 
-    private double basePrice;
+    @Builder.Default
+    @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL, orphanRemoval = true, fetch = jakarta.persistence.FetchType.EAGER)
+    private java.util.List<FlightClass> flightClasses = new java.util.ArrayList<>();
 
     @Column(columnDefinition = "TEXT")
     private String aircraft;

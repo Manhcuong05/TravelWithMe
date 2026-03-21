@@ -8,7 +8,18 @@ export interface BookingItem {
     type?: string;
     serviceType?: string;
     serviceId: string;
+    serviceName?: string;
+    subServiceId?: string;
+    subServiceName?: string;
     quantity: number;
+    adults?: number;
+    children?: number;
+    infants?: number;
+    airline?: string;
+    departureCity?: string;
+    arrivalCity?: string;
+    departureTime?: string;
+    arrivalTime?: string;
     checkInDate?: string;
     checkOutDate?: string;
     price?: number;
@@ -18,7 +29,11 @@ export interface BookingRequest {
     items: {
         type: string;
         serviceId: string;
+        subServiceId?: string;
         quantity: number;
+        adults?: number;
+        children?: number;
+        infants?: number;
         checkInDate?: string;
         checkOutDate?: string;
     }[];

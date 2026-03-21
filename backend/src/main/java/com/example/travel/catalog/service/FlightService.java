@@ -1,17 +1,21 @@
 package com.example.travel.catalog.service;
 
+import com.example.travel.catalog.dto.FlightClassDto;
 import com.example.travel.catalog.dto.FlightRequest;
 import com.example.travel.catalog.dto.FlightResponse;
 import com.example.travel.catalog.entity.Flight;
+import com.example.travel.catalog.entity.FlightClass;
 import com.example.travel.catalog.repository.FlightRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class FlightService {
 
     private final FlightRepository flightRepository;
@@ -26,9 +30,27 @@ public class FlightService {
                 .arrivalAirport(request.getArrivalAirport())
                 .departureTime(request.getDepartureTime())
                 .arrivalTime(request.getArrivalTime())
-                .basePrice(request.getBasePrice())
                 .aircraft(request.getAircraft())
                 .build();
+
+        if (flight.getFlightClasses() == null) {
+            flight.setFlightClasses(new java.util.ArrayList<>());
+        }
+
+        if (request.getFlightClasses() != null) {
+            request.getFlightClasses().forEach(dto -> {
+                flight.getFlightClasses().add(FlightClass.builder()
+                        .flight(flight)
+                        .className(dto.getClassName())
+                        .priceAdult(dto.getPriceAdult())
+                        .priceChild(dto.getPriceChild())
+                        .priceInfant(dto.getPriceInfant())
+                        .totalSeats(dto.getTotalSeats())
+                        .availableSeats(dto.getAvailableSeats() == 0 ? dto.getTotalSeats() : dto.getAvailableSeats())
+                        .baggageAllowanceKg(dto.getBaggageAllowanceKg())
+                        .build());
+            });
+        }
         return mapToResponse(flightRepository.save(flight));
     }
 
@@ -44,8 +66,28 @@ public class FlightService {
         flight.setArrivalAirport(request.getArrivalAirport());
         flight.setDepartureTime(request.getDepartureTime());
         flight.setArrivalTime(request.getArrivalTime());
-        flight.setBasePrice(request.getBasePrice());
         flight.setAircraft(request.getAircraft());
+
+        if (flight.getFlightClasses() != null) {
+            flight.getFlightClasses().clear();
+        } else {
+            flight.setFlightClasses(new java.util.ArrayList<>());
+        }
+
+        if (request.getFlightClasses() != null) {
+            request.getFlightClasses().forEach(dto -> {
+                flight.getFlightClasses().add(FlightClass.builder()
+                        .flight(flight)
+                        .className(dto.getClassName())
+                        .priceAdult(dto.getPriceAdult())
+                        .priceChild(dto.getPriceChild())
+                        .priceInfant(dto.getPriceInfant())
+                        .totalSeats(dto.getTotalSeats())
+                        .availableSeats(dto.getAvailableSeats() == 0 ? dto.getTotalSeats() : dto.getAvailableSeats())
+                        .baggageAllowanceKg(dto.getBaggageAllowanceKg())
+                        .build());
+            });
+        }
 
         return mapToResponse(flightRepository.save(flight));
     }
@@ -78,6 +120,20 @@ public class FlightService {
     }
 
     private FlightResponse mapToResponse(Flight flight) {
+        java.util.List<FlightClassDto> classDtos = new java.util.ArrayList<>();
+        if (flight.getFlightClasses() != null) {
+            classDtos = flight.getFlightClasses().stream().map(fc -> FlightClassDto.builder()
+                    .id(fc.getId())
+                    .className(fc.getClassName())
+                    .priceAdult(fc.getPriceAdult())
+                    .priceChild(fc.getPriceChild())
+                    .priceInfant(fc.getPriceInfant())
+                    .totalSeats(fc.getTotalSeats())
+                    .availableSeats(fc.getAvailableSeats())
+                    .baggageAllowanceKg(fc.getBaggageAllowanceKg())
+                    .build()).collect(Collectors.toList());
+        }
+
         return FlightResponse.builder()
                 .id(flight.getId())
                 .flightNumber(flight.getFlightNumber())
@@ -86,7 +142,7 @@ public class FlightService {
                 .arrivalCity(flight.getArrivalCity())
                 .departureTime(flight.getDepartureTime())
                 .arrivalTime(flight.getArrivalTime())
-                .basePrice(flight.getBasePrice())
+                .flightClasses(classDtos)
                 .build();
     }
 }

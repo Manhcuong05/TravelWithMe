@@ -9,6 +9,7 @@ import com.example.travel.booking.repository.BookingItemRepository;
 import com.example.travel.booking.repository.BookingRepository;
 import com.example.travel.catalog.dto.ServiceType;
 import com.example.travel.catalog.entity.Flight;
+import com.example.travel.catalog.entity.FlightClass;
 import com.example.travel.catalog.entity.HotelRoom;
 import com.example.travel.catalog.entity.Tour;
 import com.example.travel.catalog.repository.FlightRepository;
@@ -137,7 +138,35 @@ public class BookingService {
                 case FLIGHT:
                     Flight flight = flightRepository.findById(itemReq.getServiceId())
                             .orElseThrow(() -> new BusinessException("SERVICE_NOT_FOUND", "Không tìm thấy chuyến bay"));
-                    price = flight.getBasePrice();
+
+                    if (itemReq.getSubServiceId() == null) {
+                        throw new BusinessException("CLASS_NOT_SELECTED", "Vui lòng chọn hạng vé");
+                    }
+
+                    FlightClass flightClass = flight.getFlightClasses().stream()
+                            .filter(fc -> fc.getId().equals(itemReq.getSubServiceId()))
+                            .findFirst()
+                            .orElseThrow(
+                                    () -> new BusinessException("CLASS_NOT_FOUND", "Không tìm thấy hạng vé hợp lệ"));
+
+                    int passengers = itemReq.getAdults() + itemReq.getChildren();
+                    if (flightClass.getAvailableSeats() < passengers) {
+                        throw new BusinessException("OUT_OF_STOCK",
+                                "Không còn đủ ghế cho hạng vé " + flightClass.getClassName());
+                    }
+
+                    // Deduct inventory
+                    flightClass.setAvailableSeats(flightClass.getAvailableSeats() - passengers);
+
+                    // Calculate precise total price for the flight
+                    double flightTotal = (itemReq.getAdults() * flightClass.getPriceAdult()) +
+                            (itemReq.getChildren() * flightClass.getPriceChild()) +
+                            (itemReq.getInfants() * flightClass.getPriceInfant());
+
+                    // Since the bottom logic does price * quantity, we normalize 'price' by
+                    // quantity
+                    // so the total comes out exact. Usually quantity = 1 for a flight segment.
+                    price = flightTotal / Math.max(1, itemReq.getQuantity());
                     break;
                 case TOUR:
                     Tour tour = tourRepository.findById(itemReq.getServiceId())
@@ -153,7 +182,11 @@ public class BookingService {
                     .booking(booking)
                     .serviceType(itemReq.getType())
                     .serviceId(itemReq.getServiceId())
+                    .subServiceId(itemReq.getSubServiceId())
                     .quantity(itemReq.getQuantity())
+                    .adults(itemReq.getAdults())
+                    .children(itemReq.getChildren())
+                    .infants(itemReq.getInfants())
                     .priceAtBooking(price)
                     .checkInDate(itemReq.getCheckInDate())
                     .checkOutDate(itemReq.getCheckOutDate())
@@ -232,14 +265,47 @@ public class BookingService {
                 .totalAmount(booking.getTotalAmount())
                 .status(booking.getStatus())
                 .createdAt(booking.getCreatedAt())
-                .items(booking.getItems().stream().map(item -> BookingResponse.ItemResponse.builder()
-                        .serviceId(item.getServiceId())
-                        .serviceType(item.getServiceType().name())
-                        .quantity(item.getQuantity())
-                        .price(item.getPriceAtBooking())
-                        .checkInDate(item.getCheckInDate())
-                        .checkOutDate(item.getCheckOutDate())
-                        .build()).collect(Collectors.toList()))
+                .items(booking.getItems().stream().map(item -> {
+                    BookingResponse.ItemResponse.ItemResponseBuilder itemRes = BookingResponse.ItemResponse.builder()
+                            .serviceId(item.getServiceId())
+                            .subServiceId(item.getSubServiceId())
+                            .serviceType(item.getServiceType().name())
+                            .quantity(item.getQuantity() != null ? item.getQuantity() : 1)
+                            .price(item.getPriceAtBooking())
+                            .adults(item.getAdults() != null ? item.getAdults() : 0)
+                            .children(item.getChildren() != null ? item.getChildren() : 0)
+                            .infants(item.getInfants() != null ? item.getInfants() : 0)
+                            .checkInDate(item.getCheckInDate())
+                            .checkOutDate(item.getCheckOutDate());
+
+                    if (item.getServiceType() == ServiceType.FLIGHT) {
+                        flightRepository.findById(item.getServiceId()).ifPresent(f -> {
+                            itemRes.serviceName("Chuyến bay " + f.getDepartureCity() + " - " + f.getArrivalCity());
+                            itemRes.airline(f.getAirline());
+                            itemRes.departureCity(f.getDepartureCity());
+                            itemRes.arrivalCity(f.getArrivalCity());
+                            itemRes.departureTime(f.getDepartureTime());
+                            itemRes.arrivalTime(f.getArrivalTime());
+
+                            if (item.getSubServiceId() != null) {
+                                f.getFlightClasses().stream()
+                                        .filter(fc -> fc.getId().equals(item.getSubServiceId()))
+                                        .findFirst()
+                                        .ifPresent(fc -> itemRes.subServiceName(fc.getClassName()));
+                            }
+                        });
+                    } else if (item.getServiceType() == ServiceType.HOTEL) {
+                        hotelRoomRepository.findById(item.getServiceId()).ifPresent(r -> {
+                            itemRes.serviceName(r.getRoomType());
+                        });
+                    } else if (item.getServiceType() == ServiceType.TOUR) {
+                        tourRepository.findById(item.getServiceId()).ifPresent(t -> {
+                            itemRes.serviceName(t.getTitle());
+                        });
+                    }
+
+                    return itemRes.build();
+                }).collect(Collectors.toList()))
                 .build();
 
         if (booking.getContact() != null) {

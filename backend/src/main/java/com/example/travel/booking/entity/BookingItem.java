@@ -30,7 +30,12 @@ public class BookingItem {
     @Column(nullable = false)
     private String serviceId; // ID of HotelRoom, Flight, or Tour
 
-    private int quantity;
+    private Integer quantity; // Total quantity (often adults + children)
+    private Integer adults;
+    private Integer children;
+    private Integer infants;
+
+    private String subServiceId; // Specific variant ID, e.g., FlightClass ID
 
     private double priceAtBooking; // Snapshot of price at the time of booking
 

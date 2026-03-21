@@ -18,5 +18,5 @@ public class FlightResponse {
     private String arrivalCity;
     private LocalDateTime departureTime;
     private LocalDateTime arrivalTime;
-    private double basePrice;
+    private java.util.List<FlightClassDto> flightClasses;
 }

@@ -65,45 +65,51 @@ import { BookingService } from '../../core/services/booking.service';
                </div>
                
                <div class="card-body">
-                 <div class="pax-header flex items-center gap-2 mb-4">
-                   <span class="pax-badge">1</span>
-                   <h3 class="m-0 text-white font-bold text-lg">Người Lớn</h3>
-                 </div>
-                 
-                 <div class="form-grid">
-                   <div class="form-group third-width">
-                     <label>Danh xưng <span class="text-error">*</span></label>
-                     <select [(ngModel)]="paxTitle" class="form-control">
-                       <option value="MR">Ông (Mr)</option>
-                       <option value="MRS">Bà (Mrs)</option>
-                       <option value="MISS">Cô (Miss)</option>
-                     </select>
+                 <ng-container *ngFor="let pax of passengers; let i = index">
+                   <div class="pax-header flex items-center gap-2 mb-4 mt-6">
+                     <span class="pax-badge">{{ i + 1 }}</span>
+                     <h3 class="m-0 text-white font-bold text-lg">
+                        {{ pax.type === 'ADULT' ? 'Người Lớn' : (pax.type === 'CHILD' ? 'Trẻ Em' : 'Em Bé') }}
+                     </h3>
                    </div>
                    
-                   <div class="form-group third-width">
-                     <label>Họ (VD: NGUYEN) <span class="text-error">*</span></label>
-                     <input type="text" [(ngModel)]="paxLastName" class="form-control uppercase" placeholder="NGUYEN">
+                   <div class="form-grid">
+                     <div class="form-group third-width">
+                       <label>Danh xưng <span class="text-error">*</span></label>
+                       <select [(ngModel)]="pax.title" class="form-control">
+                         <option value="MR" *ngIf="pax.type === 'ADULT'">Ông (Mr)</option>
+                         <option value="MRS" *ngIf="pax.type === 'ADULT'">Bà (Mrs)</option>
+                         <option value="MISS" *ngIf="pax.type === 'ADULT'">Cô (Miss)</option>
+                         <option value="MSTR" *ngIf="pax.type !== 'ADULT'">Bé trai (Mstr)</option>
+                         <option value="MISS" *ngIf="pax.type !== 'ADULT'">Bé gái (Miss)</option>
+                       </select>
+                     </div>
+                     
+                     <div class="form-group third-width">
+                       <label>Họ (VD: NGUYEN) <span class="text-error">*</span></label>
+                       <input type="text" [(ngModel)]="pax.lastName" class="form-control uppercase" placeholder="NGUYEN">
+                     </div>
+                     
+                     <div class="form-group third-width">
+                       <label>Chữ đệm & Tên <span class="text-error">*</span></label>
+                       <input type="text" [(ngModel)]="pax.firstName" class="form-control uppercase" placeholder="VAN A">
+                     </div>
+                     
+                     <div class="form-group half-width">
+                       <label>Ngày sinh <span class="text-error">*</span></label>
+                       <input type="date" [(ngModel)]="pax.dob" class="form-control">
+                     </div>
+                     
+                     <div class="form-group half-width">
+                       <label>Quốc tịch <span class="text-error">*</span></label>
+                       <select [(ngModel)]="pax.nationality" class="form-control">
+                         <option value="VN">Việt Nam</option>
+                         <option value="US">Hoa Kỳ</option>
+                         <option value="UK">Vương Quốc Anh</option>
+                       </select>
+                     </div>
                    </div>
-                   
-                   <div class="form-group third-width">
-                     <label>Chữ đệm & Tên <span class="text-error">*</span></label>
-                     <input type="text" [(ngModel)]="paxFirstName" class="form-control uppercase" placeholder="VAN A">
-                   </div>
-                   
-                   <div class="form-group half-width">
-                     <label>Ngày sinh <span class="text-error">*</span></label>
-                     <input type="date" [(ngModel)]="paxDob" class="form-control">
-                   </div>
-                   
-                   <div class="form-group half-width">
-                     <label>Quốc tịch <span class="text-error">*</span></label>
-                     <select [(ngModel)]="paxNationality" class="form-control">
-                       <option value="VN">Việt Nam</option>
-                       <option value="US">Hoa Kỳ</option>
-                       <option value="UK">Vương Quốc Anh</option>
-                     </select>
-                   </div>
-                 </div>
+                 </ng-container>
                </div>
             </div>
 
@@ -264,10 +270,22 @@ import { BookingService } from '../../core/services/booking.service';
                 </div>
                 <div class="card-body p-5">
                   <div class="price-breakdown">
-                    <div class="price-row">
-                       <span class="price-label">Giá vé {{ ticketClassName() }} (x1)</span>
+                    <div class="price-row" *ngIf="adults > 0">
+                       <span class="price-label">Người lớn (x{{ adults }})</span>
                        <span class="price-dotted"></span>
-                       <span class="price-value">{{ basePrice() | number }} đ</span>
+                       <span class="price-value">{{ adults * (flightClass()?.priceAdult || 0) | number }} đ</span>
+                    </div>
+                    
+                    <div class="price-row" *ngIf="children > 0">
+                       <span class="price-label">Trẻ em (x{{ children }})</span>
+                       <span class="price-dotted"></span>
+                       <span class="price-value">{{ children * (flightClass()?.priceChild || 0) | number }} đ</span>
+                    </div>
+
+                    <div class="price-row" *ngIf="infants > 0">
+                       <span class="price-label">Em bé (x{{ infants }})</span>
+                       <span class="price-dotted"></span>
+                       <span class="price-value">{{ infants * (flightClass()?.priceInfant || 0) | number }} đ</span>
                     </div>
                     
                     <div class="price-row" *ngIf="baggagePrice() > 0">
@@ -289,9 +307,9 @@ import { BookingService } from '../../core/services/booking.service';
                     </div>
                     
                     <div class="price-row" *ngIf="selectedInsurance()">
-                       <span class="price-label text-gold"><i class="fas fa-shield-alt mr-1"></i> Bảo hiểm Flexi</span>
+                       <span class="price-label text-gold"><i class="fas fa-shield-alt mr-1"></i> Bảo hiểm Flexi (x{{ adults + children }})</span>
                        <span class="price-dotted"></span>
-                       <span class="price-value text-gold">60,500 đ</span>
+                       <span class="price-value text-gold">{{ (adults + children) * 60500 | number }} đ</span>
                     </div>
                   </div>
                   
@@ -516,18 +534,18 @@ export class FlightCheckoutComponent implements OnInit {
   flight = signal<Flight | null>(null);
 
   flightId = '';
-  ticketClass = 'ECONOMY';
+  classId = '';
+
+  adults = 1;
+  children = 0;
+  infants = 0;
 
   // Forms
   contactName = '';
   contactPhone = '';
   contactEmail = '';
 
-  paxTitle = 'MR';
-  paxFirstName = '';
-  paxLastName = '';
-  paxDob = '';
-  paxNationality = 'VN';
+  passengers: any[] = [];
 
   // Addons Signals
   selectedBaggage = signal<number>(0);
@@ -542,28 +560,23 @@ export class FlightCheckoutComponent implements OnInit {
   private catalogService = inject(CatalogService);
   private bookingService = inject(BookingService);
 
-  basePrice = computed(() => {
+  flightClass = computed(() => {
     const f = this.flight();
-    if (!f) return 0;
+    if (!f || !f.flightClasses) return null;
+    return f.flightClasses.find(c => c.id === this.classId) || null;
+  });
 
-    let multiplier = 1;
-    switch (this.ticketClass) {
-      case 'ECONOMY_FLEX': multiplier = 1.3; break;
-      case 'ECONOMY_DELUXE': multiplier = 1.8; break;
-      case 'BUSINESS': multiplier = 2.8; break;
-      case 'BUSINESS_SKYBOSS': multiplier = 4.5; break;
-    }
-    return f.basePrice * multiplier;
+  basePrice = computed(() => {
+    const fc = this.flightClass();
+    if (!fc) return 0;
+    return (this.adults * fc.priceAdult) +
+      (this.children * fc.priceChild) +
+      (this.infants * fc.priceInfant);
   });
 
   ticketClassName = computed(() => {
-    switch (this.ticketClass) {
-      case 'ECONOMY_FLEX': return 'Phổ thông linh hoạt';
-      case 'ECONOMY_DELUXE': return 'Phổ thông Deluxe';
-      case 'BUSINESS': return 'Thương gia';
-      case 'BUSINESS_SKYBOSS': return 'Thương gia SkyBoss';
-      default: return 'Phổ thông (Basic)';
-    }
+    const fc = this.flightClass();
+    return fc ? fc.className : 'Khác';
   });
 
   baggagePrice = computed(() => {
@@ -576,22 +589,32 @@ export class FlightCheckoutComponent implements OnInit {
 
   totalPrice = computed(() => {
     let total = this.basePrice();
+    // applied for the whole booking (simplification for UI)
     total += this.baggagePrice();
     if (this.selectedMeals()) total += 120000;
     if (this.selectedSeat()) total += 42000;
-    if (this.selectedInsurance()) total += 60500;
+    if (this.selectedInsurance()) total += ((this.adults + this.children) * 60500);
     return total;
   });
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       this.flightId = params['flightId'];
-      this.ticketClass = params['class'] || 'ECONOMY';
+      this.classId = params['classId'];
+      this.adults = parseInt(params['adults'] || '1');
+      this.children = parseInt(params['children'] || '0');
+      this.infants = parseInt(params['infants'] || '0');
 
       if (!this.flightId) {
         this.goBack();
         return;
       }
+
+      // Initialize passenger arrays
+      this.passengers = [];
+      for (let i = 0; i < this.adults; i++) this.passengers.push({ type: 'ADULT', title: 'MR', firstName: '', lastName: '', dob: '', nationality: 'VN' });
+      for (let i = 0; i < this.children; i++) this.passengers.push({ type: 'CHILD', title: 'MSTR', firstName: '', lastName: '', dob: '', nationality: 'VN' });
+      for (let i = 0; i < this.infants; i++) this.passengers.push({ type: 'INFANT', title: 'MSTR', firstName: '', lastName: '', dob: '', nationality: 'VN' });
 
       this.catalogService.getFlight(this.flightId).subscribe({
         next: (res) => {
@@ -624,9 +647,17 @@ export class FlightCheckoutComponent implements OnInit {
   }
 
   submitBooking() {
-    if (!this.contactName || !this.contactPhone || !this.contactEmail || !this.paxLastName || !this.paxFirstName) {
-      alert("Vui lòng điền các trường bắt buộc có dấu *");
+    if (!this.contactName || !this.contactPhone || !this.contactEmail) {
+      alert("Vui lòng điền thông tin liên hệ");
       return;
+    }
+
+    // Check passengers
+    for (let p of this.passengers) {
+      if (!p.lastName || !p.firstName || !p.dob) {
+        alert("Vui lòng điền đủ Họ tên và Ngày sinh cho tất cả hành khách");
+        return;
+      }
     }
 
     this.submitting.set(true);
@@ -635,20 +666,24 @@ export class FlightCheckoutComponent implements OnInit {
       items: [{
         type: 'FLIGHT',
         serviceId: this.flightId,
-        quantity: 1
+        subServiceId: this.classId,
+        quantity: 1,
+        adults: this.adults,
+        children: this.children,
+        infants: this.infants
       }],
       contact: {
         name: this.contactName,
         phone: this.contactPhone,
         email: this.contactEmail
       },
-      passengers: [{
-        title: this.paxTitle,
-        lastName: this.paxLastName,
-        firstName: this.paxFirstName,
-        dob: this.paxDob || "",
-        nationality: this.paxNationality
-      }],
+      passengers: this.passengers.map(p => ({
+        title: p.title,
+        lastName: p.lastName,
+        firstName: p.firstName,
+        dob: p.dob || "",
+        nationality: p.nationality
+      })),
       addons: {
         baggage: this.selectedBaggage(),
         meals: this.selectedMeals(),

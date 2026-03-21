@@ -19,13 +19,24 @@ export interface Tour {
     aiSuggestions?: string;
 }
 
+export interface FlightClass {
+    id: string;
+    className: string;
+    priceAdult: number;
+    priceChild: number;
+    priceInfant: number;
+    totalSeats: number;
+    availableSeats: number;
+    baggageAllowanceKg: number;
+}
+
 export interface Flight {
     id: string;
     flightNumber: string;
     airline: string;
     departureCity: string;
     arrivalCity: string;
-    basePrice: number;
+    flightClasses?: FlightClass[];
     departureTime: string;
     arrivalTime: string;
     aircraft?: string;
