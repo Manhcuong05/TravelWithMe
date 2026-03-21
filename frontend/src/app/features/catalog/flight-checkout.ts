@@ -647,13 +647,27 @@ export class FlightCheckoutComponent implements OnInit {
   }
 
   submitBooking() {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    // Trim values
+    this.contactName = this.contactName.trim();
+    this.contactPhone = this.contactPhone.trim();
+    this.contactEmail = this.contactEmail.trim();
+
     if (!this.contactName || !this.contactPhone || !this.contactEmail) {
-      alert("Vui lòng điền thông tin liên hệ");
+      alert("Vui lòng điền đủ thông tin liên hệ");
+      return;
+    }
+
+    if (!emailRegex.test(this.contactEmail)) {
+      alert("Email không đúng định dạng. VD: travel@example.com");
       return;
     }
 
     // Check passengers
     for (let p of this.passengers) {
+      p.lastName = (p.lastName || "").trim();
+      p.firstName = (p.firstName || "").trim();
       if (!p.lastName || !p.firstName || !p.dob) {
         alert("Vui lòng điền đủ Họ tên và Ngày sinh cho tất cả hành khách");
         return;
@@ -662,7 +676,7 @@ export class FlightCheckoutComponent implements OnInit {
 
     this.submitting.set(true);
 
-    this.bookingService.createBooking({
+    const bookingRequest: any = {
       items: [{
         type: 'FLIGHT',
         serviceId: this.flightId,
@@ -690,19 +704,23 @@ export class FlightCheckoutComponent implements OnInit {
         seat: this.selectedSeat(),
         insurance: this.selectedInsurance()
       }
-    }).subscribe({
+    };
+
+    console.log('Sending Booking Request:', bookingRequest);
+
+    this.bookingService.createBooking(bookingRequest).subscribe({
       next: (res) => {
         if (res.success && res.data) {
-          // Additional passenger info could be passed to backend if supported by API.
-          // Currently, API takes simple items. Redirect to the unified payment page.
           this.router.navigate(['/bookings', res.data.id]);
         } else {
-          alert("Lỗi khi tạo đơn hàng, vui lòng thử lại.");
+          alert("Lỗi khi tạo đơn hàng: " + (res.message || "Vui lòng kiểm tra lại thông tin"));
           this.submitting.set(false);
         }
       },
-      error: () => {
-        alert("Lỗi hệ thống.");
+      error: (err) => {
+        console.error('Booking Error Details:', err);
+        const serverError = err?.error?.message || "Lỗi dữ liệu. Vui lòng kiểm tra lại định dạng email và thông tin hành khách.";
+        alert("Thất bại: " + serverError);
         this.submitting.set(false);
       }
     });
