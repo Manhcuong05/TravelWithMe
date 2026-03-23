@@ -60,6 +60,7 @@ export interface POI {
     region?: string;
     bestTimeToVisit?: string;
     tips?: string;
+    handbookJson?: string;
 }
 
 export type PointOfInterest = POI;

@@ -92,6 +92,40 @@ import { CatalogService, PointOfInterest } from '../../../core/services/catalog.
               <label>Tips & Lưu ý (Cẩm nang)</label>
               <textarea formControlName="tips" rows="4" placeholder="Nhập kinh nghiệm, lưu ý khi đi..."></textarea>
             </div>
+
+            <div class="handbook-editor-section full-width">
+              <h3 class="luxury-font section-sub">BIÊN TẬP CẨM NANG CHUYÊN GIA (6 PHẦN)</h3>
+              
+              <div class="form-group full-width mt-10">
+                <label>Phần 1: Di chuyển (Logistics)</label>
+                <textarea formControlName="h_logistics" rows="2" placeholder="VD: Thuê xe máy, xe bus..."></textarea>
+              </div>
+
+              <div class="form-group full-width">
+                <label>Phần 2: Lưu trú (Accommodation)</label>
+                <textarea formControlName="h_accommodation" rows="2" placeholder="VD: Khách sạn Bãi Bắc, Resort..."></textarea>
+              </div>
+
+              <div class="form-group full-width">
+                <label>Phần 3: Điểm khám phá (Discovery - Xuống dòng cho mỗi điểm)</label>
+                <textarea formControlName="h_discovery" rows="4" placeholder="Tên điểm: Mô tả ngắn..."></textarea>
+              </div>
+
+              <div class="form-group full-width">
+                <label>Phần 4: Ẩm thực (Culinary)</label>
+                <textarea formControlName="h_culinary" rows="2" placeholder="VD: Hải sản Mân Thái, Rượu dừa..."></textarea>
+              </div>
+
+              <div class="form-group full-width">
+                <label>Phần 5: Lịch trình (Itinerary - Xuống dòng cho mỗi ngày)</label>
+                <textarea formControlName="h_itinerary" rows="4" placeholder="Ngày 1: ..."></textarea>
+              </div>
+
+              <div class="form-group full-width">
+                <label>Phần 6: Tips từ chuyên gia (Sống sót - Xuống dòng cho mỗi tip)</label>
+                <textarea formControlName="h_tips" rows="4" placeholder="Nên mang theo..."></textarea>
+              </div>
+            </div>
           </div>
 
           <div class="modal-actions">
@@ -125,6 +159,10 @@ import { CatalogService, PointOfInterest } from '../../../core/services/catalog.
 
     .modal-actions { display: flex; gap: 15px; margin-top: 35px; }
     .modal-actions button { flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; }
+
+    .handbook-editor-section { margin-top: 40px; padding-top: 30px; border-top: 1px solid rgba(212,175,55,0.2); }
+    .section-sub { color: var(--gold-primary); font-size: 1rem; letter-spacing: 2px; margin-bottom: 20px; }
+    .mt-10 { margin-top: 10px; }
   `]
 })
 export class PoiMgmtComponent implements OnInit {
@@ -149,7 +187,13 @@ export class PoiMgmtComponent implements OnInit {
     city: ['', Validators.required],
     latitude: [0],
     longitude: [0],
-    averageSpend: [0]
+    averageSpend: [0],
+    h_logistics: [''],
+    h_accommodation: [''],
+    h_discovery: [''],
+    h_culinary: [''],
+    h_itinerary: [''],
+    h_tips: ['']
   });
 
   columns: Column[] = [
@@ -211,8 +255,28 @@ export class PoiMgmtComponent implements OnInit {
         city: poi.city,
         latitude: poi.latitude || 0,
         longitude: poi.longitude || 0,
-        averageSpend: poi.averageSpend || 0
+        averageSpend: poi.averageSpend || 0,
+        h_logistics: '',
+        h_accommodation: '',
+        h_discovery: '',
+        h_culinary: '',
+        h_itinerary: '',
+        h_tips: ''
       });
+
+      if (poi.handbookJson) {
+        try {
+          const h = JSON.parse(poi.handbookJson);
+          this.poiForm.patchValue({
+            h_logistics: h.logistics || '',
+            h_accommodation: h.accommodation || '',
+            h_discovery: h.discovery?.map((d: any) => `${d.title}: ${d.desc}`).join('\n') || '',
+            h_culinary: h.culinary || '',
+            h_itinerary: h.itinerary?.join('\n') || '',
+            h_tips: h.tips?.join('\n') || ''
+          });
+        } catch (e) { console.error('Error parsing handbookJson', e); }
+      }
     } else {
       this.editingPoi.set(null);
       this.poiForm.reset({ latitude: 0, longitude: 0, averageSpend: 0, region: 'NORTH' });
@@ -224,10 +288,25 @@ export class PoiMgmtComponent implements OnInit {
     if (this.poiForm.invalid) return;
 
     this.loading.set(true);
-    const formVal = this.poiForm.value;
+    const formVal: any = this.poiForm.value;
+
+    // Serialize Handbook Data
+    const handbook = {
+      logistics: formVal.h_logistics,
+      accommodation: formVal.h_accommodation,
+      discovery: formVal.h_discovery?.split('\n').filter((l: string) => l.includes(':')).map((l: string) => {
+        const [title, desc] = l.split(':');
+        return { title: title.trim(), desc: desc.trim() };
+      }),
+      culinary: formVal.h_culinary,
+      itinerary: formVal.h_itinerary?.split('\n').filter((l: string) => l.trim()),
+      tips: formVal.h_tips?.split('\n').filter((l: string) => l.trim())
+    };
+
     const requestData = {
       ...formVal,
-      images: formVal.imageUrl ? [formVal.imageUrl] : []
+      images: formVal.imageUrl ? [formVal.imageUrl] : [],
+      handbookJson: JSON.stringify(handbook)
     };
 
     const action = this.editingPoi()
