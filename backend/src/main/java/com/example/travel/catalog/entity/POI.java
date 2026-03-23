@@ -24,6 +24,12 @@ public class POI {
 
     private String category; // e.g. Museum, Park, Beach, Historical
 
+    private String region; // Miền Bắc / Trung / Nam (NORTH, CENTRAL, SOUTH)
+    private String bestTimeToVisit; // Thời điểm lý tưởng
+    @Column(columnDefinition = "TEXT")
+    private String tips; // Mẹo du lịch / Lưu ý (Hướng dẫn dài)
+    private Double rating; // Đánh giá sao (VD: 4.8)
+
     private String address;
     private String city;
 

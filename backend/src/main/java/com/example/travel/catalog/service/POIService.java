@@ -32,6 +32,9 @@ public class POIService {
                 .longitude(request.getLongitude())
                 .imagesJson(toJson(request.getImages()))
                 .averageSpend(request.getAverageSpend())
+                .region(request.getRegion())
+                .bestTimeToVisit(request.getBestTimeToVisit())
+                .tips(request.getTips())
                 .build();
         return mapToResponse(poiRepository.save(poi));
     }
@@ -49,6 +52,9 @@ public class POIService {
         poi.setLongitude(request.getLongitude());
         poi.setImagesJson(toJson(request.getImages()));
         poi.setAverageSpend(request.getAverageSpend());
+        poi.setRegion(request.getRegion());
+        poi.setBestTimeToVisit(request.getBestTimeToVisit());
+        poi.setTips(request.getTips());
 
         return mapToResponse(poiRepository.save(poi));
     }
@@ -92,6 +98,12 @@ public class POIService {
                 .city(poi.getCity())
                 .latitude(poi.getLatitude())
                 .longitude(poi.getLongitude())
+                .region(poi.getRegion())
+                .bestTimeToVisit(poi.getBestTimeToVisit())
+                .tips(poi.getTips())
+                .rating(poi.getRating() != null ? poi.getRating() : 0.0)
+                .averageSpend(poi.getAverageSpend())
+                .imagesJson(poi.getImagesJson())
                 .build();
     }
 }

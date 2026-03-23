@@ -55,7 +55,11 @@ export interface POI {
     longitude?: number;
     averageSpend?: number;
     imageUrl?: string;
+    imagesJson?: string;
     rating?: number;
+    region?: string;
+    bestTimeToVisit?: string;
+    tips?: string;
 }
 
 export type PointOfInterest = POI;
@@ -130,5 +134,11 @@ export class CatalogService {
 
     deletePOI(id: string): Observable<ApiResponse<void>> {
         return this.http.delete<ApiResponse<void>>(`/api/pois/${id}`);
+    }
+
+    uploadFile(file: File): Observable<ApiResponse<string>> {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.post<ApiResponse<string>>('/api/upload', formData);
     }
 }

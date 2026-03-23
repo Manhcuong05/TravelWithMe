@@ -18,4 +18,11 @@ public class POIResponse {
     private String city;
     private double latitude;
     private double longitude;
+
+    private String region;
+    private String bestTimeToVisit;
+    private String tips;
+    private Double rating;
+    private double averageSpend;
+    private String imagesJson;
 }

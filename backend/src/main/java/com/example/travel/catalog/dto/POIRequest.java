@@ -22,6 +22,10 @@ public class POIRequest {
     private String address;
     private String city;
 
+    private String region;
+    private String bestTimeToVisit;
+    private String tips;
+
     private double latitude;
     private double longitude;
 
