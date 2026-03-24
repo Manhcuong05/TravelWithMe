@@ -36,7 +36,8 @@ export const routes: Routes = [
             { path: "pois", loadComponent: () => import("./features/admin/services/poi-mgmt").then(m => m.PoiMgmtComponent) },
             { path: "bookings", loadComponent: () => import("./features/admin/bookings/booking-mgmt").then(m => m.BookingMgmtComponent) },
             { path: "promotions", loadComponent: () => import("./features/admin/payment/promotion-mgmt").then(m => m.PromotionMgmtComponent) },
-            { path: "transactions", loadComponent: () => import("./features/admin/payment/transaction-mgmt").then(m => m.TransactionMgmtComponent) }
+            { path: "transactions", loadComponent: () => import("./features/admin/payment/transaction-mgmt").then(m => m.TransactionMgmtComponent) },
+            { path: "chat", loadComponent: () => import("./features/admin/services/chat-mgmt").then(m => m.AdminChatComponent) }
         ]
     },
     { path: "**", redirectTo: "" }

@@ -39,7 +39,7 @@ import { AuthService } from '../../core/services/auth.service';
           <p>Xin chào! Chúng tôi có thể giúp gì cho bạn trong chuyến đi này?</p>
         </div>
 
-        <div *ngFor="let msg of chatService.messages()" 
+        <div *ngFor="let msg of filteredMessages()" 
              class="msg-item" 
              [class.is-me]="msg.senderId === currentUserId()">
           <div class="msg-bubble">
@@ -157,6 +157,14 @@ export class ContactChatComponent implements AfterViewChecked {
 
   toggleChat() {
     this.isOpen.set(!this.isOpen());
+  }
+
+  filteredMessages() {
+    const userId = this.currentUserId();
+    if (!userId) return [];
+    return this.chatService.messages().filter(m => 
+        m.senderId === userId || m.recipientId === userId
+    );
   }
 
   send() {

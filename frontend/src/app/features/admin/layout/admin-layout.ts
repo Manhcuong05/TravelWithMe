@@ -57,7 +57,15 @@ import { AuthService } from '../../../core/services/auth.service';
                  <i class="fas fa-tags"></i> <span>Mã khuyến mãi</span>
               </a>
               <a routerLink="/management/transactions" routerLinkActive="active" class="nav-link-pro">
-                 <i class="fas fa-wallet"></i> <span>Lịch sử giao dịch</span>
+                 <i class="fas fa wallet"></i> <span>Lịch sử giao dịch</span>
+              </a>
+            </div>
+
+            <div class="nav-section-label">TƯƠNG TÁC</div>
+            <div class="nav-group-pro">
+              <a routerLink="/management/chat" routerLinkActive="active" class="nav-link-pro">
+                 <i class="fas fa-comments"></i> <span>Hỗ trợ trực tuyến</span>
+                 <span class="badge-new" *ngIf="false">NEW</span>
               </a>
             </div>
 

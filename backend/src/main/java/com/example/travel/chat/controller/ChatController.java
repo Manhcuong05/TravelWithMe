@@ -26,16 +26,33 @@ public class ChatController {
         
         ChatMessage saved = repository.save(chatMessage);
         
-        // Notify recipient
-        if (chatMessage.getRecipientId() != null) {
+        // Notify recipient OR broadcast to admins if sent to support
+        if (chatMessage.getRecipientId() != null && !chatMessage.getRecipientId().equals("SUPPORT")) {
             messagingTemplate.convertAndSendToUser(
                 chatMessage.getRecipientId(), "/queue/messages",
                 saved
             );
         } else {
-            // General support topic
             messagingTemplate.convertAndSend("/topic/support", saved);
         }
+
+        // ALWAYS notify sender on their private queue for sync
+        messagingTemplate.convertAndSendToUser(
+            chatMessage.getSenderId(), "/queue/messages",
+            saved
+        );
+    }
+
+    @GetMapping("/api/chat/users")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'CTV')")
+    public List<java.util.Map<String, String>> getActiveChatUsers() {
+        return repository.findActiveChatUsers().stream()
+            .map(obj -> {
+                java.util.Map<String, String> map = new java.util.HashMap<>();
+                map.put("userId", (String) obj[0]);
+                map.put("userName", (String) obj[1]);
+                return map;
+            }).toList();
     }
 
     @GetMapping("/api/chat/history")

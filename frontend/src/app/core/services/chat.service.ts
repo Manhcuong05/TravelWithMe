@@ -24,6 +24,7 @@ export class ChatService {
     private stompClient: Client | null = null;
     
     public messages = signal<ChatMessage[]>([]);
+    public activeChatUsers = signal<{userId: string, userName: string}[]>([]);
     private messageSubject = new BehaviorSubject<ChatMessage[]>([]);
     public messages$ = this.messageSubject.asObservable();
 
@@ -52,26 +53,45 @@ export class ChatService {
     private subscribeToMessages() {
         const user = this.auth.currentUser();
         
-        // Public/Support channel
-        this.stompClient?.subscribe('/topic/support', (message: IMessage) => {
-            if (message.body) {
-                this.addMessage(JSON.parse(message.body));
-            }
-        });
+        // Public/Support channel (Admins listen to this for NEW requests)
+        if (user?.role === 'ADMIN' || user?.role === 'CTV') {
+            this.stompClient?.subscribe('/topic/support', (message: IMessage) => {
+                if (message.body) {
+                    const msg = JSON.parse(message.body);
+                    this.addMessage(msg);
+                    // Refresh user list if new user
+                    this.refreshActiveUsers();
+                }
+            });
+        }
 
-        // Private channel if logged in
+        // Private channel
         if (user) {
             this.stompClient?.subscribe(`/user/${user.id}/queue/messages`, (message: IMessage) => {
                 if (message.body) {
                     this.addMessage(JSON.parse(message.body));
                 }
             });
-            this.loadHistory(user.id, 'SUPPORT');
+            
+            if (user.role !== 'ADMIN' && user.role !== 'CTV') {
+                this.loadHistory(user.id, 'SUPPORT');
+            }
+        }
+    }
+
+    public refreshActiveUsers() {
+        const user = this.auth.currentUser();
+        if (user?.role === 'ADMIN' || user?.role === 'CTV') {
+            this.http.get<{userId: string, userName: string}[]>('/api/chat/users')
+                .subscribe(users => this.activeChatUsers.set(users));
         }
     }
 
     private addMessage(msg: ChatMessage) {
         const current = this.messages();
+        // Avoid duplicates if we receive the same message via multiple channels
+        if (msg.id && current.some(m => m.id === msg.id)) return;
+        
         this.messages.set([...current, msg]);
         this.messageSubject.next(this.messages());
     }
