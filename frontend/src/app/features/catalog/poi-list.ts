@@ -125,6 +125,14 @@ import { gsap } from 'gsap';
         </div>
       </div>
 
+      <!-- Search & Quick Filters -->
+      <div class="search-pro-container">
+        <div class="search-wrap">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" placeholder="Tìm kiếm địa danh, thành phố hoặc cẩm nang du lịch..." (input)="onSearch($event)" />
+        </div>
+      </div>
+
       <!-- Guide Grid Pro -->
       <div class="pro-grid" *ngIf="!loading()">
         <div *ngFor="let poi of filteredPois(); let i = index" 
@@ -136,13 +144,33 @@ import { gsap } from 'gsap';
               <span class="tag-blur">{{ poi.category }}</span>
               <span class="tag-gold-blur" *ngIf="poi.rating"><i class="fas fa-star"></i> {{ poi.rating }}</span>
             </div>
+            
+            <!-- Quick Glance Button -->
+            <button class="btn-quick-view" (click)="openDetail(poi)">
+              <i class="fas fa-expand-alt"></i>
+            </button>
           </div>
           <div class="pro-card-content">
             <span class="card-meta">{{ poi.city }} • {{ poi.bestTimeToVisit || 'Quanh năm' }}</span>
             <h3 class="luxury-font card-title-pro">{{ poi.name }}</h3>
             <p class="card-excerpt">{{ truncateDesc(poi.description, 100) }}</p>
-            <button class="card-link" (click)="openDetail(poi)">KHÁM PHÁ CHI TIẾT <i class="fas fa-long-arrow-alt-right"></i></button>
+            <div class="card-footer-pro">
+              <button class="card-link" (click)="openDetail(poi)">KHÁM PHÁ CHI TIẾT <i class="fas fa-long-arrow-alt-right"></i></button>
+              <div class="card-actions-minimal">
+                <i class="far fa-heart heart-btn"></i>
+                <i class="fas fa-share-alt share-btn"></i>
+              </div>
+            </div>
           </div>
+        </div>
+      </div>
+
+      <!-- AI Floating Guide -->
+      <div class="ai-fab-container" (click)="askAI()">
+        <div class="ai-pulse"></div>
+        <div class="ai-fab-content">
+          <i class="fas fa-robot"></i>
+          <span class="tooltip-pro">Hỏi Trợ Lý AI</span>
         </div>
       </div>
 
@@ -450,8 +478,64 @@ import { gsap } from 'gsap';
 
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     .animate-fade-in { animation: fadeIn 1s ease-out forwards; }
-    .animate-slide-up { animation: revealUp 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) forwards; }
     @keyframes revealUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+    /* Search Bar Pro */
+    .search-pro-container { margin-bottom: 50px; position: relative; z-index: 10; }
+    .search-wrap { 
+      max-width: 800px; margin: 0 auto; position: relative;
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 20px; padding: 5px; backdrop-filter: blur(10px);
+      transition: 0.4s;
+    }
+    .search-wrap:focus-within { border-color: var(--gold-primary); box-shadow: 0 0 40px rgba(212,175,55,0.1); }
+    .search-icon { position: absolute; left: 30px; top: 50%; transform: translateY(-50%); color: var(--gold-primary); font-size: 1.2rem; }
+    .search-wrap input { 
+      width: 100%; background: none; border: none; padding: 18px 20px 18px 70px; 
+      color: #f1f5f9; font-size: 1.1rem; outline: none;
+    }
+
+    /* AI FAB Pro */
+    .ai-fab-container { 
+      position: fixed; bottom: 40px; right: 40px; z-index: 900; 
+      cursor: pointer; transition: 0.4s;
+    }
+    .ai-fab-content { 
+      width: 65px; height: 65px; border-radius: 50%; background: linear-gradient(135deg, #d4af37, #f7d081);
+      display: flex; align-items: center; justify-content: center; color: #000; font-size: 1.5rem;
+      box-shadow: 0 15px 35px rgba(212,175,55,0.4); border: 4px solid rgba(2, 6, 23, 0.8);
+      position: relative; overflow: hidden;
+    }
+    .ai-pulse { 
+      position: absolute; inset: -10px; border-radius: 50%; border: 1px solid var(--gold-primary);
+      animation: ai-pulse 2s infinite; opacity: 0; pointer-events: none;
+    }
+    @keyframes ai-pulse { 
+      0% { transform: scale(1); opacity: 0.8; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
+    .ai-fab-container:hover .ai-fab-content { transform: scale(1.1) rotate(10deg); }
+    .tooltip-pro { 
+      position: absolute; right: 80px; background: #fff; color: #000; padding: 8px 15px; border-radius: 8px;
+      font-weight: 800; font-size: 0.75rem; white-space: nowrap; opacity: 0; transform: translateX(20px); transition: 0.3s;
+    }
+    .ai-fab-container:hover .tooltip-pro { opacity: 1; transform: translateX(0); }
+
+    .btn-quick-view { 
+      position: absolute; top: 20px; right: -60px; width: 45px; height: 45px; 
+      background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border: none;
+      border-radius: 50%; color: #fff; cursor: pointer; transition: 0.4s; z-index: 10;
+    }
+    .pro-card:hover .btn-quick-view { right: 20px; }
+    .btn-quick-view:hover { background: var(--gold-primary); color: #000; }
+
+    .card-footer-pro { display: flex; justify-content: space-between; align-items: center; }
+    .card-actions-minimal { display: flex; gap: 20px; color: #64748b; font-size: 1rem; }
+    .heart-btn:hover { color: #ef4444; }
+    .share-btn:hover { color: var(--gold-primary); }
+
+    .mt-40 { margin-top: 40px; }
+    .ml-2 { margin-left: 8px; }
   `]
 })
 export class PoiListComponent implements OnInit, OnDestroy {
@@ -462,6 +546,7 @@ export class PoiListComponent implements OnInit, OnDestroy {
   loading = signal(true);
   selectedRegion = signal<string>('ALL');
   selectedPoi = signal<POI | null>(null);
+  searchTerm = signal<string>('');
 
   activeIndex = signal(0);
   private timerId?: any;
@@ -484,10 +569,23 @@ export class PoiListComponent implements OnInit, OnDestroy {
   });
 
   filteredPois = computed(() => {
-    const list = this.pois();
+    let list = this.pois();
     const region = this.selectedRegion();
-    if (region === 'ALL') return list;
-    return list.filter(p => p.region === region);
+    const query = this.searchTerm().toLowerCase();
+
+    if (region !== 'ALL') {
+      list = list.filter(p => p.region === region);
+    }
+
+    if (query) {
+      list = list.filter(p => 
+        p.name.toLowerCase().includes(query) || 
+        p.city.toLowerCase().includes(query) || 
+        p.category.toLowerCase().includes(query)
+      );
+    }
+
+    return list;
   });
 
   constructor() {
@@ -597,6 +695,14 @@ export class PoiListComponent implements OnInit, OnDestroy {
   closeDetail() {
     this.selectedPoi.set(null);
     document.body.style.overflow = '';
+  }
+
+  onSearch(event: any) {
+    this.searchTerm.set(event.target.value);
+  }
+
+  askAI() {
+    alert("Cửa sổ Trợ lý AI đang được khởi tạo. Bạn có thể hỏi về bất kỳ địa danh nào tại đây!");
   }
 
   getHandbook(poi: POI) {
