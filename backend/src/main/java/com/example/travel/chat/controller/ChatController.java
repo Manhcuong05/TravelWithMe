@@ -28,19 +28,13 @@ public class ChatController {
         
         // Notify recipient OR broadcast to admins if sent to support
         if (chatMessage.getRecipientId() != null && !chatMessage.getRecipientId().equals("SUPPORT")) {
-            messagingTemplate.convertAndSendToUser(
-                chatMessage.getRecipientId(), "/queue/messages",
-                saved
-            );
+            messagingTemplate.convertAndSend("/topic/chat." + chatMessage.getRecipientId(), saved);
         } else {
             messagingTemplate.convertAndSend("/topic/support", saved);
         }
 
         // ALWAYS notify sender on their private queue for sync
-        messagingTemplate.convertAndSendToUser(
-            chatMessage.getSenderId(), "/queue/messages",
-            saved
-        );
+        messagingTemplate.convertAndSend("/topic/chat." + chatMessage.getSenderId(), saved);
     }
 
     @GetMapping("/api/chat/users")
@@ -57,6 +51,10 @@ public class ChatController {
 
     @GetMapping("/api/chat/history")
     public List<ChatMessage> getChatHistory(@RequestParam String senderId, @RequestParam String recipientId) {
+        if ("SUPPORT".equals(recipientId)) {
+            // If customer is asking for their support history, give them everything involving them
+            return repository.findUserChatHistory(senderId);
+        }
         return repository.findChatHistory(senderId, recipientId);
     }
 }

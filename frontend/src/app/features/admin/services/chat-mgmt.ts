@@ -147,8 +147,7 @@ export class AdminChatComponent {
   selectUser(user: {userId: string, userName: string}) {
     this.selectedUserId.set(user.userId);
     this.selectedUser.set(user);
-    this.chatService.loadHistory(user.userId, 'ADMIN'); 
-    // Actually our history query is symmetric, so any of admin/support will do
+    this.chatService.loadHistory(user.userId, this.user()?.id!); 
   }
 
   filteredMessages() {

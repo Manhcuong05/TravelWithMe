@@ -1,4 +1,4 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { Injectable, signal, inject, effect } from '@angular/core';
 import { Client, IMessage } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { AuthService } from './auth.service';
@@ -28,8 +28,18 @@ export class ChatService {
     private messageSubject = new BehaviorSubject<ChatMessage[]>([]);
     public messages$ = this.messageSubject.asObservable();
 
+    private subscriptions: any[] = [];
+
     constructor() {
         this.initConnection();
+        
+        // Watch for user changes to re-subscribe reactively
+        effect(() => {
+            const user = this.auth.currentUser();
+            if (this.stompClient?.connected) {
+                this.refreshSubscriptions();
+            }
+        });
     }
 
     private initConnection() {
@@ -40,7 +50,7 @@ export class ChatService {
             heartbeatOutgoing: 4000,
             onConnect: () => {
                 console.log('Connected to WebSocket');
-                this.subscribeToMessages();
+                this.refreshSubscriptions();
             },
             onStompError: (frame) => {
                 console.error('STOMP error', frame);
@@ -50,28 +60,38 @@ export class ChatService {
         this.stompClient.activate();
     }
 
-    private subscribeToMessages() {
+    private refreshSubscriptions() {
+        // Clear old ones first
+        this.subscriptions.forEach(s => {
+            try { s.unsubscribe(); } catch(e) {}
+        });
+        this.subscriptions = [];
+
         const user = this.auth.currentUser();
+        if (!this.stompClient?.connected) return;
+
+        console.log('Refreshing subscriptions for user:', user?.email || 'Guest');
         
         // Public/Support channel (Admins listen to this for NEW requests)
         if (user?.role === 'ADMIN' || user?.role === 'CTV') {
-            this.stompClient?.subscribe('/topic/support', (message: IMessage) => {
+            const sub = this.stompClient.subscribe('/topic/support', (message: IMessage) => {
                 if (message.body) {
                     const msg = JSON.parse(message.body);
                     this.addMessage(msg);
-                    // Refresh user list if new user
                     this.refreshActiveUsers();
                 }
             });
+            this.subscriptions.push(sub);
         }
 
         // Private channel
         if (user) {
-            this.stompClient?.subscribe(`/user/${user.id}/queue/messages`, (message: IMessage) => {
+            const sub = this.stompClient.subscribe(`/topic/chat.${user.id}`, (message: IMessage) => {
                 if (message.body) {
                     this.addMessage(JSON.parse(message.body));
                 }
             });
+            this.subscriptions.push(sub);
             
             if (user.role !== 'ADMIN' && user.role !== 'CTV') {
                 this.loadHistory(user.id, 'SUPPORT');
@@ -83,7 +103,10 @@ export class ChatService {
         const user = this.auth.currentUser();
         if (user?.role === 'ADMIN' || user?.role === 'CTV') {
             this.http.get<{userId: string, userName: string}[]>('/api/chat/users')
-                .subscribe(users => this.activeChatUsers.set(users));
+                .subscribe({
+                    next: (users) => this.activeChatUsers.set(users),
+                    error: (err) => console.error('Failed to load active users', err)
+                });
         }
     }
 
@@ -111,16 +134,16 @@ export class ChatService {
             destination: '/app/chat',
             body: JSON.stringify(chatMessage)
         });
-        
-        // Optimistically add to local list if it's sent to support topic
-        // although the server will broadcast it back to /topic/support
     }
 
     public loadHistory(senderId: string, recipientId: string) {
         this.http.get<ChatMessage[]>(`/api/chat/history?senderId=${senderId}&recipientId=${recipientId}`)
-            .subscribe(msgs => {
-                this.messages.set(msgs);
-                this.messageSubject.next(msgs);
+            .subscribe({
+                next: (msgs) => {
+                    this.messages.set(msgs);
+                    this.messageSubject.next(msgs);
+                },
+                error: (err) => console.error('Failed to load chat history', err)
             });
     }
 }
