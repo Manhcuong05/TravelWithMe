@@ -165,15 +165,6 @@ import { gsap } from 'gsap';
         </div>
       </div>
 
-      <!-- AI Floating Guide -->
-      <div class="ai-fab-container" (click)="askAI()">
-        <div class="ai-pulse"></div>
-        <div class="ai-fab-content">
-          <i class="fas fa-robot"></i>
-          <span class="tooltip-pro">Hỏi Trợ Lý AI</span>
-        </div>
-      </div>
-
       <!-- Empty State -->
       <div class="empty-state text-center py-100" *ngIf="!loading() && filteredPois().length === 0">
         <div class="empty-icon-wrap">
@@ -494,40 +485,6 @@ import { gsap } from 'gsap';
       width: 100%; background: none; border: none; padding: 18px 20px 18px 70px; 
       color: #f1f5f9; font-size: 1.1rem; outline: none;
     }
-
-    /* AI FAB Pro */
-    .ai-fab-container { 
-      position: fixed; bottom: 40px; right: 40px; z-index: 900; 
-      cursor: pointer; transition: 0.4s;
-    }
-    .ai-fab-content { 
-      width: 65px; height: 65px; border-radius: 50%; background: linear-gradient(135deg, #d4af37, #f7d081);
-      display: flex; align-items: center; justify-content: center; color: #000; font-size: 1.5rem;
-      box-shadow: 0 15px 35px rgba(212,175,55,0.4); border: 4px solid rgba(2, 6, 23, 0.8);
-      position: relative; overflow: hidden;
-    }
-    .ai-pulse { 
-      position: absolute; inset: -10px; border-radius: 50%; border: 1px solid var(--gold-primary);
-      animation: ai-pulse 2s infinite; opacity: 0; pointer-events: none;
-    }
-    @keyframes ai-pulse { 
-      0% { transform: scale(1); opacity: 0.8; }
-      100% { transform: scale(1.4); opacity: 0; }
-    }
-    .ai-fab-container:hover .ai-fab-content { transform: scale(1.1) rotate(10deg); }
-    .tooltip-pro { 
-      position: absolute; right: 80px; background: #fff; color: #000; padding: 8px 15px; border-radius: 8px;
-      font-weight: 800; font-size: 0.75rem; white-space: nowrap; opacity: 0; transform: translateX(20px); transition: 0.3s;
-    }
-    .ai-fab-container:hover .tooltip-pro { opacity: 1; transform: translateX(0); }
-
-    .btn-quick-view { 
-      position: absolute; top: 20px; right: -60px; width: 45px; height: 45px; 
-      background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); border: none;
-      border-radius: 50%; color: #fff; cursor: pointer; transition: 0.4s; z-index: 10;
-    }
-    .pro-card:hover .btn-quick-view { right: 20px; }
-    .btn-quick-view:hover { background: var(--gold-primary); color: #000; }
 
     .card-footer-pro { display: flex; justify-content: space-between; align-items: center; }
     .card-actions-minimal { display: flex; gap: 20px; color: #64748b; font-size: 1rem; }
