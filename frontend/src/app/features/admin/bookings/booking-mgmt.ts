@@ -18,64 +18,86 @@ import { BookingService, BookingResponse } from '../../../core/services/booking.
       (onDelete)="handleDelete($event)"
     ></app-generic-mgmt>
 
-    <!-- Booking Detail/Status Modal -->
-    <div class="modal-overlay" *ngIf="showDetail()">
-      <div class="modal-card glass-effect">
-        <h2 class="luxury-font">Chi tiết đơn hàng</h2>
+    <!-- Booking Detail Modal Pro -->
+    <div class="modal-overlay-pro" *ngIf="showDetail()" (click)="$event.target === modalOverlay && showDetail.set(false)" #modalOverlay>
+      <div class="modal-card-pro glass-pro-heavy">
+        <div class="modal-header-pro text-center">
+            <h2 class="luxury-font primary-gradient-text w-full">Chi tiết đơn hàng</h2>
+        </div>
         
-        <div class="booking-info" *ngIf="selectedBooking()">
-          <div class="info-row">
-            <span class="label">Mã đơn:</span>
-            <span class="value">{{ selectedBooking()?.id }}</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Tổng tiền:</span>
-            <span class="value gold">{{ selectedBooking()?.totalAmount | number }} VNĐ</span>
-          </div>
-          <div class="info-row">
-            <span class="label">Ngày đặt:</span>
-            <span class="value">{{ selectedBooking()?.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        <div class="booking-content" *ngIf="selectedBooking()">
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="d-label">Mã đơn hàng</span>
+              <span class="d-value mono">{{ selectedBooking()?.id }}</span>
+            </div>
+            
+            <div class="detail-item">
+              <span class="d-label">Tổng thanh toán</span>
+              <span class="d-value gold-text text-xl">{{ selectedBooking()?.totalAmount | number }} VNĐ</span>
+            </div>
+            
+            <div class="detail-item">
+              <span class="d-label">Thời gian đặt</span>
+              <span class="d-value">{{ selectedBooking()?.createdAt | date:'dd MMM yyyy, HH:mm' }}</span>
+            </div>
           </div>
           
-          <div class="status-update mt-6">
-            <label>Cập nhật trạng thái:</label>
-            <select [(ngModel)]="newStatus" class="status-select">
-              <option value="PENDING">Chờ xử lý (PENDING)</option>
-              <option value="CONFIRMED">Đã xác nhận (CONFIRMED)</option>
-              <option value="PAID">Đã thanh toán (PAID)</option>
-              <option value="CANCELLED">Đã hủy (CANCELLED)</option>
-              <option value="COMPLETED">Hoàn thành (COMPLETED)</option>
-            </select>
+          <div class="status-control mt-8">
+            <label class="d-label mb-3 block">Cập nhật trạng thái hệ thống:</label>
+            <div class="select-wrapper-pro">
+              <select [(ngModel)]="newStatus" class="elite-select">
+                <option value="PENDING">Chờ xử lý (PENDING)</option>
+                <option value="CONFIRMED">Đã xác nhận (CONFIRMED)</option>
+                <option value="PAID">Đã thanh toán (PAID)</option>
+                <option value="CANCELLED">Đã hủy (CANCELLED)</option>
+                <option value="COMPLETED">Hoàn thành (COMPLETED)</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        <div class="modal-actions">
-          <button type="button" class="btn-gold" (click)="updateStatus()" [disabled]="loading()">
-            {{ loading() ? 'Đang cập nhật...' : 'Cập nhật trạng thái' }}
+        <div class="modal-footer-pro mt-8">
+          <button type="button" class="btn-cancel-pro" (click)="showDetail.set(false)">Đóng cửa sổ</button>
+          <button type="button" class="btn-save-pro" (click)="updateStatus()" [disabled]="loading()">
+            <i class="fas fa-arrows-rotate mr-2" [class.fa-spin]="loading()"></i>
+            {{ loading() ? 'Đang xử lý...' : 'Cập nhật ngay' }}
           </button>
-          <button type="button" class="btn-outline" (click)="showDetail.set(false)">Đóng</button>
         </div>
       </div>
     </div>
   `,
     styles: [`
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-    .modal-card { width: 450px; padding: 40px; border-radius: 24px; border: 1px solid var(--glass-border); }
-    h2 { color: var(--gold-primary); margin-bottom: 25px; text-align: center; }
+    .modal-overlay-pro { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-card-pro { width: 500px; padding: 40px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.08); background: rgba(15, 23, 42, 0.9); box-shadow: 0 40px 80px rgba(0,0,0,0.5); }
     
-    .booking-info { display: flex; flex-direction: column; gap: 15px; }
-    .info-row { display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .info-row .label { color: #94a3b8; font-size: 0.9rem; }
-    .info-row .value { color: white; font-weight: 500; }
-    .info-row .value.gold { color: var(--gold-primary); }
+    .primary-gradient-text { background: linear-gradient(135deg, #FFD700, #D4AF37); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     
-    .status-update { margin-top: 20px; }
-    .status-update label { display: block; font-size: 0.85rem; color: #94a3b8; margin-bottom: 10px; }
-    .status-select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; color: white; outline: none; }
+    .detail-grid { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; }
+    .detail-item { display: flex; flex-direction: column; gap: 6px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .d-label { font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 1.5px; }
+    .d-value { color: #f1f5f9; font-size: 1rem; font-weight: 600; }
+    .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #94a3b8; }
     
-    .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 30px; }
-    .modal-actions button { width: 100%; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; }
-    .mt-6 { margin-top: 24px; }
+    .elite-select { 
+      width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px; padding: 14px 20px; color: #fff; outline: none; transition: 0.3s;
+      appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23D4AF37'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 20px center; background-size: 18px;
+    }
+    .elite-select:focus { border-color: rgba(212,175,55,0.5); background-color: rgba(255,255,255,0.06); }
+
+    .modal-footer-pro { display: flex; gap: 15px; }
+    .btn-cancel-pro { flex: 1; background: none; border: 1px solid rgba(255,255,255,0.1); color: #64748b; padding: 14px; border-radius: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+    .btn-cancel-pro:hover { background: rgba(255,255,255,0.05); color: #fff; }
+    
+    .btn-save-pro { flex: 1.5; background: linear-gradient(135deg, #FFD700, #D4AF37); color: #000; border: none; padding: 14px; border-radius: 14px; font-weight: 800; cursor: pointer; transition: 0.3s; }
+    .btn-save-pro:hover { transform: scale(1.02); box-shadow: 0 10px 20px rgba(212,175,55,0.2); }
+
+    .mt-8 { margin-top: 32px; }
+    .mb-3 { margin-bottom: 12px; }
+    .w-full { width: 100%; }
+    .text-xl { font-size: 1.25rem; }
   `]
 })
 export class BookingMgmtComponent implements OnInit {

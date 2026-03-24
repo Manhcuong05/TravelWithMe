@@ -259,6 +259,24 @@ public class BookingService {
         return mapToResponse(bookingRepository.save(booking));
     }
 
+    @Transactional
+    public BookingResponse updateBookingStatus(String bookingId, Booking.BookingStatus status) {
+        String userEmail = SecurityUtil.getCurrentUserEmail();
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "Người dùng không tồn tại"));
+
+        // Only ADMIN or CTV can update any booking status
+        if (user.getRole() != Role.ADMIN && user.getRole() != Role.CTV) {
+            throw new BusinessException("ACCESS_DENIED", "Bạn không có quyền cập nhật trạng thái đơn hàng");
+        }
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BusinessException("BOOKING_NOT_FOUND", "Không tìm thấy đơn hàng"));
+
+        booking.setStatus(status);
+        return mapToResponse(bookingRepository.save(booking));
+    }
+
     private BookingResponse mapToResponse(Booking booking) {
         BookingResponse response = BookingResponse.builder()
                 .id(booking.getId())

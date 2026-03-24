@@ -142,4 +142,10 @@ export class CatalogService {
         formData.append('file', file);
         return this.http.post<ApiResponse<string>>('/api/upload', formData);
     }
+
+    generateHandbook(poiName: string, city: string): Observable<ApiResponse<string>> {
+        return this.http.get<ApiResponse<string>>(`/api/catalog/ai/generate-handbook`, {
+            params: { poiName, city }
+        });
+    }
 }

@@ -40,4 +40,10 @@ public class BookingController {
     public ApiResponse<BookingResponse> cancelBooking(@PathVariable String id) {
         return ApiResponse.success(bookingService.cancelBooking(id), "Đã hủy đơn hàng thành công");
     }
+
+    @PostMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('CTV', 'ADMIN')")
+    public ApiResponse<BookingResponse> updateStatus(@PathVariable String id, @RequestParam com.example.travel.booking.entity.Booking.BookingStatus status) {
+        return ApiResponse.success(bookingService.updateBookingStatus(id, status), "Cập nhật trạng thái thành công");
+    }
 }

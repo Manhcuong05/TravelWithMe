@@ -31,4 +31,5 @@ public class POIRequest {
 
     private List<String> images;
     private double averageSpend;
+    private String handbookJson;
 }

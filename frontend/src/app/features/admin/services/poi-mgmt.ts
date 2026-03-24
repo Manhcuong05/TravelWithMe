@@ -18,151 +18,215 @@ import { CatalogService, PointOfInterest } from '../../../core/services/catalog.
       (onDelete)="handleDelete($event)"
     ></app-generic-mgmt>
 
-    <!-- POI Form Modal -->
-    <div class="modal-overlay" *ngIf="showForm()">
-      <div class="modal-card glass-effect">
-        <h2 class="luxury-font">{{ editingPoi() ? 'Sửa Địa danh' : 'Thêm Địa danh Mới' }}</h2>
+    <!-- POI Form Modal Pro -->
+    <div class="modal-overlay-pro" *ngIf="showForm()" (click)="$event.target === modalOverlay && showForm.set(false)" #modalOverlay>
+      <div class="modal-card-pro glass-pro-heavy">
+        <div class="modal-header-pro">
+          <div class="header-main">
+            <i class="fas fa-location-dot gold-glow mr-3"></i>
+            <h2 class="luxury-font">{{ editingPoi() ? 'Chỉnh sửa' : 'Tạo mới' }} Địa danh</h2>
+          </div>
+          <button class="btn-close-modal" (click)="showForm.set(false)"><i class="fas fa-times"></i></button>
+        </div>
         
-        <form [formGroup]="poiForm" (ngSubmit)="savePoi()" class="admin-form">
-          <div class="form-grid">
-            <div class="form-group full-width">
-              <label>Tên địa điểm</label>
-              <input type="text" formControlName="name" placeholder="Ví dụ: Bà Nà Hills">
-            </div>
-
-            <div class="form-group">
-              <label>Thành phố</label>
-              <input type="text" formControlName="city">
-            </div>
-
-            <div class="form-group">
-              <label>Lĩnh vực / Thể loại</label>
-              <input type="text" formControlName="category" placeholder="Ví dụ: Công viên, Di tích...">
-            </div>
-
-            <div class="form-group full-width">
-              <label>Địa chỉ cụ thể</label>
-              <input type="text" formControlName="address">
-            </div>
-
-            <div class="form-group">
-              <label>Vĩ độ (Latitude)</label>
-              <input type="number" formControlName="latitude" step="0.000001">
-            </div>
-
-            <div class="form-group">
-              <label>Kinh độ (Longitude)</label>
-              <input type="number" formControlName="longitude" step="0.000001">
-            </div>
-
-            <div class="form-group full-width">
-              <label>Chi phí trung bình (VNĐ)</label>
-              <input type="number" formControlName="averageSpend">
-            </div>
-
-            <div class="form-group">
-              <label>Vùng miền</label>
-              <select formControlName="region">
-                <option value="NORTH">Miền Bắc</option>
-                <option value="CENTRAL">Miền Trung</option>
-                <option value="SOUTH">Miền Nam</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>Thời điểm lý tưởng</label>
-              <input type="text" formControlName="bestTimeToVisit" placeholder="Ví dụ: Tháng 3 - Tháng 8">
-            </div>
-
-            <div class="form-group full-width">
-              <label>Đường dẫn Ảnh (Cover URL) hoặc Tải ảnh từ máy tính</label>
-              <div class="upload-flex">
-                 <input type="text" formControlName="imageUrl" placeholder="HTTPS://...">
-                 <input type="file" (change)="onFileSelected($event)" accept="image/*" class="file-input">
-              </div>
-              <div *ngIf="isUploading()" class="uploading-text">Đang tải ảnh lên... Vui lòng đợi</div>
-            </div>
-
-            <div class="form-group full-width">
-              <label>Mô tả ngắn</label>
-              <textarea formControlName="description" rows="2"></textarea>
-            </div>
-
-            <div class="form-group full-width">
-              <label>Tips & Lưu ý (Cẩm nang)</label>
-              <textarea formControlName="tips" rows="4" placeholder="Nhập kinh nghiệm, lưu ý khi đi..."></textarea>
-            </div>
-
-            <div class="handbook-editor-section full-width">
-              <h3 class="luxury-font section-sub">BIÊN TẬP CẨM NANG CHUYÊN GIA (6 PHẦN)</h3>
+        <form [formGroup]="poiForm" (ngSubmit)="savePoi()" class="admin-form-pro">
+          <div class="form-scroll-area">
+            <div class="form-grid-pro">
+              <!-- Basic Info -->
+              <div class="form-section-title full-width">THÔNG TIN CƠ BẢN</div>
               
-              <div class="form-group full-width mt-10">
-                <label>Phần 1: Di chuyển (Logistics)</label>
-                <textarea formControlName="h_logistics" rows="2" placeholder="VD: Thuê xe máy, xe bus..."></textarea>
+              <div class="form-group-pro full-width">
+                <label>Tên địa điểm du lịch</label>
+                <input type="text" formControlName="name" placeholder="Ví dụ: Bà Nà Hills, Cầu Vàng...">
               </div>
 
-              <div class="form-group full-width">
-                <label>Phần 2: Lưu trú (Accommodation)</label>
-                <textarea formControlName="h_accommodation" rows="2" placeholder="VD: Khách sạn Bãi Bắc, Resort..."></textarea>
+              <div class="form-group-pro">
+                <label>Thành phố / Tỉnh</label>
+                <input type="text" formControlName="city" placeholder="Đà Nẵng">
               </div>
 
-              <div class="form-group full-width">
-                <label>Phần 3: Điểm khám phá (Discovery - Xuống dòng cho mỗi điểm)</label>
-                <textarea formControlName="h_discovery" rows="4" placeholder="Tên điểm: Mô tả ngắn..."></textarea>
+              <div class="form-group-pro">
+                <label>Lĩnh vực / Phân loại</label>
+                <input type="text" formControlName="category" placeholder="Công viên, Di tích...">
               </div>
 
-              <div class="form-group full-width">
-                <label>Phần 4: Ẩm thực (Culinary)</label>
-                <textarea formControlName="h_culinary" rows="2" placeholder="VD: Hải sản Mân Thái, Rượu dừa..."></textarea>
+              <div class="form-group-pro full-width">
+                <label>Địa chỉ chi tiết</label>
+                <input type="text" formControlName="address" placeholder="Số 123, đường...">
               </div>
 
-              <div class="form-group full-width">
-                <label>Phần 5: Lịch trình (Itinerary - Xuống dòng cho mỗi ngày)</label>
-                <textarea formControlName="h_itinerary" rows="4" placeholder="Ngày 1: ..."></textarea>
+              <div class="form-group-pro">
+                <label>Vĩ độ (Latitude)</label>
+                <input type="number" formControlName="latitude" step="0.000001">
               </div>
 
-              <div class="form-group full-width">
-                <label>Phần 6: Tips từ chuyên gia (Sống sót - Xuống dòng cho mỗi tip)</label>
-                <textarea formControlName="h_tips" rows="4" placeholder="Nên mang theo..."></textarea>
+              <div class="form-group-pro">
+                <label>Kinh độ (Longitude)</label>
+                <input type="number" formControlName="longitude" step="0.000001">
+              </div>
+
+              <div class="form-group-pro">
+                <label>Chi phí dự kiến (VNĐ)</label>
+                <input type="number" formControlName="averageSpend" placeholder="500000">
+              </div>
+
+              <div class="form-group-pro">
+                <label>Vùng miền</label>
+                <div class="select-wrap-pro">
+                  <select formControlName="region">
+                    <option value="NORTH">Miền Bắc</option>
+                    <option value="CENTRAL">Miền Trung</option>
+                    <option value="SOUTH">Miền Nam</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group-pro full-width">
+                <label>Thời điểm tham quan tốt nhất</label>
+                <input type="text" formControlName="bestTimeToVisit" placeholder="Tháng 3 - Tháng 9 hàng năm">
+              </div>
+
+              <div class="form-group-pro full-width">
+                <label>Hình ảnh đại diện (Banner)</label>
+                <div class="upload-zone-pro">
+                  <div class="url-input">
+                    <i class="fas fa-link"></i>
+                    <input type="text" formControlName="imageUrl" placeholder="HTTPS://...">
+                  </div>
+                  <div class="file-trigger">
+                    <input type="file" (change)="onFileSelected($event)" accept="image/*" id="file-up">
+                    <label for="file-up" class="btn-upload-minimal">
+                      <i class="fas fa-cloud-arrow-up"></i>
+                      <span>{{ isUploading() ? 'Đang tải...' : 'Tải ảnh lên' }}</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group-pro full-width">
+                <label>Mô tả tổng quát (Ngắn gọn)</label>
+                <textarea formControlName="description" rows="2" placeholder="Tóm tắt về vẻ đẹp của địa danh..."></textarea>
+              </div>
+
+              <!-- AI Handbook Section -->
+              <div class="form-section-title full-width mt-10 primary-gradient-text">
+                <i class="fas fa-wand-magic-sparkles mr-2"></i> BIÊN TẬP CẨM NANG AI
+              </div>
+              
+              <div class="ai-trigger-panel full-width">
+                <div class="ai-info">
+                  <h4>Tự động hóa nội dung</h4>
+                  <p>Sử dụng trí tuệ nhân tạo để soạn thảo cẩm nang chuyên nghiệp 6 phần.</p>
+                </div>
+                <button type="button" class="btn-ai-sparkle-pro" (click)="generateWithAI()" [disabled]="aiLoading()">
+                   <i class="fas" [class.fa-robot]="!aiLoading()" [class.fa-spinner-third]="aiLoading()" [class.fa-spin]="aiLoading()"></i>
+                   <span>{{ aiLoading() ? 'Đang thực hiện...' : 'Soạn thảo bằng AI' }}</span>
+                </button>
+              </div>
+              
+              <div class="handbook-fields full-width">
+                <div class="form-group-pro">
+                  <label>Di chuyển (Logistics)</label>
+                  <textarea formControlName="h_logistics" rows="2"></textarea>
+                </div>
+                <div class="form-group-pro">
+                  <label>Lưu trú (Accommodation)</label>
+                  <textarea formControlName="h_accommodation" rows="2"></textarea>
+                </div>
+                <div class="form-group-pro">
+                  <label>Điểm khám phá (Discovery)</label>
+                  <textarea formControlName="h_discovery" rows="4" placeholder="Tên điểm: Mô tả..."></textarea>
+                </div>
+                <div class="form-group-pro">
+                  <label>Ẩm thực (Culinary)</label>
+                  <textarea formControlName="h_culinary" rows="2"></textarea>
+                </div>
+                <div class="form-group-pro">
+                  <label>Lịch trình (Itinerary)</label>
+                  <textarea formControlName="h_itinerary" rows="4"></textarea>
+                </div>
+                <div class="form-group-pro">
+                  <label>Tips & Mẹo hay (Expert Tips)</label>
+                  <textarea formControlName="h_tips" rows="4"></textarea>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="modal-actions">
-            <button type="submit" class="btn-gold" [disabled]="poiForm.invalid || loading()">
-              {{ loading() ? 'Đang lưu...' : 'Lưu thông tin' }}
+          <div class="modal-footer-pro">
+            <button type="button" class="btn-cancel-pro" (click)="showForm.set(false)">Hủy bỏ</button>
+            <button type="submit" class="btn-save-pro" [disabled]="poiForm.invalid || loading()">
+              <i class="fas fa-check-circle mr-2"></i>
+              {{ loading() ? 'Đang lưu trữ...' : 'Lưu dữ liệu' }}
             </button>
-            <button type="button" class="btn-outline" (click)="showForm.set(false)">Hủy</button>
           </div>
         </form>
       </div>
     </div>
   `,
   styles: [`
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-    .modal-card { width: 100%; max-width: 600px; padding: 40px; border-radius: 24px; border: 1px solid var(--glass-border); max-height: 90vh; overflow-y: auto; }
-    h2 { color: var(--gold-primary); margin-bottom: 30px; text-align: center; }
+    .modal-overlay-pro { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+    .modal-card-pro { width: 100%; max-width: 850px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; max-height: 90vh; overflow: hidden; box-shadow: 0 50px 100px rgba(0,0,0,0.6); }
+    .glass-pro-heavy { background: rgba(15, 23, 42, 0.9); }
     
-    .admin-form .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .modal-header-pro { padding: 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .header-main { display: flex; align-items: center; }
+    .header-main h2 { margin: 0; font-size: 1.6rem; color: #fff; }
+    .gold-glow { color: #d4af37; filter: drop-shadow(0 0 5px rgba(212,175,55,0.5)); }
+    .btn-close-modal { background: rgba(255,255,255,0.05); border: none; color: #64748b; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; transition: 0.3s; }
+    .btn-close-modal:hover { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+
+    .form-scroll-area { flex: 1; overflow-y: auto; padding: 30px; }
+    .form-scroll-area::-webkit-scrollbar { width: 5px; }
+    .form-scroll-area::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.2); border-radius: 10px; }
+
+    .form-grid-pro { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
     .full-width { grid-column: span 2; }
-    
-    .form-group label { display: block; font-size: 0.85rem; color: #94a3b8; margin-bottom: 8px; }
-    .form-group input, .form-group textarea, .form-group select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; color: white; outline: none; transition: border-color 0.2s; }
-    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--gold-primary); }
-    .form-group select option { background: #0f172a; color: white; }
-    
-    .upload-flex { display: flex; gap: 10px; align-items: stretch; }
-    .upload-flex input[type="text"] { flex: 1; }
-    .file-input { width: auto !important; padding: 9px !important; cursor: pointer; }
-    .file-input::-webkit-file-upload-button { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; margin-right: 10px;}
-    .uploading-text { color: var(--gold-primary); font-size: 0.85rem; margin-top: 6px; font-style: italic; }
+    .form-section-title { font-size: 0.7rem; font-weight: 800; color: #475569; letter-spacing: 2.5px; margin: 20px 0 10px; }
+    .primary-gradient-text { background: linear-gradient(135deg, #FFD700, #D4AF37); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-    .modal-actions { display: flex; gap: 15px; margin-top: 35px; }
-    .modal-actions button { flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; }
+    .form-group-pro label { display: block; font-size: 0.75rem; font-weight: 700; color: #94a3b8; margin-bottom: 10px; }
+    .form-group-pro input, .form-group-pro textarea, .form-group-pro select { 
+       width: 100%; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
+       border-radius: 14px; padding: 14px 18px; color: #f1f5f9; outline: none; transition: all 0.3s;
+       font-size: 0.9rem;
+    }
+    .form-group-pro input:focus, .form-group-pro textarea:focus { border-color: rgba(212,175,55,0.3); background: rgba(255,255,255,0.04); box-shadow: 0 0 15px rgba(212,175,55,0.05); }
 
-    .handbook-editor-section { margin-top: 40px; padding-top: 30px; border-top: 1px solid rgba(212,175,55,0.2); }
-    .section-sub { color: var(--gold-primary); font-size: 1rem; letter-spacing: 2px; margin-bottom: 20px; }
-    .mt-10 { margin-top: 10px; }
+    .upload-zone-pro { display: flex; gap: 15px; align-items: stretch; }
+    .url-input { flex: 1; position: relative; }
+    .url-input i { position: absolute; left: 15px; top: 18px; color: #475569; font-size: 0.8rem; }
+    .url-input input { padding-left: 40px !important; }
+    
+    .file-trigger { position: relative; }
+    .file-trigger input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+    .btn-upload-minimal { display: flex; align-items: center; gap: 10px; height: 100%; padding: 0 20px; background: rgba(212,175,55,0.1); border: 1px dashed rgba(212,175,55,0.3); border-radius: 14px; color: #d4af37; font-weight: 700; font-size: 0.85rem; }
+
+    .ai-trigger-panel { 
+       background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%);
+       border: 1px solid rgba(168, 85, 247, 0.15); border-radius: 20px; padding: 25px;
+       display: flex; justify-content: space-between; align-items: center; margin: 15px 0;
+    }
+    .ai-info h4 { margin: 0; color: #fff; font-size: 1rem; }
+    .ai-info p { margin: 5px 0 0; color: #64748b; font-size: 0.8rem; }
+    
+    .btn-ai-sparkle-pro { 
+       background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; border: none;
+       padding: 12px 22px; border-radius: 12px; font-weight: 800; font-size: 0.85rem;
+       cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.3s;
+       box-shadow: 0 10px 20px rgba(168, 85, 247, 0.2);
+    }
+    .btn-ai-sparkle-pro:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(168, 85, 247, 0.4); }
+
+    .modal-footer-pro { padding: 30px; display: flex; justify-content: flex-end; gap: 15px; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(2, 6, 23, 0.2); }
+    .btn-cancel-pro { background: none; border: 1px solid rgba(255,255,255,0.1); color: #64748b; padding: 12px 25px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+    .btn-cancel-pro:hover { background: rgba(255,255,255,0.05); color: #f1f5f9; }
+    
+    .btn-save-pro { background: linear-gradient(135deg, #FFD700, #D4AF37); color: #000; padding: 12px 35px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2); }
+    .btn-save-pro:hover:not(:disabled) { transform: scale(1.03); box-shadow: 0 15px 30px rgba(212, 175, 55, 0.3); }
+    .btn-save-pro:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .mr-3 { margin-right: 12px; }
   `]
 })
 export class PoiMgmtComponent implements OnInit {
@@ -174,6 +238,7 @@ export class PoiMgmtComponent implements OnInit {
   editingPoi = signal<PointOfInterest | null>(null);
   loading = signal(false);
   isUploading = signal(false);
+  aiLoading = signal(false);
 
   poiForm = this.fb.group({
     name: ['', Validators.required],
@@ -198,8 +263,9 @@ export class PoiMgmtComponent implements OnInit {
 
   columns: Column[] = [
     { key: 'name', label: 'Tên Địa danh' },
-    { key: 'city', label: 'Thành phố' },
-    { key: 'category', label: 'Lĩnh vực' }
+    { key: 'city', label: 'Thành phố', type: 'badge' },
+    { key: 'category', label: 'Lĩnh vực', type: 'badge' },
+    { key: 'averageSpend', label: 'Chi phí', type: 'price' }
   ];
 
   ngOnInit() {
@@ -294,9 +360,12 @@ export class PoiMgmtComponent implements OnInit {
     const handbook = {
       logistics: formVal.h_logistics,
       accommodation: formVal.h_accommodation,
-      discovery: formVal.h_discovery?.split('\n').filter((l: string) => l.includes(':')).map((l: string) => {
-        const [title, desc] = l.split(':');
-        return { title: title.trim(), desc: desc.trim() };
+      discovery: formVal.h_discovery?.split('\n').filter((l: string) => l.trim()).map((l: string) => {
+        if (l.includes(':')) {
+          const parts = l.split(':');
+          return { title: parts[0].trim(), desc: parts.slice(1).join(':').trim() };
+        }
+        return { title: l.trim(), desc: '' };
       }),
       culinary: formVal.h_culinary,
       itinerary: formVal.h_itinerary?.split('\n').filter((l: string) => l.trim()),
@@ -325,6 +394,47 @@ export class PoiMgmtComponent implements OnInit {
         alert('Có lỗi xảy ra khi lưu thông tin địa danh.');
       },
       complete: () => this.loading.set(false)
+    });
+  }
+
+  generateWithAI() {
+    const name = this.poiForm.value.name;
+    const city = this.poiForm.value.city;
+    if (!name || !city) {
+      alert('Vui lòng nhập Tên địa danh và Thành phố để AI có thông tin biên soạn.');
+      return;
+    }
+
+    this.aiLoading.set(true);
+    this.catalogService.generateHandbook(name, city).subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          try {
+            // The backend might return a markdown-wrapped JSON or pure JSON
+            let content = res.data.trim();
+            if (content.startsWith('```json')) content = content.replace(/```json|```/g, '').trim();
+            if (content.startsWith('```')) content = content.replace(/```/g, '').trim();
+
+            const data = JSON.parse(content);
+            this.poiForm.patchValue({
+              h_logistics: data.logistics || '',
+              h_accommodation: data.accommodation || '',
+              h_discovery: data.discovery || '',
+              h_culinary: data.culinary || '',
+              h_itinerary: data.itinerary || '',
+              h_tips: data.tips || ''
+            });
+          } catch (e) {
+            console.error('Error parsing AI response:', e, res.data);
+            alert('AI phản hồi định dạng không hợp lệ. Vui lòng thử lại.');
+          }
+        }
+      },
+      error: (err) => {
+        console.error('AI error:', err);
+        alert('Có lỗi xảy ra khi gọi AI: ' + (err.error?.message || 'Không thể kết nối với dịch vụ AI.'));
+      },
+      complete: () => this.aiLoading.set(false)
     });
   }
 
