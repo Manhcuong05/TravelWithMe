@@ -107,7 +107,8 @@ import { AuthService } from '../../../core/services/auth.service';
               </div>
               <div class="p-avatar-wrap">
                 <div class="p-avatar">
-                   {{ user()?.fullName?.charAt(0) }}
+                   <img *ngIf="user()?.avatarUrl" [src]="user()?.avatarUrl" class="p-avatar-img" [alt]="user()?.fullName">
+                   <span *ngIf="!user()?.avatarUrl">{{ user()?.fullName?.charAt(0) }}</span>
                 </div>
                 <div class="status-indicator"></div>
               </div>
@@ -202,7 +203,9 @@ import { AuthService } from '../../../core/services/auth.service';
     .p-avatar { 
       width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #FFD700, #D4AF37);
       color: #000; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem;
+      overflow: hidden;
     }
+    .p-avatar-img { width: 100%; height: 100%; object-fit: cover; }
     .status-indicator { position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background: #22c55e; border-radius: 50%; border: 2px solid #0f172a; }
 
     .btn-logout-minimal { 
