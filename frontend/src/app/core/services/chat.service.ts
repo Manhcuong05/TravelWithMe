@@ -2,7 +2,8 @@ import { Injectable, signal, inject, effect } from '@angular/core';
 import { Client, IMessage } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { AuthService } from './auth.service';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { ApiResponse } from '../../data/models/auth.model';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 
 export interface ChatMessage {
@@ -24,7 +25,8 @@ export class ChatService {
     private stompClient: Client | null = null;
     
     public messages = signal<ChatMessage[]>([]);
-    public activeChatUsers = signal<{userId: string, userName: string}[]>([]);
+    public activeChatUsers = signal<{userId: string, userName: string, avatarUrl?: string}[]>([]);
+    public supportAvatar = signal<string>('https://i.pravatar.cc/150?u=support_expert');
     private messageSubject = new BehaviorSubject<ChatMessage[]>([]);
     public messages$ = this.messageSubject.asObservable();
 
@@ -102,7 +104,7 @@ export class ChatService {
     public refreshActiveUsers() {
         const user = this.auth.currentUser();
         if (user?.role === 'ADMIN' || user?.role === 'CTV') {
-            this.http.get<{userId: string, userName: string}[]>('/api/chat/users')
+            this.http.get<{userId: string, userName: string, avatarUrl?: string}[]>('/api/chat/users')
                 .subscribe({
                     next: (users) => this.activeChatUsers.set(users),
                     error: (err) => console.error('Failed to load active users', err)
@@ -145,5 +147,21 @@ export class ChatService {
                 },
                 error: (err) => console.error('Failed to load chat history', err)
             });
+    }
+
+    public loadSupportAvatar() {
+        this.http.get<ApiResponse<string>>('/api/settings/SUPPORT_AVATAR').subscribe(res => {
+            if (res.success && res.data) {
+                this.supportAvatar.set(res.data);
+            }
+        });
+    }
+
+    public updateSupportAvatar(url: string): Observable<ApiResponse<string>> {
+        return this.http.put<ApiResponse<string>>('/api/settings/SUPPORT_AVATAR', { value: url }).pipe(
+            tap((res: ApiResponse<string>) => {
+                if (res.success) this.supportAvatar.set(url);
+            })
+        );
     }
 }

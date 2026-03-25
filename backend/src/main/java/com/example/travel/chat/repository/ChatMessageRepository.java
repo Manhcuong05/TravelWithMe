@@ -12,6 +12,6 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
     @Query("SELECT c FROM ChatMessage c WHERE c.senderId = :userId OR c.recipientId = :userId ORDER BY c.timestamp ASC")
     List<ChatMessage> findUserChatHistory(String userId);
 
-    @Query("SELECT DISTINCT c.senderId, c.senderName FROM ChatMessage c WHERE c.recipientId IS NULL OR c.recipientId = 'SUPPORT' OR c.recipientId = 'ADMIN'")
+    @Query("SELECT DISTINCT c.senderId, c.senderName, u.avatarUrl FROM ChatMessage c JOIN com.example.travel.identity.entity.User u ON c.senderId = u.id WHERE c.recipientId IS NULL OR c.recipientId = 'SUPPORT' OR c.recipientId = 'ADMIN'")
     List<Object[]> findActiveChatUsers();
 }

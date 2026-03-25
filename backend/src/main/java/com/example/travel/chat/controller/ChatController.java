@@ -45,6 +45,7 @@ public class ChatController {
                 java.util.Map<String, String> map = new java.util.HashMap<>();
                 map.put("userId", (String) obj[0]);
                 map.put("userName", (String) obj[1]);
+                map.put("avatarUrl", (String) obj[2]);
                 return map;
             }).toList();
     }

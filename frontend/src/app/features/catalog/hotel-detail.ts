@@ -44,7 +44,7 @@ import { ReviewsComponent } from '../review/review';
                   <p class="capacity-info">
                     <span class="icon">👥</span> Sức chứa: {{ room.capacity }} khách 
                     <span class="separator">|</span> 
-                    <span class="icon">🛏️</span> Còn lại: {{ room.totalRooms }} phòng
+                    <span class="icon">🛏️</span> Còn lại: {{ room.availableRooms }} phòng
                   </p>
                   <div class="features">
                     <span class="amenity-tag" *ngFor="let amenity of room.amenities">{{ amenity }}</span>
@@ -179,8 +179,12 @@ export class HotelDetailComponent implements OnInit {
   };
 
   ngOnInit() {
+    this.loadHotel();
+  }
+
+  loadHotel() {
     const id = this.route.snapshot.params['id'];
-    this.hotelService.getHotel(id).subscribe({
+    this.hotelService.getHotel(id, this.checkIn, this.checkOut).subscribe({
       next: (res) => {
         if (res.success) this.hotel.set(res.data);
       }
@@ -194,6 +198,10 @@ export class HotelDetailComponent implements OnInit {
       const diff = end.getTime() - start.getTime();
       const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
       this.nights.set(days > 0 ? days : 0);
+      
+      if (days > 0) {
+        this.loadHotel();
+      }
     }
   }
 

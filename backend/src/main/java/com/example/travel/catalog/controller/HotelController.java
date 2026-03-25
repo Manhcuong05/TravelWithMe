@@ -21,8 +21,11 @@ public class HotelController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<HotelResponse> getHotel(@PathVariable String id) {
-        return ApiResponse.success(hotelService.getHotelById(id));
+    public ApiResponse<HotelResponse> getHotel(
+            @PathVariable String id,
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate checkIn,
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate checkOut) {
+        return ApiResponse.success(hotelService.getHotelById(id, checkIn, checkOut));
     }
 
     @PostMapping

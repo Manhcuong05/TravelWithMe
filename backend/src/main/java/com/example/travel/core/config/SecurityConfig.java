@@ -35,7 +35,7 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/payments/test-email").permitAll()
                                                 .requestMatchers(org.springframework.http.HttpMethod.POST,
                                                                 "/api/upload")
-                                                .hasAnyRole("ADMIN", "CTV")
+                                                .authenticated()
                                                 .requestMatchers(org.springframework.http.HttpMethod.GET,
                                                                 "/api/search/**", "/api/flights/**",
                                                                 "/api/hotels/**", "/api/pois/**",

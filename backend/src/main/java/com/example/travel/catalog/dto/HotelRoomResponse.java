@@ -17,6 +17,7 @@ public class HotelRoomResponse {
     private double pricePerNight;
     private int capacity;
     private int totalRooms;
+    private int availableRooms;
     private List<String> amenities;
     private String classification;
 }

@@ -28,7 +28,8 @@ import { AuthService } from '../../../core/services/auth.service';
                [class.active]="selectedUserId() === user.userId"
                (click)="selectUser(user)">
             <div class="avatar-zone">
-              <div class="avatar-pro gold-gradient">{{ user.userName.charAt(0) }}</div>
+              <img *ngIf="user.avatarUrl" [src]="user.avatarUrl" class="avatar-pro object-cover" [alt]="user.userName">
+              <div *ngIf="!user.avatarUrl" class="avatar-pro gold-gradient">{{ user.userName.charAt(0) }}</div>
               <div class="status-dot"></div>
             </div>
             <div class="user-meta-pro">
@@ -51,7 +52,10 @@ import { AuthService } from '../../../core/services/auth.service';
       <main class="chat-viewport-pro">
         <header class="chat-header-pro" *ngIf="selectedUser(); else noSelection">
           <div class="header-user-info">
-            <div class="h-avatar-pro luxury-border">{{ selectedUser()?.userName?.charAt(0) }}</div>
+            <div class="h-avatar-pro luxury-border">
+              <img *ngIf="selectedUser()?.avatarUrl" [src]="selectedUser()?.avatarUrl" class="h-avatar-img" [alt]="selectedUser()?.userName">
+              <span *ngIf="!selectedUser()?.avatarUrl">{{ selectedUser()?.userName?.charAt(0) }}</span>
+            </div>
             <div class="h-text-pro">
               <h4 class="h-name-pro">{{ selectedUser()?.userName }}</h4>
               <div class="h-status-pro"><span class="dot"></span> Đang trực tuyến</div>
@@ -139,6 +143,8 @@ import { AuthService } from '../../../core/services/auth.service';
     .avatar-pro { width: 50px; height: 50px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: #000; font-size: 1.3rem; }
     .gold-gradient { background: linear-gradient(135deg, var(--gold-primary), var(--gold-secondary)); }
     .status-dot { position: absolute; bottom: -2px; right: -2px; width: 14px; height: 14px; background: #22c55e; border-radius: 50%; border: 3px solid #0f172a; }
+    .object-cover { object-fit: cover; }
+    .h-avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
 
     .user-meta-pro { flex: 1; min-width: 0; }
     .u-name { display: block; font-weight: 700; color: #f8fafc; font-size: 1rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -213,7 +219,7 @@ export class AdminChatComponent {
 
   user = this.auth.currentUser;
   selectedUserId = signal<string | null>(null);
-  selectedUser = signal<{ userId: string, userName: string } | null>(null);
+  selectedUser = signal<{ userId: string, userName: string, avatarUrl?: string } | null>(null);
   loading = signal(false);
   newMessage = '';
 
@@ -229,7 +235,7 @@ export class AdminChatComponent {
     });
   }
 
-  selectUser(user: { userId: string, userName: string }) {
+  selectUser(user: { userId: string, userName: string, avatarUrl?: string }) {
     this.selectedUserId.set(user.userId);
     this.selectedUser.set(user);
     this.chatService.loadHistory(user.userId, this.user()?.id!);

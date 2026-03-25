@@ -9,6 +9,7 @@ export interface HotelRoom {
     pricePerNight: number;
     capacity: number;
     totalRooms: number;
+    availableRooms: number;
     amenities: string[];
     classification?: string;
 }
@@ -40,8 +41,11 @@ export class HotelService {
         return this.http.get<ApiResponse<Hotel[]>>(this.API_URL, { params });
     }
 
-    getHotel(id: string): Observable<ApiResponse<Hotel>> {
-        return this.http.get<ApiResponse<Hotel>>(`${this.API_URL}/${id}`);
+    getHotel(id: string, checkIn?: string, checkOut?: string): Observable<ApiResponse<Hotel>> {
+        const params: any = {};
+        if (checkIn) params.checkIn = checkIn;
+        if (checkOut) params.checkOut = checkOut;
+        return this.http.get<ApiResponse<Hotel>>(`${this.API_URL}/${id}`, { params });
     }
 
     createHotel(hotel: any): Observable<ApiResponse<Hotel>> {
