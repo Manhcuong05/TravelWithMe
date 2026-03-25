@@ -34,4 +34,9 @@ public class AdminController {
         adminService.deleteUser(id);
         return ApiResponse.success(null, "Đã xóa người dùng thành công");
     }
+
+    @PutMapping("/users/{id}")
+    public ApiResponse<User> updateUser(@PathVariable String id, @Valid @RequestBody com.example.travel.identity.dto.UserUpdateRequest request) {
+        return ApiResponse.success(adminService.updateUser(id, request), "Cập nhật người dùng thành công");
+    }
 }

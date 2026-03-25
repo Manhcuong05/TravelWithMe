@@ -5,6 +5,7 @@ export interface User {
     role: 'ADMIN' | 'CTV' | 'TRAVELER';
     phone?: string;
     avatarUrl?: string;
+    createdAt?: string;
 }
 
 export interface AuthResponse {

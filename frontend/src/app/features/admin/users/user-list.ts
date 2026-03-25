@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { AdminService } from '../../../core/services/admin.service';
+import { AppValidators } from '../../../core/utils/validators';
 import { User } from '../../../data/models/auth.model';
 
 @Component({
@@ -52,11 +53,16 @@ import { User } from '../../../data/models/auth.model';
                 <span class="role-chip" [class]="user.role">{{ user.role }}</span>
               </td>
               <td>
-                <span class="date-text">15/03/2026</span>
+                <span class="date-text">{{ (user.createdAt | date:'dd/MM/yyyy') || 'N/A' }}</span>
               </td>
               <td class="text-right">
                 <div class="row-actions">
-                  <button class="action-btn edit" title="Chỉnh sửa">✏️</button>
+                  <button class="action-btn edit" 
+                          (click)="openEditModal(user)" 
+                          *ngIf="user.role !== 'ADMIN'"
+                          title="Chỉnh sửa">
+                    ✏️
+                  </button>
                   <button class="action-btn delete" 
                           (click)="deleteUser(user)" 
                           *ngIf="user.role !== 'ADMIN'"
@@ -97,18 +103,73 @@ import { User } from '../../../data/models/auth.model';
             </div>
             <div class="form-group">
               <label>Số điện thoại</label>
-              <input type="text" formControlName="phone" placeholder="09xxxxxxx">
+              <input type="text" formControlName="phone" placeholder="VD: 0912345678">
+              <div class="error-msg" *ngIf="ctvForm.get('phone')?.touched && ctvForm.get('phone')?.errors">
+                <small *ngIf="ctvForm.get('phone')?.errors?.['required']">Số điện thoại là bắt buộc</small>
+                <small *ngIf="ctvForm.get('phone')?.errors?.['pattern']">SĐT phải gồm 10 chữ số</small>
+              </div>
             </div>
             <div class="form-group full">
               <label>Mật khẩu</label>
-              <input type="password" formControlName="password" placeholder="Tối thiểu 6 ký tự">
+              <input type="password" formControlName="password" placeholder="Min 8 ký tự, 1 hoa, 1 số, 1 đặt biệt">
+              <div class="error-msg" *ngIf="ctvForm.get('password')?.touched && ctvForm.get('password')?.errors">
+                <small *ngIf="ctvForm.get('password')?.errors?.['required']">Mật khẩu là bắt buộc</small>
+                <small *ngIf="ctvForm.get('password')?.errors?.['minlength']">Tối thiểu 8 ký tự</small>
+                <small *ngIf="ctvForm.get('password')?.errors?.['pattern']">Phải có chữ hoa, số và ký tự đặc biệt</small>
+              </div>
             </div>
+          </div>
+
+          <div class="global-error" *ngIf="errorMessage()">
+            {{ errorMessage() }}
           </div>
  
           <div class="modal-footer">
             <button type="button" class="btn-outline" (click)="showCreateModal.set(false)">Hủy bỏ</button>
             <button type="submit" class="btn-gold" [disabled]="ctvForm.invalid || loading()">
               {{ loading() ? 'Đang khởi tạo...' : 'Xác nhận tạo' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal-overlay" *ngIf="showEditModal()" (click)="showEditModal.set(false)">
+      <div class="modal-card glass-effect stop-propagation" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="luxury-font">Chỉnh sửa thông tin</h2>
+          <button class="close-modal" (click)="showEditModal.set(false)">✕</button>
+        </div>
+        
+        <form [formGroup]="editForm" (ngSubmit)="updateUser()" class="ctv-form">
+          <div class="form-grid">
+            <div class="form-group full">
+              <label>Họ và tên</label>
+              <input type="text" formControlName="fullName" placeholder="VD: Nguyễn Văn A">
+              <div class="error-msg" *ngIf="editForm.get('fullName')?.touched && editForm.get('fullName')?.errors">
+                <small *ngIf="editForm.get('fullName')?.errors?.['required']">Họ tên là bắt buộc</small>
+                <small *ngIf="editForm.get('fullName')?.errors?.['minlength']">Tối thiểu 2 ký tự</small>
+              </div>
+            </div>
+            <div class="form-group">
+                <label>Email (Chỉ xem)</label>
+                <input type="text" [value]="selectedUser()?.email" disabled class="disabled-input">
+            </div>
+            <div class="form-group">
+                <label>Vai trò (Chỉ xem)</label>
+                <input type="text" [value]="selectedUser()?.role" disabled class="disabled-input">
+            </div>
+          </div>
+
+          <div class="global-error" *ngIf="errorMessage()">
+            {{ errorMessage() }}
+          </div>
+ 
+          <div class="modal-footer">
+            <button type="button" class="btn-outline" (click)="showEditModal.set(false)">Hủy bỏ</button>
+            <button type="submit" class="btn-gold" [disabled]="editForm.invalid || loading()">
+              {{ loading() ? 'Đang cập nhật...' : 'Lưu thay đổi' }}
             </button>
           </div>
         </form>
@@ -173,6 +234,9 @@ import { User } from '../../../data/models/auth.model';
     .empty-state { text-align: center; padding: 80px 0; color: #475569; }
     .empty-icon { font-size: 3rem; margin-bottom: 15px; opacity: 0.3; }
  
+    .global-error { background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 12px; border-radius: 10px; margin-top: 20px; font-size: 0.85rem; text-align: center; border: 1px solid rgba(239, 68, 68, 0.2); }
+    .error-msg { color: #ef4444; font-size: 0.7rem; margin-top: 4px; }
+    .disabled-input { opacity: 0.6; cursor: not-allowed; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .shadow-gold { box-shadow: 0 10px 20px -5px rgba(212, 175, 55, 0.3); }
   `]
@@ -183,34 +247,47 @@ export class UserListComponent implements OnInit {
 
     users = signal<User[]>([]);
     showCreateModal = signal(false);
+    showEditModal = signal(false);
+    selectedUser = signal<User | null>(null);
     loading = signal(false);
-
+    errorMessage = signal<string | null>(null);
+ 
     ctvForm = this.fb.group({
-        fullName: ['', Validators.required],
-        email: ['', [Validators.required, Validators.email]],
-        phone: ['', Validators.required],
-        password: ['', [Validators.required, Validators.minLength(6)]]
+        fullName: ['', [Validators.required, Validators.minLength(2)]],
+        email: ['', AppValidators.email],
+        phone: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+        password: ['', AppValidators.password]
     });
 
+    editForm = this.fb.group({
+        fullName: ['', [Validators.required, Validators.minLength(2)]]
+    });
+ 
     ngOnInit() {
         this.loadUsers();
     }
-
+ 
     loadUsers() {
         this.adminService.getAllUsers().subscribe(res => {
             if (res.success) this.users.set(res.data);
         });
     }
-
+ 
     openCreateModal() {
         this.ctvForm.reset();
+        this.errorMessage.set(null);
         this.showCreateModal.set(true);
     }
-
+ 
     createCTV() {
-        if (this.ctvForm.invalid) return;
-
+        if (this.ctvForm.invalid) {
+            this.ctvForm.markAllAsTouched();
+            return;
+        }
+ 
         this.loading.set(true);
+        this.errorMessage.set(null);
+
         this.adminService.createCTV(this.ctvForm.value).subscribe({
             next: (res) => {
                 if (res.success) {
@@ -220,12 +297,48 @@ export class UserListComponent implements OnInit {
             },
             error: (err) => {
                 console.error('Error creating CTV:', err);
-                alert('Có lỗi xảy ra khi tạo tài khoản CTV.');
+                const msg = err.error?.message || 'Có lỗi xảy ra khi tạo tài khoản CTV.';
+                this.errorMessage.set(msg);
             },
             complete: () => this.loading.set(false)
         });
     }
 
+    openEditModal(user: User) {
+        this.selectedUser.set(user);
+        this.editForm.patchValue({
+            fullName: user.fullName
+        });
+        this.errorMessage.set(null);
+        this.showEditModal.set(true);
+    }
+
+    updateUser() {
+        if (this.editForm.invalid || !this.selectedUser()) return;
+
+        this.loading.set(true);
+        this.errorMessage.set(null);
+
+        const request = {
+            ...this.selectedUser(),
+            fullName: this.editForm.value.fullName
+        };
+
+        this.adminService.updateUser(this.selectedUser()!.id, request).subscribe({
+            next: (res) => {
+                if (res.success) {
+                    this.loadUsers();
+                    this.showEditModal.set(false);
+                }
+            },
+            error: (err) => {
+                console.error('Error updating user:', err);
+                this.errorMessage.set(err.error?.message || 'Có lỗi xảy ra khi cập nhật.');
+            },
+            complete: () => this.loading.set(false)
+        });
+    }
+ 
     deleteUser(user: User) {
         if (confirm(`Bạn có chắc muốn xóa người dùng ${user.fullName}?`)) {
             this.adminService.deleteUser(user.id).subscribe(res => {

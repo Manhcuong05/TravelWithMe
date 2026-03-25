@@ -22,4 +22,8 @@ export class AdminService {
     deleteUser(id: string): Observable<ApiResponse<void>> {
         return this.http.delete<ApiResponse<void>>(`${this.API_URL}/users/${id}`);
     }
+
+    updateUser(id: string, userData: any): Observable<ApiResponse<User>> {
+        return this.http.put<ApiResponse<User>>(`${this.API_URL}/users/${id}`, userData);
+    }
 }

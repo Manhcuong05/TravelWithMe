@@ -51,4 +51,21 @@ public class AdminService {
 
         userRepository.delete(user);
     }
+
+    @Transactional
+    public User updateUser(String userId, com.example.travel.identity.dto.UserUpdateRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "Không tìm thấy người dùng"));
+
+        if (!user.getEmail().equals(request.getEmail()) && userRepository.existsByEmail(request.getEmail())) {
+            throw new BusinessException("EMAIL_ALREADY_EXISTS", "Email đã tồn tại");
+        }
+
+        user.setFullName(request.getFullName());
+        user.setEmail(request.getEmail());
+        user.setPhone(request.getPhone());
+        user.setAvatarUrl(request.getAvatarUrl());
+
+        return userRepository.save(user);
+    }
 }
