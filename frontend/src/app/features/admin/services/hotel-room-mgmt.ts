@@ -4,10 +4,10 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angu
 import { HotelService, Hotel, HotelRoom } from '../../../core/services/hotel.service';
 
 @Component({
-    selector: 'app-hotel-room-mgmt',
-    standalone: true,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule],
-    template: `
+  selector: 'app-hotel-room-mgmt',
+  standalone: true,
+  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  template: `
     <div class="page-container">
       <div class="page-header">
         <div class="header-info">
@@ -132,7 +132,7 @@ import { HotelService, Hotel, HotelRoom } from '../../../core/services/hotel.ser
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .page-container { animation: fadeIn 0.5s ease; }
     .page-header { margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end; }
     .page-header h1 { color: var(--gold-primary); font-size: 2rem; margin-bottom: 5px; }
@@ -197,142 +197,142 @@ import { HotelService, Hotel, HotelRoom } from '../../../core/services/hotel.ser
   `]
 })
 export class HotelRoomMgmtComponent implements OnInit {
-    private hotelService = inject(HotelService);
-    private fb = inject(FormBuilder);
+  private hotelService = inject(HotelService);
+  private fb = inject(FormBuilder);
 
-    hotels = signal<Hotel[]>([]);
-    selectedHotelId = signal<string>('');
-    selectedHotel = signal<Hotel | null>(null);
-    currentRooms = signal<HotelRoom[]>([]);
+  hotels = signal<Hotel[]>([]);
+  selectedHotelId = signal<string>('');
+  selectedHotel = signal<Hotel | null>(null);
+  currentRooms = signal<HotelRoom[]>([]);
 
-    showForm = signal(false);
-    editingRoom = signal<HotelRoom | null>(null);
-    loading = signal(false);
+  showForm = signal(false);
+  editingRoom = signal<HotelRoom | null>(null);
+  loading = signal(false);
 
-    roomForm = this.fb.group({
-        roomType: ['', Validators.required],
-        classification: ['STANDARD'],
-        capacity: [2, [Validators.required, Validators.min(1)]],
-        totalRooms: [1, [Validators.required, Validators.min(1)]],
-        pricePerNight: [0, [Validators.required, Validators.min(0)]],
-        amenitiesStr: [''] // Comma separated string for simplicity
+  roomForm = this.fb.group({
+    roomType: ['', Validators.required],
+    classification: ['STANDARD'],
+    capacity: [2, [Validators.required, Validators.min(1)]],
+    totalRooms: [1, [Validators.required, Validators.min(1)]],
+    pricePerNight: [0, [Validators.required, Validators.min(0)]],
+    amenitiesStr: [''] // Comma separated string for simplicity
+  });
+
+  ngOnInit() {
+    this.loadHotels();
+  }
+
+  loadHotels() {
+    this.hotelService.getHotels().subscribe(res => {
+      if (res.success && res.data) {
+        this.hotels.set(res.data);
+        // If a hotel was selected, refresh its rooms
+        if (this.selectedHotelId()) {
+          this.refreshCurrentHotel();
+        }
+      }
     });
+  }
 
-    ngOnInit() {
-        this.loadHotels();
-    }
+  selectHotel(hotelId: string) {
+    this.selectedHotelId.set(hotelId);
+    this.refreshCurrentHotel();
+  }
 
-    loadHotels() {
-        this.hotelService.getHotels().subscribe(res => {
-            if (res.success && res.data) {
-                this.hotels.set(res.data);
-                // If a hotel was selected, refresh its rooms
-                if (this.selectedHotelId()) {
-                    this.refreshCurrentHotel();
-                }
-            }
-        });
-    }
-
-    selectHotel(hotelId: string) {
-        this.selectedHotelId.set(hotelId);
-        this.refreshCurrentHotel();
-    }
-
-    refreshCurrentHotel() {
-        const hotel = this.hotels().find(h => h.id === this.selectedHotelId());
-        if (hotel) {
-            this.selectedHotel.set(hotel);
-            // Since rooms are loaded with hotel, just set it
-            this.currentRooms.set(hotel.rooms || []);
-            // Alternatively, could fetch hotel by ID to ensure fresh rooms if needed.
-            this.hotelService.getHotel(hotel.id).subscribe(res => {
-                if (res.success && res.data) {
-                    this.currentRooms.set(res.data.rooms || []);
-                }
-            });
-        } else {
-            this.selectedHotel.set(null);
-            this.currentRooms.set([]);
+  refreshCurrentHotel() {
+    const hotel = this.hotels().find(h => h.id === this.selectedHotelId());
+    if (hotel) {
+      this.selectedHotel.set(hotel);
+      // Since rooms are loaded with hotel, just set it
+      this.currentRooms.set(hotel.rooms || []);
+      // Alternatively, could fetch hotel by ID to ensure fresh rooms if needed.
+      this.hotelService.getHotel(hotel.id).subscribe(res => {
+        if (res.success && res.data) {
+          this.currentRooms.set(res.data.rooms || []);
         }
+      });
+    } else {
+      this.selectedHotel.set(null);
+      this.currentRooms.set([]);
     }
+  }
 
-    openForm(room?: HotelRoom) {
-        if (room) {
-            this.editingRoom.set(room);
-            const amenitiesStr = room.amenities ? room.amenities.join(', ') : '';
-            this.roomForm.patchValue({
-                roomType: room.roomType,
-                classification: room.classification || 'STANDARD',
-                capacity: room.capacity,
-                totalRooms: room.totalRooms,
-                pricePerNight: room.pricePerNight,
-                amenitiesStr: amenitiesStr
-            });
-        } else {
-            this.editingRoom.set(null);
-            this.roomForm.reset({ classification: 'STANDARD', capacity: 2, totalRooms: 1, pricePerNight: 0, amenitiesStr: '' });
+  openForm(room?: HotelRoom) {
+    if (room) {
+      this.editingRoom.set(room);
+      const amenitiesStr = room.amenities ? room.amenities.join(', ') : '';
+      this.roomForm.patchValue({
+        roomType: room.roomType,
+        classification: room.classification || 'STANDARD',
+        capacity: room.capacity,
+        totalRooms: room.totalRooms,
+        pricePerNight: room.pricePerNight,
+        amenitiesStr: amenitiesStr
+      });
+    } else {
+      this.editingRoom.set(null);
+      this.roomForm.reset({ classification: 'STANDARD', capacity: 2, totalRooms: 1, pricePerNight: 0, amenitiesStr: '' });
+    }
+    this.showForm.set(true);
+  }
+
+  saveRoom() {
+    if (this.roomForm.invalid || !this.selectedHotelId()) return;
+
+    this.loading.set(true);
+    const formVal = this.roomForm.value;
+    const amenities = formVal.amenitiesStr ? formVal.amenitiesStr.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0) : [];
+
+    const requestData = {
+      roomType: formVal.roomType,
+      classification: formVal.classification,
+      capacity: formVal.capacity,
+      totalRooms: formVal.totalRooms,
+      pricePerNight: formVal.pricePerNight,
+      amenities: amenities
+    };
+
+    const action = this.editingRoom()
+      ? this.hotelService.updateRoom(this.editingRoom()!.id, requestData)
+      : this.hotelService.addRoom(this.selectedHotelId(), requestData);
+
+    action.subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.showForm.set(false);
+          // Refresh hotels or just the current hotel's room
+          this.refreshCurrentHotel();
         }
-        this.showForm.set(true);
-    }
+      },
+      error: (err) => {
+        console.error('Error saving room:', err);
+        alert('Có lỗi xảy ra khi lưu phòng.');
+      },
+      complete: () => this.loading.set(false)
+    });
+  }
 
-    saveRoom() {
-        if (this.roomForm.invalid || !this.selectedHotelId()) return;
-
-        this.loading.set(true);
-        const formVal = this.roomForm.value;
-        const amenities = formVal.amenitiesStr ? formVal.amenitiesStr.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0) : [];
-
-        const requestData = {
-            roomType: formVal.roomType,
-            classification: formVal.classification,
-            capacity: formVal.capacity,
-            totalRooms: formVal.totalRooms,
-            pricePerNight: formVal.pricePerNight,
-            amenities: amenities
-        };
-
-        const action = this.editingRoom()
-            ? this.hotelService.updateRoom(this.editingRoom()!.id, requestData)
-            : this.hotelService.addRoom(this.selectedHotelId(), requestData);
-
-        action.subscribe({
-            next: (res) => {
-                if (res.success) {
-                    this.showForm.set(false);
-                    // Refresh hotels or just the current hotel's room
-                    this.refreshCurrentHotel();
-                }
-            },
-            error: (err) => {
-                console.error('Error saving room:', err);
-                alert('Có lỗi xảy ra khi lưu phòng.');
-            },
-            complete: () => this.loading.set(false)
-        });
-    }
-
-    deleteRoom(room: HotelRoom) {
-        if (confirm(`Bạn có chắc muốn xóa hạng phòng "${room.roomType}"?`)) {
-            this.hotelService.deleteRoom(room.id).subscribe(res => {
-                if (res.success) {
-                    this.refreshCurrentHotel();
-                }
-            });
+  deleteRoom(room: HotelRoom) {
+    if (confirm(`Bạn có chắc muốn xóa hạng phòng "${room.roomType}"?`)) {
+      this.hotelService.deleteRoom(room.id).subscribe(res => {
+        if (res.success) {
+          this.refreshCurrentHotel();
         }
+      });
     }
+  }
 
-    getAmenitiesText(amenities: string[]): string {
-        if (!amenities || amenities.length === 0) return 'Không có tiện ích ghi chú';
-        return amenities.join(' • ');
-    }
+  getAmenitiesText(amenities: string[]): string {
+    if (!amenities || amenities.length === 0) return 'Không có tiện ích ghi chú';
+    return amenities.join(' • ');
+  }
 
-    getClassificationLabel(classification: string | undefined): string {
-        switch (classification) {
-            case 'BEST_VALUE': return 'Giá tốt nhất';
-            case 'PREMIUM': return 'Cao cấp';
-            case 'LUXURY': return 'Thượng hạng';
-            default: return 'Tiêu chuẩn';
-        }
+  getClassificationLabel(classification: string | undefined): string {
+    switch (classification) {
+      case 'BEST_VALUE': return 'Giá tốt nhất';
+      case 'PREMIUM': return 'Cao cấp';
+      case 'LUXURY': return 'Thượng hạng';
+      default: return 'Tiêu chuẩn';
     }
+  }
 }

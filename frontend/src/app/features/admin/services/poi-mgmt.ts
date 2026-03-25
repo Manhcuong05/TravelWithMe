@@ -155,8 +155,8 @@ import { CatalogService, PointOfInterest } from '../../../core/services/catalog.
 
           <div class="modal-footer-pro">
             <button type="button" class="btn-cancel-pro" (click)="showForm.set(false)">Hủy bỏ</button>
-            <button type="submit" class="btn-save-pro" [disabled]="poiForm.invalid || loading()">
-              <i class="fas fa-check-circle mr-2"></i>
+            <button type="button" class="btn-save-pro" (click)="savePoi()" [disabled]="loading()">
+              <i class="fas" [class.fa-check-circle]="!loading()" [class.fa-spinner-third]="loading()" [class.fa-spin]="loading()"></i>
               {{ loading() ? 'Đang lưu trữ...' : 'Lưu dữ liệu' }}
             </button>
           </div>
@@ -176,9 +176,12 @@ import { CatalogService, PointOfInterest } from '../../../core/services/catalog.
     .btn-close-modal { background: rgba(255,255,255,0.05); border: none; color: #64748b; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; transition: 0.3s; }
     .btn-close-modal:hover { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
 
-    .form-scroll-area { flex: 1; overflow-y: auto; padding: 30px; }
-    .form-scroll-area::-webkit-scrollbar { width: 5px; }
-    .form-scroll-area::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.2); border-radius: 10px; }
+    .admin-form-pro { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+    .form-scroll-area { flex: 1; overflow-y: auto; padding: 30px; min-height: 0; scroll-behavior: smooth; }
+    .form-scroll-area::-webkit-scrollbar { width: 8px; }
+    .form-scroll-area::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
+    .form-scroll-area::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.4); border-radius: 10px; border: 2px solid transparent; background-clip: content-box; }
+    .form-scroll-area::-webkit-scrollbar-thumb:hover { background: rgba(212,175,55,0.7); border: 2px solid transparent; background-clip: content-box; }
 
     .form-grid-pro { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
     .full-width { grid-column: span 2; }
@@ -192,6 +195,7 @@ import { CatalogService, PointOfInterest } from '../../../core/services/catalog.
        font-size: 0.9rem;
     }
     .form-group-pro input:focus, .form-group-pro textarea:focus { border-color: rgba(212,175,55,0.3); background: rgba(255,255,255,0.04); box-shadow: 0 0 15px rgba(212,175,55,0.05); }
+    .form-group-pro input.ng-invalid.ng-touched, .form-group-pro textarea.ng-invalid.ng-touched { border-color: rgba(239, 68, 68, 0.5); }
 
     .upload-zone-pro { display: flex; gap: 15px; align-items: stretch; }
     .url-input { flex: 1; position: relative; }
@@ -351,7 +355,13 @@ export class PoiMgmtComponent implements OnInit {
   }
 
   savePoi() {
-    if (this.poiForm.invalid) return;
+    console.log('Save POI triggered. Form status:', this.poiForm.status);
+    if (this.poiForm.invalid) {
+      console.warn('Form invalid fields:', this.getInvalidFields());
+      alert('Vui lòng điền đầy đủ các thông tin bắt buộc (được đánh dấu đỏ hoặc còn trống).');
+      this.poiForm.markAllAsTouched();
+      return;
+    }
 
     this.loading.set(true);
     const formVal: any = this.poiForm.value;
@@ -395,6 +405,17 @@ export class PoiMgmtComponent implements OnInit {
       },
       complete: () => this.loading.set(false)
     });
+  }
+
+  private getInvalidFields() {
+    const invalid = [];
+    const controls = this.poiForm.controls;
+    for (const name in controls) {
+      if (controls[name as keyof typeof controls].invalid) {
+        invalid.push(name);
+      }
+    }
+    return invalid;
   }
 
   generateWithAI() {
