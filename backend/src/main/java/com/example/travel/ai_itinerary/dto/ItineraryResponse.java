@@ -18,6 +18,7 @@ public class ItineraryResponse {
     private String userPreferences;
     private String title;
     private List<DayPlan> days;
+    private boolean saved;
 
     @Data
     @NoArgsConstructor

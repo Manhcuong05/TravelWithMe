@@ -1,21 +1,28 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ItineraryService, ItineraryResponse } from '../../core/services/itinerary.service';
 
 @Component({
   selector: 'app-itinerary',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   template: `
     <section class="itinerary-page animate-fade-in">
       <div class="container">
-        <div class="page-header">
+        <div class="page-header" *ngIf="!isViewingSaved()">
           <h1 class="luxury-font">Lập Kế Hoạch Du Lịch AI</h1>
           <p>Để trợ lý thông minh của chúng tôi kiến tạo hành trình tuyệt mỹ cho bạn.</p>
         </div>
 
-        <div class="planner-form glass-effect">
+        <div class="page-header" *ngIf="isViewingSaved()">
+          <h1 class="luxury-font">Hành Trình Của Bạn</h1>
+          <p>Khám phá lại những khoảnh khắc đáng nhớ đã được lưu lại.</p>
+          <a routerLink="/favorites" class="btn-back"><i class="fas fa-arrow-left"></i> Quay lại danh sách</a>
+        </div>
+
+        <div class="planner-form glass-effect" *ngIf="!isViewingSaved()">
           <div class="form-row">
             <div class="form-group">
               <label>Điểm đến</label>
@@ -46,7 +53,7 @@ import { ItineraryService, ItineraryResponse } from '../../core/services/itinera
             <h2 class="luxury-font">{{ itinerary()?.title }}</h2>
             <p class="dest-tag">{{ itinerary()?.destination }}</p>
             <div class="actions">
-               <button class="btn-gold-outline" (click)="saveSuccess()">Lưu vào tài khoản</button>
+               <button *ngIf="!itinerary()?.saved" class="btn-gold-outline" (click)="saveSuccess()">Lưu vào tài khoản</button>
                <button class="btn-gold-outline" (click)="print()">Xuất PDF</button>
             </div>
           </div>
@@ -75,6 +82,8 @@ import { ItineraryService, ItineraryResponse } from '../../core/services/itinera
     .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
     .page-header { text-align: center; margin-bottom: 50px; }
     .page-header h1 { font-size: 3.5rem; margin-bottom: 10px; }
+    .btn-back { display: inline-flex; align-items: center; gap: 8px; color: var(--gold-primary); text-decoration: none; font-size: 0.9rem; margin-top: 15px; transition: 0.3s; }
+    .btn-back:hover { color: #fff; transform: translateX(-5px); }
 
     .planner-form { padding: 40px; margin-bottom: 60px; }
     .form-row { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px; }
@@ -117,12 +126,35 @@ import { ItineraryService, ItineraryResponse } from '../../core/services/itinera
     .notes { font-size: 0.85rem; color: var(--text-muted); font-style: italic; }
   `]
 })
-export class ItineraryComponent {
+export class ItineraryComponent implements OnInit {
   private service = inject(ItineraryService);
+  private route = inject(ActivatedRoute);
 
   request = { destination: '', days: 3, preferences: '' };
   itinerary = signal<ItineraryResponse | null>(null);
   loading = signal<boolean>(false);
+  isViewingSaved = signal<boolean>(false);
+
+  ngOnInit() {
+    this.route.params.subscribe(params => {
+      const id = params['id'];
+      if (id) {
+        this.isViewingSaved.set(true);
+        this.loadItinerary(id);
+      }
+    });
+  }
+
+  loadItinerary(id: string) {
+    this.loading.set(true);
+    this.service.getById(id).subscribe({
+      next: (res) => {
+        if (res.success) this.itinerary.set(res.data);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false)
+    });
+  }
 
   generate() {
     if (!this.request.destination) return;
@@ -145,6 +177,10 @@ export class ItineraryComponent {
         next: (res) => {
           if (res.success) {
             alert('Lịch trình đã được lưu vào mục yêu thích của bạn!');
+            const current = this.itinerary();
+            if (current) {
+              this.itinerary.set({ ...current, saved: true });
+            }
           }
         }
       });

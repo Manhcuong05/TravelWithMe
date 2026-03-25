@@ -78,6 +78,12 @@ public class ItineraryService {
                 return mapToResponse(itineraryRepository.save(itinerary));
         }
 
+        public ItineraryResponse getItinerary(String id) {
+                Itinerary itinerary = itineraryRepository.findById(id)
+                                .orElseThrow(() -> new BusinessException("NOT_FOUND", "Không tìm thấy lịch trình"));
+                return mapToResponse(itinerary);
+        }
+
         private ItineraryResponse mapToResponse(Itinerary itinerary) {
                 String title = null;
                 List<ItineraryResponse.DayPlan> days = null;
@@ -101,6 +107,7 @@ public class ItineraryService {
                                 .userPreferences(itinerary.getUserPreferences())
                                 .title(title)
                                 .days(days)
+                                .saved(itinerary.getSaved() != null && itinerary.getSaved())
                                 .build();
         }
 

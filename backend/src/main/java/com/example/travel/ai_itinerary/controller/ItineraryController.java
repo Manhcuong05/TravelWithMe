@@ -37,4 +37,10 @@ public class ItineraryController {
     public ApiResponse<ItineraryResponse> save(@PathVariable String id) {
         return ApiResponse.success(itineraryService.saveItinerary(id), "Đã lưu vào danh sách yêu thích");
     }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('TRAVELER', 'CTV', 'ADMIN')")
+    public ApiResponse<ItineraryResponse> getById(@PathVariable String id) {
+        return ApiResponse.success(itineraryService.getItinerary(id));
+    }
 }

@@ -20,6 +20,7 @@ export interface ItineraryResponse {
     durationDays: number;
     userPreferences?: string;
     days: ItineraryDay[];
+    saved?: boolean;
 }
 
 @Injectable({
@@ -40,5 +41,9 @@ export class ItineraryService {
 
     save(id: string): Observable<ApiResponse<ItineraryResponse>> {
         return this.http.put<ApiResponse<ItineraryResponse>>(`${this.API_URL}/${id}/save`, {});
+    }
+
+    getById(id: string): Observable<ApiResponse<ItineraryResponse>> {
+        return this.http.get<ApiResponse<ItineraryResponse>>(`${this.API_URL}/${id}`);
     }
 }
