@@ -5,7 +5,11 @@ import com.example.travel.core.exception.BusinessException;
 import com.example.travel.core.util.JwtUtil;
 import com.example.travel.identity.dto.AuthResponse;
 import com.example.travel.identity.dto.LoginRequest;
+import com.example.travel.identity.dto.OtpRequest;
 import com.example.travel.identity.dto.RegisterRequest;
+import com.example.travel.identity.dto.ResetPasswordRequest;
+import com.example.travel.identity.dto.VerifyOtpRequest;
+import com.example.travel.identity.entity.OtpToken;
 import com.example.travel.identity.entity.User;
 import com.example.travel.identity.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +33,7 @@ public class AuthService {
         private final PasswordEncoder passwordEncoder;
         private final JwtUtil jwtUtil;
         private final AuthenticationManager authenticationManager;
+        private final OtpService otpService;
 
         @Value("${google.client.id}")
         private String googleClientId;
@@ -113,6 +118,45 @@ public class AuthService {
                 } catch (Exception e) {
                         throw new BusinessException("GOOGLE_AUTH_FAILED", "Xác thực Google thất bại: " + e.getMessage());
                 }
+        }
+        public void sendLoginOtp(OtpRequest request) {
+                User user = userRepository.findByEmail(request.getEmail())
+                                .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "Không tìm thấy người dùng đăng ký với email này"));
+
+                otpService.generateAndSendOtp(user.getEmail(), OtpToken.OtpType.LOGIN);
+        }
+
+        public AuthResponse loginWithOtp(VerifyOtpRequest request) {
+                User user = userRepository.findByEmail(request.getEmail())
+                                .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "Không tìm thấy người dùng đăng ký với email này"));
+
+                otpService.verifyOtp(request.getEmail(), request.getCode(), OtpToken.OtpType.LOGIN);
+
+                String jwtToken = jwtUtil.generateToken(new org.springframework.security.core.userdetails.User(
+                                user.getEmail(), user.getPassword(),
+                                java.util.Collections.singletonList(
+                                                new org.springframework.security.core.authority.SimpleGrantedAuthority(
+                                                                "ROLE_" + user.getRole().name()))));
+
+                return buildAuthResponse(user, jwtToken);
+        }
+
+        public void sendPasswordResetOtp(OtpRequest request) {
+                User user = userRepository.findByEmail(request.getEmail())
+                                .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "Không tìm thấy người dùng đăng ký với email này"));
+
+                otpService.generateAndSendOtp(user.getEmail(), OtpToken.OtpType.RESET_PASSWORD);
+        }
+
+        @Transactional
+        public void resetPassword(ResetPasswordRequest request) {
+                User user = userRepository.findByEmail(request.getEmail())
+                                .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "Không tìm thấy người dùng đăng ký với email này"));
+
+                otpService.verifyOtp(request.getEmail(), request.getCode(), OtpToken.OtpType.RESET_PASSWORD);
+
+                user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                userRepository.save(user);
         }
 
         public AuthResponse.UserResponse getMe() {

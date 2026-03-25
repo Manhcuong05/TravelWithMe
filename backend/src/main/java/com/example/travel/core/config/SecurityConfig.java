@@ -29,6 +29,8 @@ public class SecurityConfig {
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/api/auth/**").permitAll()
                                                 .requestMatchers("/uploads/**").permitAll()
+                                                .requestMatchers("/api/payments/webhook/**").permitAll()
+                                                .requestMatchers("/api/payments/test-email").permitAll()
                                                 .requestMatchers(org.springframework.http.HttpMethod.POST,
                                                                 "/api/upload")
                                                 .hasAnyRole("ADMIN", "CTV")

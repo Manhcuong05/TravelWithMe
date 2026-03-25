@@ -6,6 +6,7 @@ export const routes: Routes = [
     { path: "", loadComponent: () => import("./features/home/home").then(m => m.HomeComponent) },
     { path: "auth/login", loadComponent: () => import("./features/auth/login.component").then(m => m.LoginComponent) },
     { path: "auth/register", loadComponent: () => import("./features/auth/register.component").then(m => m.RegisterComponent) },
+    { path: "auth/forgot-password", loadComponent: () => import("./features/auth/forgot-password/forgot-password.component").then(m => m.ForgotPasswordComponent) },
     { path: "hotels", loadComponent: () => import("./features/catalog/hotel-list").then(m => m.HotelListComponent) },
     { path: "hotels/:id", loadComponent: () => import("./features/catalog/hotel-detail").then(m => m.HotelDetailComponent) },
     { path: "tours", loadComponent: () => import("./features/catalog/tour-list").then(m => m.TourListComponent) },

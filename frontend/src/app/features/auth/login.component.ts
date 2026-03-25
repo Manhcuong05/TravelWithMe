@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { GoogleSigninButtonModule, SocialAuthService } from '@abacritt/angularx-social-login';
@@ -21,10 +21,16 @@ import { AppValidators } from '../../core/utils/validators';
         </div>
         
         <div class="divider">
-          <span>Hoặc đăng nhập bằng Email</span>
+          <span>Hoặc</span>
         </div>
 
-        <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="auth-form">
+        <div class="mode-tabs">
+          <button type="button" [class.active]="loginMode === 'PASSWORD'" (click)="setMode('PASSWORD')">Mật Khẩu</button>
+          <button type="button" [class.active]="loginMode === 'OTP'" (click)="setMode('OTP')">Mã OTP</button>
+        </div>
+
+        <!-- MẬT KHẨU Form -->
+        <form *ngIf="loginMode === 'PASSWORD'" [formGroup]="loginForm" (ngSubmit)="onLogin()" class="auth-form">
           <div class="form-group">
             <label>Địa chỉ Email</label>
             <input 
@@ -47,12 +53,58 @@ import { AppValidators } from '../../core/utils/validators';
               <small *ngIf="loginForm.get('password')?.errors?.['required']">Mật khẩu không được để trống</small>
             </div>
           </div>
+          <div class="form-group text-right">
+             <a routerLink="/auth/forgot-password" class="forgot-link">Quên mật khẩu?</a>
+          </div>
           
           <div *ngIf="errorMessage" class="error-msg center-text">
             {{ errorMessage }}
           </div>
           
           <button type="submit" class="btn-gold w-full" [disabled]="loading">
+            {{ loading ? 'Đang đăng nhập...' : 'Đăng Nhập' }}
+          </button>
+        </form>
+
+        <!-- OTP Form -->
+        <form *ngIf="loginMode === 'OTP'" [formGroup]="otpForm" (ngSubmit)="onLoginOtp()" class="auth-form">
+          <div class="form-group">
+            <label>Địa chỉ Email</label>
+            <div class="input-action-group">
+                <input 
+                  type="email" 
+                  formControlName="email" 
+                  placeholder="email@cua-ban.com">
+                <button type="button" class="btn-action" (click)="onSendLoginOtp()" [disabled]="otpLoading || otpSent || !otpForm.get('email')?.valid">
+                  {{ otpSent ? 'Đã gửi' : 'Gửi mã' }}
+                </button>
+            </div>
+            <div class="error-msg text-left" *ngIf="isOtpInvalid('email')">
+              <small *ngIf="otpForm.get('email')?.errors?.['required']">Email không được để trống</small>
+              <small *ngIf="otpForm.get('email')?.errors?.['email']">Email không đúng định dạng</small>
+            </div>
+          </div>
+          
+          <div class="form-group" *ngIf="otpSent">
+            <label>Mã OTP (6 số)</label>
+            <input 
+              type="text" 
+              formControlName="code" 
+              maxlength="6"
+              placeholder="123456">
+            <div class="error-msg text-left" *ngIf="isOtpInvalid('code')">
+              <small *ngIf="otpForm.get('code')?.errors?.['required']">Mã OTP không được để trống</small>
+            </div>
+          </div>
+          
+          <div *ngIf="errorMessage" class="error-msg center-text">
+            {{ errorMessage }}
+          </div>
+          <div *ngIf="successMessage" class="success-msg center-text">
+            {{ successMessage }}
+          </div>
+          
+          <button *ngIf="otpSent" type="submit" class="btn-gold w-full" [disabled]="loading">
             {{ loading ? 'Đang đăng nhập...' : 'Đăng Nhập' }}
           </button>
         </form>
@@ -109,14 +161,31 @@ import { AppValidators } from '../../core/utils/validators';
       margin-top: 4px; 
       display: block;
     }
+    .success-msg { color: #10b981; font-size: 0.85rem; margin-top: 4px; display: block; }
     .text-left { text-align: left; }
+    .text-right { text-align: right; }
     .center-text { text-align: center; margin-bottom: 20px; }
+    .forgot-link { color: var(--gold-primary); font-size: 0.8rem; text-decoration: none; transition: 0.3s; }
+    .forgot-link:hover { text-decoration: underline; }
+    .mode-tabs { display: flex; gap: 10px; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 8px; }
+    .mode-tabs button { flex: 1; padding: 10px; background: transparent; border: none; color: #888; border-radius: 6px; cursor: pointer; transition: 0.3s; font-weight: 500; font-size: 0.85rem; }
+    .mode-tabs button.active { background: var(--gold-primary); color: #000; box-shadow: 0 4px 10px rgba(201, 168, 76, 0.3); }
+    .input-action-group { display: flex; gap: 10px; }
+    .input-action-group input { margin-bottom: 0; flex: 1; }
+    .btn-action { padding: 0 15px; background: #2a2a2a; border: 1px solid var(--glass-border); color: #fff; border-radius: 8px; cursor: pointer; transition: 0.3s; font-size: 0.8rem; white-space: nowrap; }
+    .btn-action:hover:not([disabled]) { background: #333; border-color: var(--gold-primary); color: var(--gold-primary); }
+    .btn-action[disabled] { opacity: 0.5; cursor: not-allowed; }
   `]
 })
 export class LoginComponent implements OnInit {
   loginForm!: FormGroup;
+  otpForm!: FormGroup;
   loading = false;
+  otpLoading = false;
+  otpSent = false;
   errorMessage = '';
+  successMessage = '';
+  loginMode: 'PASSWORD' | 'OTP' = 'PASSWORD';
 
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
@@ -127,6 +196,11 @@ export class LoginComponent implements OnInit {
     this.loginForm = this.fb.group({
       email: ['', AppValidators.email],
       password: ['', [AppValidators.password[0]]] // Only required for login
+    });
+
+    this.otpForm = this.fb.group({
+      email: ['', AppValidators.email],
+      code: ['']
     });
 
     this.socialAuthService.authState.subscribe((user: any) => {
@@ -175,6 +249,73 @@ export class LoginComponent implements OnInit {
       },
       error: (err: any) => {
         this.errorMessage = err.error?.message || 'Đã có lỗi xảy ra trong quá trình đăng nhập.';
+        this.loading = false;
+      }
+    });
+  }
+
+  setMode(mode: 'PASSWORD' | 'OTP') {
+    this.loginMode = mode;
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  isOtpInvalid(controlName: string) {
+    const control = this.otpForm.get(controlName);
+    return control && control.invalid && (control.touched || control.dirty);
+  }
+
+  onSendLoginOtp() {
+    const emailControl = this.otpForm.get('email');
+    if (!emailControl || emailControl.invalid) {
+      emailControl?.markAsTouched();
+      return;
+    }
+
+    this.otpLoading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+    
+    this.authService.sendLoginOtp(emailControl.value).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.otpSent = true;
+          this.successMessage = 'Mã OTP đã được gửi đến email của bạn.';
+          this.otpForm.get('code')?.setValidators([Validators.required]);
+          this.otpForm.get('code')?.updateValueAndValidity();
+        } else {
+          this.errorMessage = res.message || 'Lỗi gửi mã OTP.';
+        }
+        this.otpLoading = false;
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Có lỗi xảy ra. Hãy kiểm tra lại email của bạn.';
+        this.otpLoading = false;
+      }
+    });
+  }
+
+  onLoginOtp() {
+    if (this.otpForm.invalid) {
+      this.otpForm.markAllAsTouched();
+      return;
+    }
+
+    this.loading = true;
+    this.errorMessage = '';
+
+    const { email, code } = this.otpForm.value;
+    this.authService.loginWithOtp(email, code).subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.router.navigate(['/']);
+        } else {
+          this.errorMessage = res.message || 'Đăng nhập bằng OTP thất bại.';
+          this.loading = false;
+        }
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Mã OTP không hợp lệ hoặc đã hết hạn.';
         this.loading = false;
       }
     });

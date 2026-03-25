@@ -40,4 +40,27 @@ public class BookingController {
     public ApiResponse<BookingResponse> cancelBooking(@PathVariable String id) {
         return ApiResponse.success(bookingService.cancelBooking(id), "Đã hủy đơn hàng thành công");
     }
+
+    // --- ADMIN / CTV ENDPOINTS ---
+
+    @GetMapping("/all")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CTV')")
+    public ApiResponse<java.util.List<BookingResponse>> getAllBookings() {
+        return ApiResponse.success(bookingService.getAllBookings());
+    }
+
+    @PutMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('ADMIN', 'CTV')")
+    public ApiResponse<BookingResponse> updateBookingStatus(
+            @PathVariable String id, 
+            @RequestBody java.util.Map<String, String> body) {
+        String status = body.get("status");
+        if (status == null || status.trim().isEmpty()) {
+            throw new com.example.travel.core.exception.BusinessException("INVALID_STATUS", "Trạng thái không được để trống");
+        }
+        return ApiResponse.success(
+            bookingService.updateBookingStatus(id, status), 
+            "Cập nhật trạng thái đơn hàng thành công"
+        );
+    }
 }

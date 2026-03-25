@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface Column {
@@ -70,7 +70,7 @@ export interface Column {
 export class GenericMgmtComponent {
   @Input() title: string = '';
   @Input() columns: Column[] = [];
-  @Input() items = signal<any[]>([]);
+  @Input() items: Signal<any[]> = signal([]);
 
   @Output() onCreate = new EventEmitter<void>();
   @Output() onEdit = new EventEmitter<any>();

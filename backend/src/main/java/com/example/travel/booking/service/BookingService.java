@@ -40,6 +40,7 @@ public class BookingService {
     private final FlightRepository flightRepository;
     private final TourRepository tourRepository;
     private final UserRepository userRepository;
+    private final com.example.travel.core.service.EmailService emailService;
 
     @Transactional
     public BookingResponse createBooking(BookingRequest request) {
@@ -257,6 +258,41 @@ public class BookingService {
         }
 
         return mapToResponse(bookingRepository.save(booking));
+    }
+
+    @Transactional(readOnly = true)
+    public List<BookingResponse> getAllBookings() {
+        return bookingRepository.findAll().stream()
+                .sorted((b1, b2) -> b2.getCreatedAt().compareTo(b1.getCreatedAt()))
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public BookingResponse updateBookingStatus(String bookingId, String statusObj) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new BusinessException("BOOKING_NOT_FOUND", "Không tìm thấy đơn hàng"));
+
+        try {
+            Booking.BookingStatus newStatus = Booking.BookingStatus.valueOf(statusObj.toUpperCase());
+            
+            // Check if status is actually changing to CONFIRMED
+            boolean isJustConfirmed = (booking.getStatus() != Booking.BookingStatus.CONFIRMED) 
+                                      && (newStatus == Booking.BookingStatus.CONFIRMED);
+            
+            booking.setStatus(newStatus);
+            Booking savedBooking = bookingRepository.save(booking);
+
+            if (isJustConfirmed) {
+                userRepository.findById(booking.getUserId()).ifPresent(user -> {
+                    emailService.sendBookingConfirmation(savedBooking, user);
+                });
+            }
+
+            return mapToResponse(savedBooking);
+        } catch (IllegalArgumentException e) {
+            throw new BusinessException("INVALID_STATUS", "Trạng thái không hợp lệ");
+        }
     }
 
     private BookingResponse mapToResponse(Booking booking) {

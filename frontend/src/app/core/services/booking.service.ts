@@ -94,6 +94,10 @@ export class BookingService {
         return this.http.get<ApiResponse<BookingResponse[]>>(this.API_URL);
     }
 
+    getAllBookings(): Observable<ApiResponse<BookingResponse[]>> {
+        return this.http.get<ApiResponse<BookingResponse[]>>(`${this.API_URL}/all`);
+    }
+
     getBooking(id: string): Observable<ApiResponse<BookingResponse>> {
         return this.http.get<ApiResponse<BookingResponse>>(`${this.API_URL}/${id}`);
     }

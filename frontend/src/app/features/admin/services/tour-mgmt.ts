@@ -142,7 +142,8 @@ export class TourMgmtComponent implements OnInit {
         const formValue = this.tourForm.value;
         const requestData = {
             ...formValue,
-            highlights: formValue.highlights ? formValue.highlights.split(',').map(s => s.trim()) : []
+            // Backend expects single string for highlights in TourRequest
+            highlights: formValue.highlights ? formValue.highlights.trim() : ''
         };
 
         const action = this.editingTour()

@@ -61,6 +61,33 @@ export class AuthService {
         );
     }
 
+    sendLoginOtp(email: string): Observable<ApiResponse<void>> {
+        return this.http.post<ApiResponse<void>>(`${this.AUTH_URL}/send-login-otp`, { email });
+    }
+
+    loginWithOtp(email: string, code: string): Observable<ApiResponse<AuthResponse>> {
+        return this.http.post<ApiResponse<AuthResponse>>(`${this.AUTH_URL}/login-otp`, { email, code }).pipe(
+            tap(res => {
+                if (res.success && res.data.accessToken) {
+                    localStorage.setItem(this.TOKEN_KEY, res.data.accessToken);
+                    if (res.data.user) {
+                        localStorage.setItem(this.USER_KEY, JSON.stringify(res.data.user));
+                        this.currentUser.set(res.data.user);
+                    }
+                    this.isAuthenticated.set(true);
+                }
+            })
+        );
+    }
+
+    sendPasswordResetOtp(email: string): Observable<ApiResponse<void>> {
+        return this.http.post<ApiResponse<void>>(`${this.AUTH_URL}/forgot-password`, { email });
+    }
+
+    resetPassword(data: any): Observable<ApiResponse<void>> {
+        return this.http.post<ApiResponse<void>>(`${this.AUTH_URL}/reset-password`, data);
+    }
+
     register(userData: any): Observable<ApiResponse<any>> {
         return this.http.post<ApiResponse<any>>(`${this.AUTH_URL}/register`, userData);
     }

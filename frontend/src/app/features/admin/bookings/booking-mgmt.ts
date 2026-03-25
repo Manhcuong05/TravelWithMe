@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GenericMgmtComponent, Column } from '../shared/generic-mgmt';
@@ -9,10 +9,17 @@ import { BookingService, BookingResponse } from '../../../core/services/booking.
     standalone: true,
     imports: [CommonModule, GenericMgmtComponent, FormsModule],
     template: `
+    <div class="filter-tabs mb-4 flex gap-2">
+      <button class="filter-btn" [class.active]="activeFilter() === 'ALL'" (click)="activeFilter.set('ALL')">Tất Cả</button>
+      <button class="filter-btn" [class.active]="activeFilter() === 'TOUR'" (click)="activeFilter.set('TOUR')">Tour Du Lịch</button>
+      <button class="filter-btn" [class.active]="activeFilter() === 'FLIGHT'" (click)="activeFilter.set('FLIGHT')">Vé Máy Bay</button>
+      <button class="filter-btn" [class.active]="activeFilter() === 'HOTEL'" (click)="activeFilter.set('HOTEL')">Khách Sạn</button>
+    </div>
+
     <app-generic-mgmt
       [title]="'Quản lý Đơn hàng'"
       [columns]="columns"
-      [items]="bookings"
+      [items]="filteredBookings"
       (onCreate)="handleCreate()"
       (onEdit)="openDetail($event)"
       (onDelete)="handleDelete($event)"
@@ -41,10 +48,10 @@ import { BookingService, BookingResponse } from '../../../core/services/booking.
             <label>Cập nhật trạng thái:</label>
             <select [(ngModel)]="newStatus" class="status-select">
               <option value="PENDING">Chờ xử lý (PENDING)</option>
+              <option value="AWAITING_PAYMENT">Chờ thanh toán (AWAITING_PAYMENT)</option>
               <option value="CONFIRMED">Đã xác nhận (CONFIRMED)</option>
-              <option value="PAID">Đã thanh toán (PAID)</option>
               <option value="CANCELLED">Đã hủy (CANCELLED)</option>
-              <option value="COMPLETED">Hoàn thành (COMPLETED)</option>
+              <option value="REFUNDED">Đã hoàn tiền (REFUNDED)</option>
             </select>
           </div>
         </div>
@@ -72,23 +79,42 @@ import { BookingService, BookingResponse } from '../../../core/services/booking.
     .status-update { margin-top: 20px; }
     .status-update label { display: block; font-size: 0.85rem; color: #94a3b8; margin-bottom: 10px; }
     .status-select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; color: white; outline: none; }
+    .status-select option { background: #1a1a1a; color: white; }
     
     .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 30px; }
     .modal-actions button { width: 100%; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; }
     .mt-6 { margin-top: 24px; }
+    
+    .filter-tabs { border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
+    .filter-btn { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); color: #94a3b8; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+    .filter-btn:hover { background: rgba(255,255,255,0.05); color: #fff; }
+    .filter-btn.active { background: rgba(212,175,55,0.15); border-color: rgba(212,175,55,0.4); color: var(--gold-primary); }
+    .flex { display: flex; }
+    .gap-2 { gap: 0.5rem; }
+    .mb-4 { margin-bottom: 1rem; }
   `]
 })
 export class BookingMgmtComponent implements OnInit {
     private bookingService = inject(BookingService);
 
-    bookings = signal<BookingResponse[]>([]);
+    bookings = signal<any[]>([]);
     showDetail = signal(false);
     selectedBooking = signal<BookingResponse | null>(null);
     newStatus = '';
     loading = signal(false);
 
+    activeFilter = signal<'ALL' | 'TOUR' | 'FLIGHT' | 'HOTEL'>('ALL');
+
+    filteredBookings = computed(() => {
+        const filter = this.activeFilter();
+        const all = this.bookings();
+        if (filter === 'ALL') return all;
+        return all.filter(b => b.rawServiceType === filter);
+    });
+
     columns: Column[] = [
         { key: 'id', label: 'Mã đơn' },
+        { key: 'serviceTypeLabel', label: 'Loại Dịch Vụ' },
         { key: 'totalAmount', label: 'Tổng tiền', type: 'price' },
         { key: 'status', label: 'Trạng thái', type: 'badge' },
         { key: 'createdAt', label: 'Ngày đặt' }
@@ -99,9 +125,17 @@ export class BookingMgmtComponent implements OnInit {
     }
 
     loadBookings() {
-        this.bookingService.getMyBookings().subscribe(res => {
+        this.bookingService.getAllBookings().subscribe(res => {
             if (res.success && res.data) {
-                this.bookings.set(res.data);
+                const mapped = res.data.map(b => {
+                    const type = b.items?.length > 0 ? b.items[0].serviceType : 'UNKNOWN';
+                    return {
+                        ...b,
+                        rawServiceType: type,
+                        serviceTypeLabel: type === 'HOTEL' ? 'Khách sạn' : (type === 'TOUR' ? 'Tour' : (type === 'FLIGHT' ? 'Vé Máy Bay' : 'Khác'))
+                    };
+                });
+                this.bookings.set(mapped);
             }
         });
     }
@@ -129,16 +163,7 @@ export class BookingMgmtComponent implements OnInit {
             },
             error: (err) => {
                 console.error('Error updating status:', err);
-                // Note: Generic updateStatus might not exist on backend yet, 
-                // fallback to cancel if status is CANCELLED
-                if (this.newStatus === 'CANCELLED') {
-                    this.bookingService.cancelBooking(this.selectedBooking()!.id).subscribe(() => {
-                        this.loadBookings();
-                        this.showDetail.set(false);
-                    });
-                } else {
-                    alert('Tính năng cập nhật trạng thái này đang được hoàn thiện ở phía backend.');
-                }
+                alert(err.error?.message || 'Có lỗi xảy ra khi cập nhật trạng thái');
             },
             complete: () => this.loading.set(false)
         });

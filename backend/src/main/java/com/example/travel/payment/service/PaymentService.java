@@ -4,6 +4,7 @@ import com.example.travel.booking.entity.Booking;
 import com.example.travel.booking.repository.BookingRepository;
 import com.example.travel.identity.repository.UserRepository;
 import com.example.travel.core.exception.BusinessException;
+import com.example.travel.core.service.EmailService;
 import com.example.travel.payment.dto.PaymentInitResponse;
 import com.example.travel.payment.entity.Transaction;
 import com.example.travel.payment.repository.TransactionRepository;
@@ -17,9 +18,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class PaymentService {
 
-        private final BookingRepository bookingRepository;
-        private final TransactionRepository transactionRepository;
-        private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
+    private final TransactionRepository transactionRepository;
+    private final UserRepository userRepository;
+    private final EmailService emailService;
 
         @Transactional
         public PaymentInitResponse initializePayment(String bookingId) {
@@ -88,7 +90,12 @@ public class PaymentService {
                                 .orElseThrow(() -> new BusinessException("BOOKING_NOT_FOUND",
                                                 "Đơn hàng liên quan không tồn tại"));
 
-                booking.setStatus(Booking.BookingStatus.CONFIRMED);
-                bookingRepository.save(booking);
-        }
+        booking.setStatus(Booking.BookingStatus.CONFIRMED);
+        bookingRepository.save(booking);
+
+        // Send confirmation email asynchronously
+        userRepository.findById(booking.getUserId()).ifPresent(user -> {
+            emailService.sendBookingConfirmation(booking, user);
+        });
+    }
 }
