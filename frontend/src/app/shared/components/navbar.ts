@@ -8,242 +8,277 @@ import { AuthService } from '../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive],
   template: `
-    <nav class="glass-effect navbar">
-      <div class="container">
-        <a routerLink="/" class="logo luxury-font">TravelWithMe</a>
+    <nav class="navbar-pro" [class.scrolled]="isScrolled">
+      <div class="navbar-glass"></div>
+      <div class="container-pro">
+        <a routerLink="/" class="logo-pro luxury-font">
+          <span class="logo-text">TravelWithMe</span>
+          <div class="logo-underline"></div>
+        </a>
         
-        <ul class="nav-links">
-          <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Khám Phá</a></li>
-          <li><a routerLink="/itinerary" routerLinkActive="active">Lên Kế Hoạch AI</a></li>
-          <li><a routerLink="/hotels" routerLinkActive="active">Khách Sạn</a></li>
-          <li><a routerLink="/tours" routerLinkActive="active">Tour Du Lịch</a></li>
-          
-          <li class="dropdown" (mouseenter)="showDropdown = true" (mouseleave)="showDropdown = false">
-            <a href="javascript:void(0)" class="dropdown-toggle" [class.active]="showDropdown">
-              Khác <span class="chevron">▾</span>
+        <ul class="nav-links-pro">
+          <li>
+            <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+              Khám Phá
+              <div class="indicator"></div>
             </a>
-            <ul class="luxury-dropdown" *ngIf="showDropdown">
-              <li><a routerLink="/flights" routerLinkActive="active"><i class="icon">✈️</i> Vé Máy Bay</a></li>
-              <li><a routerLink="/pois" routerLinkActive="active"><i class="icon">📍</i> Địa Điểm (POI)</a></li>
-            </ul>
+          </li>
+          <li>
+            <a routerLink="/itinerary" routerLinkActive="active">
+              Lên Kế Hoạch AI
+              <div class="indicator"></div>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/hotels" routerLinkActive="active">
+              Khách Sạn
+              <div class="indicator"></div>
+            </a>
+          </li>
+          <li>
+            <a routerLink="/tours" routerLinkActive="active">
+              Tour Du Lịch
+              <div class="indicator"></div>
+            </a>
           </li>
           
-          <li *ngIf="authService.currentUser()?.role === 'ADMIN' || authService.currentUser()?.role === 'CTV'">
-            <a routerLink="/management" class="mgmt-link">Admin ⚡</a>
+          <li class="dropdown-pro" 
+              (mouseenter)="onKhacEnter()" 
+              (mouseleave)="onKhacLeave()">
+            <a href="javascript:void(0)" 
+               class="dropdown-toggle-pro" 
+               (click)="toggleKhacPin($event)" 
+               [class.active]="showDropdown"
+               [class.pinned]="isKhacPinned">
+              Khác <i class="fas fa-chevron-down chevron-pro"></i>
+            </a>
+            <ul class="luxury-dropdown-pro" *ngIf="showDropdown" (click)="$event.stopPropagation()">
+              <li><a routerLink="/flights" (click)="closeMenus()"><i class="fas fa-plane"></i> Chuyến Bay</a></li>
+              <li><a routerLink="/pois" (click)="closeMenus()"><i class="fas fa-map-marker-alt"></i> Điểm Đến</a></li>
+            </ul>
           </li>
         </ul>
 
-        <div class="auth-actions">
+        <div class="actions-pro">
+          <ng-container *ngIf="authService.currentUser()?.role === 'ADMIN' || authService.currentUser()?.role === 'CTV'">
+            <a routerLink="/management" class="btn-mgmt-pro">
+              Admin <i class="fas fa-bolt-lightning bolt-pro"></i>
+            </a>
+          </ng-container>
+
+          <div class="divider-vertical"></div>
+
           <ng-container *ngIf="authService.isAuthenticated(); else authButtons">
-            <div class="user-menu-wrapper">
-              <div class="user-avatar-btn" (click)="toggleUserMenu($event)">
-                <img [src]="authService.currentUser()?.avatarUrl || 'https://ui-avatars.com/api/?name=' + authService.currentUser()?.fullName + '&background=D4AF37&color=fff'" 
-                     [alt]="authService.currentUser()?.fullName"
-                     class="avatar-img">
-                <span class="user-name-scroll">{{ authService.currentUser()?.fullName }}</span>
+            <div class="user-menu-pro" 
+                 (mouseenter)="onUserEnter()" 
+                 (mouseleave)="onUserLeave()">
+              <div class="avatar-pedestal" 
+                   (click)="toggleUserPin($event)"
+                   [class.pinned]="isUserPinned">
+                <div class="avatar-ring">
+                  <img [src]="authService.currentUser()?.avatarUrl || 'https://ui-avatars.com/api/?name=' + authService.currentUser()?.fullName + '&background=D4AF37&color=fff'" 
+                       [alt]="authService.currentUser()?.fullName"
+                       class="avatar-pro">
+                </div>
+                <div class="name-badge">{{ authService.currentUser()?.fullName }}</div>
               </div>
               
-              <ul class="user-dropdown-menu" *ngIf="showUserMenu" (click)="$event.stopPropagation()">
-                <li class="menu-header">
-                  <span class="user-email">{{ authService.currentUser()?.email }}</span>
+              <ul class="menu-dropdown-pro" *ngIf="showUserMenu" (click)="$event.stopPropagation()">
+                <li class="user-header">
+                  <span class="email-muted">{{ authService.currentUser()?.email }}</span>
                 </li>
-                <div class="divider"></div>
-                <li><a routerLink="/profile"><i class="icon">👤</i> Thông tin cá nhân</a></li>
-                <li><a routerLink="/favorites"><i class="icon">⭐</i> Chuyến đi yêu thích</a></li>
-                <li><a routerLink="/bookings"><i class="icon">📦</i> Đơn hàng của tôi</a></li>
-                <div class="divider"></div>
-                <li><a (click)="logout()" class="logout-item"><i class="icon">🚪</i> Đăng xuất</a></li>
+                <div class="menu-divider"></div>
+                <li><a routerLink="/profile" (click)="closeMenus()"><i class="fas fa-user-circle"></i> Hồ sơ của tôi</a></li>
+                <li><a routerLink="/favorites" (click)="closeMenus()"><i class="fas fa-heart"></i> Yêu thích</a></li>
+                <li><a routerLink="/bookings" (click)="closeMenus()"><i class="fas fa-shopping-bag"></i> Đơn hàng</a></li>
+                <div class="menu-divider"></div>
+                <li><a (click)="logout()" class="logout-pro"><i class="fas fa-power-off"></i> Đăng xuất</a></li>
               </ul>
             </div>
           </ng-container>
           <ng-template #authButtons>
-            <a routerLink="/auth/login" class="login-link">Đăng Nhập</a>
-            <a routerLink="/auth/register" class="btn-gold">Đăng Ký Ngay</a>
+            <a routerLink="/auth/login" class="link-login-pro">Đăng Nhập</a>
+            <a routerLink="/auth/register" class="btn-gold-pro">Đăng Ký</a>
           </ng-template>
         </div>
       </div>
     </nav>
   `,
   styles: [`
-    .navbar {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90%;
-      max-width: 1200px;
-      z-index: 1000;
-      padding: 15px 30px;
-      display: flex;
-      justify-content: center;
-    }
-    .container {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .logo {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--gold-primary);
-      text-decoration: none;
-      letter-spacing: 1px;
-    }
-    .nav-links {
-      display: flex;
-      list-style: none;
-      gap: 30px;
-    }
-    .nav-links a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: var(--transition-smooth);
-    }
-    .nav-links a:hover, .nav-links a.active {
-      color: var(--gold-primary);
-    }
-    .auth-actions {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-    .login-link {
-      color: var(--text-primary);
-      text-decoration: none;
-      font-size: 0.9rem;
-    }
-    .mgmt-link {
-        color: var(--gold-secondary) !important;
-        font-weight: 700 !important;
-        border: 1.5px solid rgba(212,175,55,0.4);
-        padding: 6px 14px;
-        border-radius: 20px;
-        background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(212,175,55,0.05));
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        font-size: 0.85rem;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-    }
-    .mgmt-link:hover {
-        background: rgba(212,175,55,0.2);
-        border-color: var(--gold-primary);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(212,175,55,0.2);
-    }
-
-    /* Fix Dropdown Positioning */
-    .dropdown, .user-menu-wrapper { 
-      position: relative !important;
-      display: inline-block;
-    }
-
-    /* Common Luxury Dropdown Styles */
-    .luxury-dropdown, .user-dropdown-menu {
-      position: absolute !important;
-      top: 100%;
-      left: 0 !important;
-      right: auto !important;
-      background: rgba(10, 10, 12, 0.95);
-      backdrop-filter: blur(25px);
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      border-radius: 18px;
-      padding: 10px 0;
-      min-width: 220px;
-      list-style: none;
-      box-shadow: 0 25px 60px rgba(0,0,0,0.8);
-      animation: dropdownEntry 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      z-index: 1100;
-    }
-
-    .luxury-dropdown { left: 0; right: auto; }
-
-    .luxury-dropdown a, .user-dropdown-menu a {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 12px 22px;
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-      text-decoration: none;
-      transition: all 0.25s ease;
-      cursor: pointer;
-      position: relative;
-    }
-
-    .luxury-dropdown a:hover, .user-dropdown-menu a:hover {
-      background: rgba(212,175,55,0.12);
-      color: var(--gold-primary);
-      padding-left: 28px;
-    }
-
-    .luxury-dropdown a::before, .user-dropdown-menu a::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 3px;
-      height: 0;
-      background: var(--gold-primary);
-      transition: height 0.3s ease;
-    }
-
-    .luxury-dropdown a:hover::before, .user-dropdown-menu a:hover::before {
-      height: 60%;
-    }
-
-    /* User Menu Styles */
-    .user-avatar-btn {
-      display: flex; align-items: center; gap: 12px; cursor: pointer;
-      padding: 6px 16px; border-radius: 35px; background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(212, 175, 55, 0.2); transition: all 0.3s ease;
-    }
-    .user-avatar-btn:hover { 
-      background: rgba(255,255,255,0.07); 
-      border-color: var(--gold-primary);
-      box-shadow: 0 0 15px rgba(212, 175, 55, 0.1);
-    }
-    .avatar-img { 
-      width: 34px; height: 34px; border-radius: 50%; 
-      object-fit: cover; border: 2px solid var(--gold-primary);
-      box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
-    }
-    .user-name-scroll { font-size: 0.9rem; font-weight: 600; color: var(--text-primary); }
-
-    .menu-header { padding: 10px 22px 14px; }
-    .user-email { font-size: 0.8rem; color: var(--gold-secondary); opacity: 0.8; }
-    .divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(212,175,55,0.2), transparent); margin: 8px 0; }
+    :host { --nav-h: 80px; --gold: #D4AF37; --gold-light: #FFD700; --bg-glass: rgba(2, 6, 23, 0.7); }
     
-    .logout-item:hover { color: #ff5555 !important; background: rgba(255, 85, 85, 0.08) !important; }
-    .icon { font-style: normal; font-size: 1.2rem; filter: sepia(1) saturate(2) hue-rotate(10deg); }
-
-    @keyframes dropdownEntry { 
-      from { opacity: 0; transform: translateY(15px) scale(0.95); } 
-      to { opacity: 1; transform: translateY(0) scale(1); } 
+    .navbar-pro {
+      position: fixed; top: 25px; left: 50%; transform: translateX(-50%);
+      width: 95%; max-width: 1400px; height: var(--nav-h); z-index: 2000;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    .navbar-glass { 
+      position: absolute; inset: 0; border-radius: 40px;
+      background: var(--bg-glass); backdrop-filter: blur(30px) saturate(180%);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,255,255,0.02);
+      z-index: -1;
+    }
+    .navbar-pro.scrolled { top: 0; width: 100%; max-width: none; border-radius: 0; }
+    .navbar-pro.scrolled .navbar-glass { border-radius: 0; border-top: none; border-left: none; border-right: none; }
+
+    .container-pro { height: 100%; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; }
+
+    .logo-pro { text-decoration: none; position: relative; display: flex; flex-direction: column; }
+    .logo-text { font-size: 1.6rem; color: var(--gold); letter-spacing: 2px; font-weight: 800; text-shadow: 0 0 15px rgba(212,175,55,0.3); }
+    .logo-underline { height: 2px; width: 40%; background: linear-gradient(90deg, var(--gold), transparent); margin-top: -2px; }
+
+    .nav-links-pro { display: flex; list-style: none; gap: 35px; align-items: center; }
+    .nav-links-pro a { 
+      color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.95rem; font-weight: 600; 
+      position: relative; padding: 10px 0; transition: all 0.3s;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    .nav-links-pro a:hover, .nav-links-pro a.active { color: #fff; }
+    .indicator { position: absolute; bottom: 0; left: 50%; width: 0; height: 3px; background: var(--gold); transform: translateX(-50%); border-radius: 10px; transition: 0.3s; box-shadow: 0 0 10px var(--gold); }
+    .nav-links-pro a:hover .indicator, .nav-links-pro a.active .indicator { width: 100%; }
+
+    .dropdown-pro { position: relative; }
+    .dropdown-toggle-pro { display: flex; align-items: center; gap: 8px; }
+    .chevron-pro { font-size: 0.7rem; color: var(--gold); transition: 0.3s; }
+    .dropdown-toggle-pro:hover .chevron-pro { transform: rotate(180deg); }
+
+    .luxury-dropdown-pro {
+      position: absolute; top: 120%; left: 0; background: rgba(10, 10, 12, 0.98); 
+      backdrop-filter: blur(20px); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 18px;
+      min-width: 220px; padding: 12px 0; box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+      animation: floatIn 0.4s ease forwards; list-style: none; margin: 0;
+    }
+    .luxury-dropdown-pro a { display: flex; align-items: center; gap: 12px; padding: 12px 25px; color: #94a3b8; font-size: 0.9rem; }
+    .luxury-dropdown-pro a:hover { background: rgba(212,175,55,0.1); color: var(--gold); padding-left: 30px; }
+
+    .actions-pro { display: flex; align-items: center; gap: 25px; }
+    .btn-mgmt-pro { 
+      padding: 8px 18px; border-radius: 30px; border: 1px solid rgba(212,175,55,0.3);
+      background: linear-gradient(135deg, rgba(212,175,55,0.15), transparent);
+      color: var(--gold); font-weight: 800; font-size: 0.85rem; text-decoration: none;
+      display: flex; align-items: center; gap: 8px; transition: 0.3s;
+      animation: goldBreath 3s infinite;
+    }
+    .btn-mgmt-pro:hover { background: var(--gold); color: #000; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(212,175,55,0.2); }
+    
+    .divider-vertical { width: 1px; height: 30px; background: rgba(255,255,255,0.1); }
+
+    .avatar-pedestal { 
+      display: flex; align-items: center; gap: 12px; cursor: pointer;
+      background: rgba(255,255,255,0.03); padding: 5px 15px 5px 5px; border-radius: 40px;
+      border: 1px solid rgba(255,255,255,0.05); transition: 0.3s;
+    }
+    .avatar-pedestal:hover { background: rgba(255,255,255,0.08); border-color: var(--gold); }
+    .avatar-ring { 
+      width: 42px; height: 42px; border-radius: 50%; padding: 2px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      box-shadow: 0 0 15px rgba(212,175,55,0.4);
+    }
+    .avatar-pro { width: 100%; height: 100%; border-radius: 50%; border: 2px solid #000; object-fit: cover; }
+    .name-badge { color: #fff; font-weight: 700; font-size: 0.9rem; }
+
+    .menu-dropdown-pro {
+      position: absolute; top: 120%; right: 0; background: rgba(10, 10, 12, 0.98);
+      backdrop-filter: blur(25px); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 20px;
+      min-width: 260px; padding: 15px 0; box-shadow: 0 30px 60px rgba(0,0,0,0.9);
+      animation: floatIn 0.4s ease forwards; list-style: none; margin: 0;
+    }
+    .user-header { padding: 0 25px 10px; }
+    .email-muted { font-size: 0.75rem; color: #64748b; font-family: 'JetBrains Mono', monospace; }
+    .menu-divider { height: 1px; background: rgba(255,255,255,0.05); margin: 10px 0; }
+    .menu-dropdown-pro a { 
+      display: flex; align-items: center; gap: 15px; padding: 12px 25px;
+      color: #94a3b8; text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: 0.3s;
+    }
+    .menu-dropdown-pro a:hover { color: #fff; background: rgba(255,255,255,0.03); }
+    .menu-dropdown-pro a i { color: var(--gold); font-size: 1.1rem; }
+    .logout-pro:hover { color: #f43f5e !important; }
+
+    .link-login-pro { color: #fff; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: 0.3s; }
+    .link-login-pro:hover { color: var(--gold); }
+
+    .btn-gold-pro {
+      background: var(--gold); color: #000; padding: 12px 25px; border-radius: 30px;
+      font-weight: 800; text-decoration: none; font-size: 0.85rem; letter-spacing: 1px;
+      transition: 0.3s; box-shadow: 0 10px 20px rgba(212,175,55,0.2);
+    }
+    .btn-gold-pro:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(212,175,55,0.4); background: var(--gold-light); }
+
+    .dropdown-toggle-pro.pinned, .avatar-pedestal.pinned { 
+      border-color: var(--gold) !important; 
+      background: rgba(212,175,55,0.1) !important;
+      filter: brightness(1.2);
+    }
+
+    @keyframes floatIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes goldBreath { 0%, 100% { box-shadow: 0 0 5px rgba(212,175,55,0.2); } 50% { box-shadow: 0 0 20px rgba(212,175,55,0.4); } }
   `]
 })
 export class NavbarComponent {
   authService = inject(AuthService);
-  showDropdown = false;
-  showUserMenu = false;
+  isScrolled = false;
 
-  toggleUserMenu(event: Event) {
+  // Dropdown States
+  showDropdown = false;
+  isKhacPinned = false;
+  
+  showUserMenu = false;
+  isUserPinned = false;
+
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    this.isScrolled = window.scrollY > 20;
+  }
+
+  // Khác Dropdown Logic
+  onKhacEnter() {
+    this.showDropdown = true;
+  }
+
+  onKhacLeave() {
+    if (!this.isKhacPinned) {
+      this.showDropdown = false;
+    }
+  }
+
+  toggleKhacPin(event: Event) {
     event.stopPropagation();
-    this.showUserMenu = !this.showUserMenu;
+    this.isKhacPinned = !this.isKhacPinned;
+    this.showDropdown = true;
+    this.showUserMenu = false;
+    this.isUserPinned = false;
+  }
+
+  // User Menu Logic
+  onUserEnter() {
+    this.showUserMenu = true;
+  }
+
+  onUserLeave() {
+    if (!this.isUserPinned) {
+      this.showUserMenu = false;
+    }
+  }
+
+  toggleUserPin(event: Event) {
+    event.stopPropagation();
+    this.isUserPinned = !this.isUserPinned;
+    this.showUserMenu = true;
+    this.showDropdown = false;
+    this.isKhacPinned = false;
   }
 
   @HostListener('document:click')
-  closeUserMenu() {
+  closeMenus() {
     this.showUserMenu = false;
+    this.isUserPinned = false;
+    this.showDropdown = false;
+    this.isKhacPinned = false;
   }
 
   logout() {
     this.authService.logout();
-    this.showUserMenu = false;
+    this.closeMenus();
   }
 }
