@@ -104,9 +104,16 @@ export class AuthService {
             tap(res => {
                 if (res.success) {
                     this.currentUser.set(res.data);
+                    localStorage.setItem(this.USER_KEY, JSON.stringify(res.data));
                 }
             })
         );
+    }
+
+    uploadAvatar(file: File): Observable<ApiResponse<string>> {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.post<ApiResponse<string>>('/api/upload', formData);
     }
 
     getToken(): string | null {
