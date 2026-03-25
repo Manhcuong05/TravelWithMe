@@ -60,6 +60,7 @@ export interface POI {
     region?: string;
     bestTimeToVisit?: string;
     tips?: string;
+    handbookJson?: string;
 }
 
 export type PointOfInterest = POI;
@@ -140,5 +141,11 @@ export class CatalogService {
         const formData = new FormData();
         formData.append('file', file);
         return this.http.post<ApiResponse<string>>('/api/upload', formData);
+    }
+
+    generateHandbook(poiName: string, city: string): Observable<ApiResponse<string>> {
+        return this.http.get<ApiResponse<string>>(`/api/catalog/ai/generate-handbook`, {
+            params: { poiName, city }
+        });
     }
 }

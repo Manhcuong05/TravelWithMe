@@ -215,6 +215,10 @@ export class HotelDetailComponent implements OnInit {
         if (res.success) {
           this.router.navigate(['/bookings', res.data.id]);
         }
+      },
+      error: (err) => {
+        const errorMsg = err.error?.message || 'Có lỗi xảy ra khi đặt phòng. Vui lòng thử lại.';
+        alert(errorMsg);
       }
     });
   }

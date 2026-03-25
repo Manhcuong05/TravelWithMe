@@ -199,7 +199,8 @@ export class TourDetailComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Failed to create tour booking', err);
+        const errorMsg = err.error?.message || 'Có lỗi xảy ra khi đặt tour. Vui lòng thử lại.';
+        alert(errorMsg);
       }
     });
   }

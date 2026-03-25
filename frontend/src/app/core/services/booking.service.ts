@@ -108,8 +108,6 @@ export class BookingService {
 
     // New for management
     updateStatus(id: string, status: string): Observable<ApiResponse<any>> {
-        // Assuming there might be a status endpoint or similar. 
-        // If not, we use this as a placeholder for future backend development.
         return this.http.put<ApiResponse<any>>(`${this.API_URL}/${id}/status`, { status });
     }
 }

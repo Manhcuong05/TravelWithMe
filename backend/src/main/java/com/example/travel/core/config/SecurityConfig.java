@@ -28,6 +28,8 @@ public class SecurityConfig {
                                 .csrf(AbstractHttpConfigurer::disable)
                                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers("/api/auth/**").permitAll()
+                                                .requestMatchers("/ws-chat/**").permitAll()
+                                                .requestMatchers("/api/chat/**").permitAll()
                                                 .requestMatchers("/uploads/**").permitAll()
                                                 .requestMatchers("/api/payments/webhook/**").permitAll()
                                                 .requestMatchers("/api/payments/test-email").permitAll()

@@ -51,7 +51,9 @@ public class Booking {
         PENDING,
         AWAITING_PAYMENT,
         CONFIRMED,
+        PAID,
         CANCELLED,
-        REFUNDED
+        REFUNDED,
+        COMPLETED
     }
 }

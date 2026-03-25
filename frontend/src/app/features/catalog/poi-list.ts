@@ -1,130 +1,288 @@
-import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal, computed, effect, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CatalogService, POI } from '../../core/services/catalog.service';
+import { gsap } from 'gsap';
 
 @Component({
   selector: 'app-poi-list',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <!-- Feature Hero Section -->
-    <section class="guide-hero animate-fade-in" *ngIf="featuredPoi()">
-      <div class="hero-bg" [style.backgroundImage]="'url(' + extractImage(featuredPoi()!) + ')'"></div>
-      <div class="hero-overlay"></div>
-      <div class="hero-content container">
-        <span class="trend-tag">Điểm đến nổi bật</span>
-        <h1 class="luxury-font">{{ featuredPoi()?.name }}</h1>
-        <p class="hero-desc">{{ truncateDesc(featuredPoi()?.description, 180) }}</p>
-        <div class="hero-meta" *ngIf="featuredPoi() as p">
-          <span *ngIf="p.bestTimeToVisit"><i class="fas fa-calendar-alt"></i> {{ p.bestTimeToVisit }}</span>
-          <span *ngIf="p.rating"><i class="fas fa-star text-gold"></i> {{ p.rating }} / 5.0</span>
-          <span><i class="fas fa-map-marker-alt"></i> {{ p.city }}</span>
+    <!-- Feature Hero Carousel - Pro Max Edition -->
+    <section class="guide-hero animate-fade-in" *ngIf="featuredPois().length > 0" (mouseenter)="stopTimer()" (mouseleave)="startTimer()">
+      <div class="slides-container">
+        <div *ngFor="let poi of featuredPois(); let i = index" 
+             class="slide" 
+             [class.active]="i === activeIndex()">
+          <div class="hero-bg" [style.backgroundImage]="'url(' + extractImage(poi) + ')'"></div>
+          <div class="hero-overlay-complex"></div>
+          
+          <div class="hero-content container">
+            <div class="text-content">
+              <span class="trend-tag">Điểm đến nổi bật</span>
+              <h1 class="luxury-font hero-title">{{ poi.name }}</h1>
+              <p class="hero-desc">{{ truncateDesc(poi.description, 180) }}</p>
+              
+              <div class="hero-meta-grid">
+                <div class="meta-item">
+                  <i class="fas fa-calendar-alt icon-gold"></i>
+                  <div>
+                    <label>Mùa đẹp nhất</label>
+                    <span>{{ poi.bestTimeToVisit || 'Quanh năm' }}</span>
+                  </div>
+                </div>
+                <div class="meta-item">
+                  <i class="fas fa-star icon-gold"></i>
+                  <div>
+                    <label>Đánh giá</label>
+                    <span>{{ poi.rating || '5.0' }} / 5.0</span>
+                  </div>
+                </div>
+                <div class="meta-item">
+                  <i class="fas fa-map-marker-alt icon-gold"></i>
+                  <div>
+                    <label>Thành phố</label>
+                    <span>{{ poi.city }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="hero-actions mt-40">
+                <button class="btn-pro-gold" (click)="openDetail(poi)"> 
+                  <span>Khám phá bài viết</span>
+                  <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-        <button class="btn-gold mt-30" (click)="openDetail(featuredPoi()!)">Khám Phá Bài Viết</button>
+      </div>
+
+      <!-- Pro Thumbnail Stack -->
+      <div class="thumbnail-stack">
+        <div *ngFor="let poi of getUpcomingPois(); let i = index" 
+             class="thumb-card-pro" 
+             (click)="goToSlideByPoi(poi)">
+          <div class="thumb-img-pro" [style.backgroundImage]="'url(' + extractImage(poi) + ')'"></div>
+          <div class="thumb-glass"></div>
+          <div class="thumb-label">
+            <span class="city">{{ poi.city }}</span>
+            <h4>{{ poi.name }}</h4>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pro Hero Utils -->
+      <div class="hero-footer container">
+        <div class="indicator-pro">
+          <div class="numbers">
+            <span class="active-num">{{ padZero(activeIndex() + 1) }}</span>
+            <span class="divider">/</span>
+            <span class="total-num">{{ padZero(featuredPois().length) }}</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-bar-pro" [style.width.%]="((activeIndex() + 1) / featuredPois().length) * 100"></div>
+          </div>
+        </div>
+        
+        <div class="nav-controls-pro">
+          <button class="nav-btn-pro prev" (click)="prevSlide()"><i class="fas fa-chevron-left"></i></button>
+          <button class="nav-btn-pro next" (click)="nextSlide()"><i class="fas fa-chevron-right"></i></button>
+        </div>
       </div>
     </section>
 
+    <!-- Main Content Section -->
     <section class="guide-body container animate-fade-in">
-      <div class="page-header text-center mt-50 mb-40">
-        <h2 class="luxury-font text-3xl">Cẩm Nang Du Lịch Nội Địa</h2>
-        <p class="text-gray mt-2">Tuyển tập những vùng đất mang đậm bản sắc văn hoá và thiên nhiên hùng vĩ.</p>
+      <div class="section-header-pro text-center">
+        <div class="pro-tag">
+          <span class="dot"></span>
+          <span>DÀNH CHO BẠN</span>
+        </div>
+        <h2 class="luxury-font pro-main-title">Cẩm Nang Du Lịch Nội Địa</h2>
+        <p class="pro-section-desc">Tuyển tập những vùng đất mang đậm bản sắc văn hoá và thiên nhiên hùng vĩ, chắt lọc bởi đội ngũ chuyên gia hàng đầu.</p>
       </div>
 
-      <!-- Region Navigation -->
-      <div class="guide-nav mb-40">
-        <button class="nav-btn" [class.active]="selectedRegion() === 'ALL'" (click)="selectedRegion.set('ALL')">Tất cả</button>
-        <button class="nav-btn" [class.active]="selectedRegion() === 'NORTH'" (click)="selectedRegion.set('NORTH')">Miền Bắc</button>
-        <button class="nav-btn" [class.active]="selectedRegion() === 'CENTRAL'" (click)="selectedRegion.set('CENTRAL')">Miền Trung</button>
-        <button class="nav-btn" [class.active]="selectedRegion() === 'SOUTH'" (click)="selectedRegion.set('SOUTH')">Miền Nam</button>
+      <!-- Region Navigation Pro Max -->
+      <div class="pro-nav-container animate-fade-in-up">
+        <div class="pro-nav-glass">
+          <button class="pro-pill" [class.active]="selectedRegion() === 'ALL'" (click)="selectedRegion.set('ALL')">
+            <i class="fas fa-globe-asia"></i>
+            <span>Tất cả</span>
+          </button>
+          <button class="pro-pill" [class.active]="selectedRegion() === 'NORTH'" (click)="selectedRegion.set('NORTH')">
+            <i class="fas fa-mountain"></i>
+            <span>Miền Bắc</span>
+          </button>
+          <button class="pro-pill" [class.active]="selectedRegion() === 'CENTRAL'" (click)="selectedRegion.set('CENTRAL')">
+            <i class="fas fa-landmark"></i>
+            <span>Miền Trung</span>
+          </button>
+          <button class="pro-pill" [class.active]="selectedRegion() === 'SOUTH'" (click)="selectedRegion.set('SOUTH')">
+            <i class="fas fa-umbrella-beach"></i>
+            <span>Miền Nam</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Guide Grid -->
-      <div class="grid" *ngIf="!loading()">
-        <div *ngFor="let poi of filteredPois()" class="guide-card glass-effect hover-up">
-          <div class="card-img" [style.backgroundImage]="'url(' + extractImage(poi) + ')'">
-            <div class="cat-tag">{{ poi.category }}</div>
-            <div class="rating-badge" *ngIf="poi.rating"><i class="fas fa-star text-gold"></i> {{ poi.rating }}</div>
-          </div>
-          <div class="card-body">
-            <div class="meta-tags mb-3">
-              <span class="city-tag"><i class="fas fa-map-marker-alt"></i> {{ poi.city }}</span>
-              <span class="time-tag" *ngIf="poi.bestTimeToVisit"><i class="fas fa-sun"></i> {{ poi.bestTimeToVisit }}</span>
+      <!-- Search & Quick Filters -->
+      <div class="search-pro-container">
+        <div class="search-wrap">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" placeholder="Tìm kiếm địa danh, thành phố hoặc cẩm nang du lịch..." (input)="onSearch($event)" />
+        </div>
+      </div>
+
+      <!-- Guide Grid Pro -->
+      <div class="pro-grid" *ngIf="!loading()">
+        <div *ngFor="let poi of filteredPois(); let i = index" 
+             class="pro-card reveal-item" 
+             [style.animationDelay]="(i % 3) * 0.1 + 's'">
+          <div class="pro-card-img" [style.backgroundImage]="'url(' + extractImage(poi) + ')'">
+            <div class="overlay-gradient"></div>
+            <div class="card-tags">
+              <span class="tag-blur">{{ poi.category }}</span>
+              <span class="tag-gold-blur" *ngIf="poi.rating"><i class="fas fa-star"></i> {{ poi.rating }}</span>
             </div>
-            <h3 class="luxury-font card-title">{{ poi.name }}</h3>
-            <p class="desc">{{ truncateDesc(poi.description, 110) }}</p>
             
-            <div class="card-footer mt-4">
-              <button class="btn-read-more" (click)="openDetail(poi)">Đọc tiếp <i class="fas fa-arrow-right ml-1"></i></button>
+            <!-- Quick Glance Button -->
+            <button class="btn-quick-view" (click)="openDetail(poi)">
+              <i class="fas fa-expand-alt"></i>
+            </button>
+          </div>
+          <div class="pro-card-content">
+            <span class="card-meta">{{ poi.city }} • {{ poi.bestTimeToVisit || 'Quanh năm' }}</span>
+            <h3 class="luxury-font card-title-pro">{{ poi.name }}</h3>
+            <p class="card-excerpt">{{ truncateDesc(poi.description, 100) }}</p>
+            <div class="card-footer-pro">
+              <button class="card-link" (click)="openDetail(poi)">KHÁM PHÁ CHI TIẾT <i class="fas fa-long-arrow-alt-right"></i></button>
+              <div class="card-actions-minimal">
+                <i class="far fa-heart heart-btn"></i>
+                <i class="fas fa-share-alt share-btn"></i>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Empty State -->
-      <div class="empty-state text-center py-50" *ngIf="!loading() && filteredPois().length === 0">
-        <i class="fas fa-compass text-gray text-5xl mb-3"></i>
-        <h3 class="luxury-font text-xl text-gold">Chưa có cẩm nang nào</h3>
-        <p class="text-gray">Không tìm thấy địa điểm nào trong khu vực này. Trở lại sau nhé!</p>
+      <div class="empty-state text-center py-100" *ngIf="!loading() && filteredPois().length === 0">
+        <div class="empty-icon-wrap">
+          <i class="fas fa-compass"></i>
+        </div>
+        <h3 class="luxury-font text-gold mt-4">Thông tin đang được cập nhật</h3>
+        <p class="text-gray mt-2">Chúng tôi đang chuẩn bị những bài viết chất lượng nhất cho phân vùng này.</p>
       </div>
     </section>
 
-    <!-- Story Detail Modal -->
+    <!-- Story Detail Modal - Pro Improvements -->
     <div class="guide-modal-overlay" *ngIf="selectedPoi() as detailPoi" (click)="closeDetail()">
       <div class="guide-modal-content animate-slide-up" (click)="$event.stopPropagation()">
-        <button class="btn-close" (click)="closeDetail()"><i class="fas fa-times"></i></button>
+        <button class="btn-close-pro" (click)="closeDetail()"><i class="fas fa-times"></i></button>
         
-        <div class="modal-hero" [style.backgroundImage]="'url(' + extractImage(detailPoi) + ')'">
-          <div class="modal-hero-overlay"></div>
+        <div class="modal-hero-pro" [style.backgroundImage]="'url(' + extractImage(detailPoi) + ')'">
+          <div class="modal-hero-vignette"></div>
           <div class="modal-hero-text">
-            <span class="cat-tag">{{ detailPoi.category }}</span>
-            <h2 class="luxury-font">{{ detailPoi.name }}</h2>
-            <div class="meta-tags mt-3">
+            <span class="cat-tag-pro">{{ detailPoi.category }}</span>
+            <h2 class="luxury-font detail-title">{{ detailPoi.name }}</h2>
+            <div class="detail-meta">
               <span><i class="fas fa-map-marker-alt"></i> {{ detailPoi.city }}</span>
-              <span *ngIf="detailPoi.rating"><i class="fas fa-star text-gold"></i> {{ detailPoi.rating }} / 5.0</span>
+              <span><i class="fas fa-clock"></i> {{ detailPoi.bestTimeToVisit }}</span>
+              <span class="rating"><i class="fas fa-star"></i> {{ detailPoi.rating }}</span>
             </div>
           </div>
         </div>
         
-        <div class="modal-body">
-          <div class="modal-grid">
-            <div class="modal-main-col">
-              <h3 class="luxury-font text-2xl mb-3 text-gold">Về Điểm Chân Này</h3>
-              <p class="article-text">{{ detailPoi.description }}</p>
+        <!-- Internal Sticky Nav -->
+        <nav class="handbook-nav-sticky">
+          <a href="#overview" (click)="$event.preventDefault(); scrollInternal('overview')" class="h-nav-item">Tổng quan</a>
+          <a href="#logistics" (click)="$event.preventDefault(); scrollInternal('logistics')" class="h-nav-item">Di chuyển</a>
+          <a href="#discovery" (click)="$event.preventDefault(); scrollInternal('discovery')" class="h-nav-item">Khám phá</a>
+          <a href="#culinary" (click)="$event.preventDefault(); scrollInternal('culinary')" class="h-nav-item">Ẩm thực</a>
+          <a href="#itinerary" (click)="$event.preventDefault(); scrollInternal('itinerary')" class="h-nav-item">Lịch trình</a>
+          <a href="#tips" (click)="$event.preventDefault(); scrollInternal('tips')" class="h-nav-item">Tips</a>
+        </nav>
+        
+        <div class="modal-body-pro">
+          <div class="article-layout-full">
+            <div class="article-content" id="handbook-scroll-container">
+              
+              <!-- Handbook Content Rendering -->
+              <ng-container *ngIf="getHandbook(detailPoi) as handbook; else comingSoon">
+                <!-- Section 1: Overview -->
+                <section id="overview" class="handbook-section">
+                  <div class="section-label">PHẦN 1: TỔNG QUAN</div>
+                  <div class="article-intro">
+                    <p class="drop-cap">{{ detailPoi.description }}</p>
+                  </div>
+                </section>
 
-              <div *ngIf="detailPoi.tips" class="tips-box mt-40">
-                <h4 class="luxury-font text-xl text-gold mb-3"><i class="fas fa-lightbulb"></i> Kinh nghiệm & Lưu ý</h4>
-                <div class="article-text" [innerHTML]="detailPoi.tips"></div>
-              </div>
-            </div>
-            
-            <div class="modal-side-col">
-              <div class="info-card glass-effect">
-                <h4 class="luxury-font text-gold mb-3 text-lg">Thông tin nhanh</h4>
-                <ul class="info-list">
-                  <li *ngIf="detailPoi.bestTimeToVisit">
-                    <i class="fas fa-calendar-check text-gold"></i>
-                    <div>
-                      <strong>Mùa đẹp nhất</strong>
-                      <span>{{ detailPoi.bestTimeToVisit }}</span>
+                <!-- Section 2: Logistics -->
+                <section id="logistics" class="handbook-section">
+                  <div class="section-label">PHẦN 2: DI CHUYỂN & LƯU TRÚ</div>
+                  <div class="logistics-grid">
+                    <div class="log-card glass-morph">
+                      <i class="fas fa-motorcycle text-gold"></i>
+                      <h4>Di chuyển</h4>
+                      <p>{{ handbook.logistics }}</p>
                     </div>
-                  </li>
-                  <li *ngIf="detailPoi.averageSpend">
-                    <i class="fas fa-wallet text-gold"></i>
-                    <div>
-                      <strong>Chi phí tham khảo</strong>
-                      <span>{{ detailPoi.averageSpend | number }}đ</span>
+                    <div class="log-card glass-morph">
+                      <i class="fas fa-hotel text-gold"></i>
+                      <h4>Lưu trú</h4>
+                      <p>{{ handbook.accommodation }}</p>
                     </div>
-                  </li>
-                  <li *ngIf="detailPoi.address">
-                    <i class="fas fa-map text-gold"></i>
-                    <div>
-                      <strong>Địa chỉ cụ thể</strong>
-                      <span>{{ detailPoi.address }}</span>
+                  </div>
+                </section>
+
+                <!-- Section 3: Discovery -->
+                <section id="discovery" class="handbook-section">
+                  <div class="section-label">PHẦN 3: BẢN ĐỒ KHÁM PHÁ</div>
+                  <ul class="discovery-list">
+                    <li *ngFor="let item of handbook.discovery">
+                      <strong>{{ item.title }}:</strong> {{ item.desc }}
+                    </li>
+                  </ul>
+                </section>
+
+                <!-- Section 4: Culinary -->
+                <section id="culinary" class="handbook-section">
+                  <div class="section-label">PHẦN 4: HÀNH TRÌNH ẨM THỰC</div>
+                  <div class="food-expert-box glass-morph">
+                    <p>{{ handbook.culinary }}</p>
+                  </div>
+                </section>
+
+                <!-- Section 5: Itinerary -->
+                <section id="itinerary" class="handbook-section">
+                  <div class="section-label">PHẦN 5: LỊCH TRÌNH TỐI ƯU</div>
+                  <div class="iti-steps">
+                    <div class="iti-step" *ngFor="let step of handbook.itinerary; let i = index">
+                      <span>N{{ i + 1 }}</span> {{ step }}
                     </div>
-                  </li>
-                </ul>
-                <button class="btn-gold w-full mt-30 shadow-gold" (click)="closeDetail()">Tìm Tour Gần Đây</button>
-              </div>
+                  </div>
+                </section>
+
+                <!-- Section 6: Tips -->
+                <section id="tips" class="handbook-section">
+                  <div class="section-label">PHẦN 6: TIPS TỪ CHUYÊN GIA</div>
+                  <div class="survival-tips-grid">
+                    <div class="s-tip" *ngFor="let tip of handbook.tips">
+                      <i class="fas fa-lightbulb text-gold"></i> {{ tip }}
+                    </div>
+                  </div>
+                </section>
+              </ng-container>
+
+              <ng-template #comingSoon>
+                <section class="handbook-section">
+                  <div class="section-label">ĐANG CẬP NHẬT</div>
+                  <div class="article-intro">
+                    <p class="drop-cap">{{ detailPoi.description }}</p>
+                    <p class="mt-40 text-center opacity-50">Cẩm nang chi tiết cho địa điểm này đang được đội ngũ chuyên gia biên soạn.</p>
+                  </div>
+                </section>
+              </ng-template>
+
             </div>
           </div>
         </div>
@@ -132,140 +290,358 @@ import { CatalogService, POI } from '../../core/services/catalog.service';
     </div>
   `,
   styles: [`
-    /* Hero Section */
-    .guide-hero { position: relative; height: 75vh; min-height: 600px; display: flex; align-items: center; overflow: hidden; margin-top: -80px; } /* Pull under navbar */
-    .hero-bg { position: absolute; inset: 0; background-size: cover; background-position: center; transition: transform 10s ease-out; }
-    .guide-hero:hover .hero-bg { transform: scale(1.05); }
-    .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to right, rgba(11, 15, 25, 0.95) 0%, rgba(11, 15, 25, 0.6) 50%, rgba(11, 15, 25, 0.2) 100%); }
-    .hero-content { position: relative; z-index: 10; max-width: 800px; padding: 0 40px; }
-    
-    .trend-tag { display: inline-block; background: rgba(212, 175, 55, 0.15); color: var(--gold-primary); padding: 6px 16px; border-radius: 30px; border: 1px solid rgba(212, 175, 55, 0.3); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 24px; }
-    .hero-content h1 { font-size: 4rem; line-height: 1.1; margin-bottom: 24px; color: white; text-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-    .hero-desc { font-size: 1.15rem; color: #cbd5e1; line-height: 1.8; margin-bottom: 30px; text-shadow: 0 4px 10px rgba(0,0,0,0.5); max-width: 600px; }
-    
-    .hero-meta { display: flex; gap: 24px; color: white; margin-bottom: 30px; font-size: 0.95rem; }
-    .hero-meta span { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 12px; backdrop-filter: blur(4px); }
-    
-    /* Navigation */
-    .guide-nav { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
-    .nav-btn { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #94a3b8; padding: 12px 30px; border-radius: 30px; font-weight: 600; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; font-size: 0.85rem; }
-    .nav-btn:hover { background: rgba(255,255,255,0.1); color: white; }
-    .nav-btn.active { background: rgba(212, 175, 55, 0.15); border-color: var(--gold-primary); color: var(--gold-primary); box-shadow: 0 0 20px rgba(212,175,55,0.15); }
-    
-    /* Grid & Cards */
-    .guide-body { padding-bottom: 100px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 32px; }
-    
-    .guide-card { display: flex; flex-direction: column; overflow: hidden; border-radius: 20px; transition: transform 0.4s, box-shadow 0.4s; border: 1px solid rgba(255,255,255,0.05); }
-    .guide-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); border-color: rgba(212,175,55,0.3); }
-    .guide-card:hover .card-img { background-size: 110%; }
-    
-    .card-img { height: 260px; background-size: cover; background-position: center; position: relative; transition: background-size 0.6s ease; }
-    .cat-tag { position: absolute; top: 20px; left: 20px; background: rgba(11, 15, 25, 0.85); color: white; padding: 6px 14px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1); }
-    .rating-badge { position: absolute; top: 20px; right: 20px; background: rgba(11,15,25,0.85); padding: 6px 12px; border-radius: 6px; font-weight: 700; color: white; font-size: 0.85rem; border: 1px solid rgba(212,175,55,0.3); }
-    
-    .card-body { padding: 32px; display: flex; flex-direction: column; flex-grow: 1; }
-    .meta-tags { display: flex; gap: 16px; font-size: 0.8rem; color: var(--gold-secondary); text-transform: uppercase; letter-spacing: 1px; }
-    .time-tag { color: #94a3b8; }
-    .card-title { font-size: 1.6rem; margin-bottom: 16px; color: white; line-height: 1.3; }
-    .desc { color: #cbd5e1; line-height: 1.6; font-size: 0.95rem; flex-grow: 1; }
-    
-    .card-footer { display: flex; justify-content: space-between; align-items: flex-end; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.05); }
-    .price { font-size: 0.85rem; color: #94a3b8; }
-    .price span { font-size: 1.25rem; display: block; margin-top: 4px; }
-    .btn-read-more { background: transparent; border: none; color: var(--gold-primary); font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 0.95rem; display: flex; align-items: center; }
-    .btn-read-more:hover { color: white; transform: translateX(5px); }
-    
-    /* Utils */
-    .mt-30 { margin-top: 30px; } .mt-40 { margin-top: 40px; } .mt-50 { margin-top: 50px; }
-    .mb-3 { margin-bottom: 12px; } .mb-40 { margin-bottom: 40px; }
-    .py-50 { padding: 50px 0; }
-    .text-3xl { font-size: 2.2rem; margin-bottom: 10px; color: var(--gold-primary); }
-    .text-gray { color: #94a3b8; } .text-gold { color: var(--gold-primary); } .font-bold { font-weight: bold; }
-    .ml-1 { margin-left: 6px; } .w-full { width: 100%; }
+    :host { --gold-primary: #D4AF37; --gold-secondary: #B8860B; --bg-dark: #050a14; --text-muted: #94a3b8; }
 
-    /* Guide Modal */
-    .guide-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; display: flex; justify-content: center; align-items: flex-end; padding: 20px 0 0 0; }
-    .guide-modal-content { background: var(--bg-primary); width: 100%; max-width: 1100px; height: 90vh; border-radius: 24px 24px 0 0; overflow-y: auto; position: relative; border-top: 1px solid rgba(212,175,55,0.3); box-shadow: 0 -20px 50px rgba(0,0,0,0.8); }
-    .animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-    @keyframes slideUp { from { transform: translateY(100vh); } to { transform: translateY(0); } }
+    /* Hero Carousel Pro Max */
+    .guide-hero { position: relative; height: 100vh; min-height: 800px; overflow: hidden; margin-top: -80px; background: var(--bg-dark); }
+    .slides-container { position: absolute; inset: 0; }
+    .slide { position: absolute; inset: 0; opacity: 0; visibility: hidden; z-index: 1; transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1); background: var(--bg-dark); }
+    .slide.active { opacity: 1; visibility: visible; z-index: 2; }
     
-    .btn-close { position: absolute; top: 20px; right: 20px; z-index: 20; width: 40px; height: 40px; border-radius: 50%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: white; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-    .btn-close:hover { background: var(--gold-primary); color: black; transform: rotate(90deg); }
+    .hero-bg { position: absolute; inset: 0; background-size: cover; background-position: center; transition: transform 0.1s linear; opacity: 1; visibility: visible; }
     
-    .modal-hero { height: 420px; background-size: cover; background-position: center; position: relative; display: flex; align-items: flex-end; padding: 50px; }
-    .modal-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(5,10,20,1) 0%, rgba(5,10,20,0) 100%); }
-    .modal-hero-text { position: relative; z-index: 10; width: 100%; }
-    .modal-hero-text h2 { font-size: 3.5rem; color: white; margin: 15px 0; line-height: 1.1; text-shadow: 0 5px 20px rgba(0,0,0,0.6); }
-    .modal-hero-text .cat-tag { position: relative; top: auto; left: auto; display: inline-block; margin-bottom: 5px; }
+    .hero-overlay-complex { 
+      position: absolute; inset: 0; 
+      background: 
+        linear-gradient(to right, rgba(5,10,20,0.95) 0%, rgba(5,10,20,0.4) 40%, transparent 100%),
+        linear-gradient(to top, rgba(5,10,20,1) 0%, rgba(5,10,20,0) 50%);
+      z-index: 3;
+    }
     
-    .modal-body { padding: 50px; }
-    .modal-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 50px; }
-    @media (max-width: 800px) { .modal-grid { grid-template-columns: 1fr; } }
+    .hero-content { position: relative; z-index: 10; height: 100%; display: flex; align-items: center; padding-top: 100px; }
+    .text-content { max-width: 750px; }
     
-    .article-text { color: #cbd5e1; font-size: 1.1rem; line-height: 1.8; white-space: pre-wrap; }
-    .tips-box { background: rgba(212,175,55,0.05); border: 1px solid rgba(212,175,55,0.2); padding: 35px; border-radius: 16px; position: relative; }
-    .tips-box::before { content: ''; position: absolute; left: 0; top: 20px; bottom: 20px; width: 4px; background: var(--gold-primary); border-radius: 0 4px 4px 0; }
+    .trend-tag { 
+      display: inline-block; background: rgba(212, 175, 55, 0.15); color: var(--gold-primary); 
+      padding: 8px 24px; border-radius: 4px; border-left: 3px solid var(--gold-primary); 
+      font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 4px; 
+      margin-bottom: 30px; box-shadow: 10px 0 30px rgba(212,175,55,0.1);
+    }
     
-    .text-2xl { font-size: 1.8rem; } .text-xl { font-size: 1.4rem; } .text-lg { font-size: 1.2rem; }
+    .hero-title { font-size: 6.5rem; line-height: 1; margin-bottom: 24px; color: white; letter-spacing: -2px; font-family: 'Playfair Display', serif; }
+    @media (max-width: 1200px) { .hero-title { font-size: 4.5rem; } }
+
+    .hero-desc { font-size: 1.1rem; color: #cbd5e1; opacity: 0.8; line-height: 1.8; margin-bottom: 45px; max-width: 550px; }
     
-    .info-card { padding: 35px; border-radius: 20px; position: sticky; top: 20px; }
-    .info-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 24px; }
-    .info-list li { display: flex; gap: 16px; align-items: flex-start; }
-    .info-list i { font-size: 1.4rem; margin-top: 4px; opacity: 0.8; }
-    .info-list strong { display: block; color: white; margin-bottom: 6px; font-size: 0.95rem; }
-    .info-list span { color: #94a3b8; font-size: 0.95rem; line-height: 1.4; display: block; }
-    .shadow-gold { box-shadow: 0 10px 20px rgba(212,175,55,0.15); }
+    .hero-meta-grid { display: flex; gap: 40px; margin-bottom: 40px; }
+    .meta-item { display: flex; align-items: center; gap: 15px; }
+    .icon-gold { font-size: 1.5rem !important; color: var(--gold-primary) !important; opacity: 1 !important; display: inline-block !important; }
+    .meta-item label { display: block; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+    .meta-item span { color: white; font-weight: 600; font-size: 1rem; }
+
+    .btn-pro-gold { 
+      background: var(--gold-primary); color: #000; border: none; padding: 18px 45px; 
+      font-weight: 800; text-transform: uppercase; letter-spacing: 2px; font-size: 0.9rem;
+      border-radius: 4px; cursor: pointer; display: flex; align-items: center; 
+      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); position: relative; z-index: 10;
+    }
+    .btn-pro-gold:hover { background: #fff; transform: translateY(-5px); box-shadow: 0 15px 35px rgba(212,175,55,0.3); }
+
+    .thumbnail-stack { position: absolute; right: 100px; bottom: 120px; z-index: 20; display: flex; gap: 30px; }
+    .thumb-card-pro { 
+      width: 220px; height: 320px; border-radius: 12px; overflow: hidden; position: relative; 
+      cursor: pointer; border: 1px solid rgba(255,255,255,0.08); transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+    .thumb-card-pro:hover { transform: translateY(-30px) scale(1.05); border-color: var(--gold-primary); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+    .thumb-img-pro { position: absolute; inset: 0; background-size: cover; background-position: center; transition: 0.8s; }
+    .thumb-glass { position: absolute; inset: 0; background: linear-gradient(to top, rgba(5,10,20,0.95), transparent); }
+    .thumb-label { position: absolute; bottom: 30px; left: 20px; right: 20px; color: white; }
+    .thumb-label h4 { font-size: 1.1rem; font-family: 'Playfair Display', serif; }
+
+    .hero-footer { position: absolute; left: 0; right: 0; bottom: 60px; z-index: 20; display: flex; justify-content: space-between; align-items: flex-end; }
+    .indicator-pro { display: flex; align-items: center; gap: 30px; }
+    .active-num { font-size: 2rem; font-weight: 700; color: var(--gold-primary); font-family: 'Playfair Display', serif; }
+    .total-num { color: #fff; opacity: 0.5; font-family: 'Playfair Display', serif; }
+    .progress-track { width: 150px; height: 2px; background: rgba(255,255,255,0.1); }
+    .progress-bar-pro { height: 100%; background: var(--gold-primary); }
+    
+    .nav-controls-pro { display: flex; gap: 15px; }
+    .nav-btn-pro { 
+      width: 60px; height: 60px; border-radius: 50%; border: 1px solid rgba(212,175,55,0.3); 
+      background: rgba(255,255,255,0.05); color: var(--gold-primary); cursor: pointer; transition: 0.3s;
+      display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px);
+    }
+    .nav-btn-pro:hover { background: var(--gold-primary); color: #000; transform: scale(1.1); }
+    .nav-btn-pro i { font-size: 1.2rem; display: block; }
+
+    /* Section Header Pro Max */
+    .section-header-pro { margin: 100px 0 60px; }
+    .pro-tag { 
+      display: inline-flex; align-items: center; gap: 10px; background: rgba(212,175,55,0.1); 
+      padding: 6px 20px; border-radius: 20px; color: var(--gold-primary); 
+      font-size: 0.65rem; font-weight: 800; letter-spacing: 3px; margin-bottom: 20px;
+    }
+    .pro-tag .dot { width: 6px; height: 6px; background: var(--gold-primary); border-radius: 50%; box-shadow: 0 0 10px var(--gold-primary); }
+    .pro-main-title { font-size: 3.5rem; color: #fff; margin-bottom: 20px; letter-spacing: -1px; font-family: 'Playfair Display', serif; }
+    .pro-section-desc { color: #94a3b8; font-size: 1.1rem; max-width: 650px; margin: 0 auto; line-height: 1.8; opacity: 0.8; }
+
+    /* Region Navigation Pro Max */
+    .pro-nav-container { display: flex; justify-content: center; margin: 50px 0 100px; }
+    .pro-nav-glass { 
+      display: flex; gap: 10px; background: rgba(255,255,255,0.03); 
+      padding: 8px; border-radius: 60px; border: 1px solid rgba(255,255,255,0.05); 
+      backdrop-filter: blur(20px); box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+    }
+    .pro-pill { 
+      background: transparent; border: none; color: #94a3b8; padding: 14px 35px; 
+      border-radius: 50px; cursor: pointer; display: flex; align-items: center; gap: 12px;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 2px; font-size: 0.7rem;
+      transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .pro-pill i { font-size: 0.9rem; opacity: 0.6; transition: 0.3s; }
+    .pro-pill:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .pro-pill:hover i { transform: rotate(15deg) scale(1.2); opacity: 1; }
+    
+    .pro-pill.active { 
+      background: linear-gradient(135deg, #FFD700 0%, #D4AF37 50%, #B8860B 100%);
+      color: #000; box-shadow: 0 10px 30px rgba(212,175,55,0.4); transform: scale(1.05);
+    }
+    .pro-pill.active i { opacity: 1; color: #000; }
+    
+    @media (max-width: 768px) {
+      .pro-nav-glass { flex-direction: column; border-radius: 20px; width: 100%; padding: 15px; }
+      .pro-pill { justify-content: center; width: 100%; }
+    }
+
+    /* Grid & Cards Pro Max */
+    .pro-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 40px; margin-bottom: 100px; }
+    .pro-card { background: #0a0f1a; border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); transition: 0.6s cubic-bezier(0.165, 0.84, 0.44, 1); position: relative; }
+    .pro-card:hover { transform: translateY(-15px); border-color: var(--gold-primary); }
+    
+    .pro-card-img { height: 320px; background-size: cover; background-position: center; position: relative; overflow: hidden; transition: 0.8s; }
+    .pro-card:hover .pro-card-img { transform: scale(1.05); }
+    .overlay-gradient { position: absolute; inset: 0; background: linear-gradient(to top, #0a0f1a 0%, transparent 60%); }
+    
+    .card-tags { position: absolute; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; z-index: 5; }
+    .tag-blur { background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); color: #fff; padding: 6px 15px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; border: 1px solid rgba(255,255,255,0.1); }
+    .tag-gold-blur { background: rgba(212,175,55,0.15); backdrop-filter: blur(10px); color: var(--gold-primary); padding: 6px 15px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; border: 1px solid rgba(212,175,55,0.3); }
+
+    .pro-card-content { padding: 35px; position: relative; z-index: 5; }
+    .card-meta { display: block; color: var(--gold-primary); font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; }
+    .card-title-pro { font-size: 2.2rem; color: white; font-family: 'Playfair Display', serif; margin-bottom: 15px; line-height: 1.2; }
+    .card-excerpt { color: #94a3b8; line-height: 1.8; font-size: 1rem; margin-bottom: 30px; }
+    .card-link { background: none; border: none; color: var(--gold-primary); font-weight: 800; font-size: 0.75rem; letter-spacing: 2px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.3s; text-transform: uppercase; }
+    .card-link:hover { gap: 20px; color: #fff; }
+
+    /* Modal Pro Max Fixes */
+    .guide-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(15px); z-index: 10000; display: flex; justify-content: center; align-items: flex-end; }
+    .guide-modal-content { background: #050a14; width: 100%; max-width: 1200px; height: 90vh; border-radius: 24px 24px 0 0; overflow-y: auto; position: relative; border: 1px solid rgba(212,175,55,0.3); }
+    .btn-close-pro { position: absolute; top: 30px; right: 30px; z-index: 10010; width: 50px; height: 50px; border-radius: 50%; background: #000; border: 1px solid var(--gold-primary); color: var(--gold-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+    .modal-hero-pro { height: 500px; background-size: cover; background-position: center; position: relative; display: flex; align-items: flex-end; padding: 60px; }
+    .modal-hero-vignette { position: absolute; inset: 0; background: linear-gradient(to top, #050a14 0%, transparent 100%); }
+    .modal-hero-text { position: relative; z-index: 10; }
+    .detail-title { font-size: 4rem; color: #fff; font-family: 'Playfair Display', serif; margin-bottom: 15px; }
+    .detail-meta { display: flex; gap: 30px; color: #cbd5e1; }
+    .detail-meta span { display: flex; align-items: center; gap: 8px; }
+    .detail-meta i { color: var(--gold-primary); }
+
+    .modal-body-pro { padding: 60px; max-width: 1000px; margin: 0 auto; }
+    .article-layout-full { width: 100%; }
+    .drop-cap::first-letter { font-family: 'Playfair Display', serif; float: left; font-size: 5rem; color: var(--gold-primary); font-weight: 700; margin-right: 15px; line-height: 0.8; }
+    
+    /* Modal Handbook Styling */
+    .handbook-nav-sticky { position: sticky; top: 0; background: rgba(5,10,20,0.8); backdrop-filter: blur(10px); z-index: 50; display: flex; gap: 25px; padding: 0 60px; height: 55px; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .h-nav-item { color: #fff; opacity: 0.5; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; text-decoration: none; transition: 0.3s; }
+    .h-nav-item:hover { opacity: 1; color: var(--gold-primary); }
+
+    .handbook-section { margin-bottom: 70px; scroll-margin-top: 80px; }
+    .section-label { font-size: 0.75rem; font-weight: 800; color: var(--gold-primary); margin-bottom: 15px; letter-spacing: 1px; }
+    
+    .logistics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 25px; }
+    .log-card { padding: 25px; border-radius: 12px; border: 1px solid rgba(212,175,55,0.2); }
+    .log-card i { font-size: 1.5rem; margin-bottom: 15px; color: var(--gold-primary); }
+    .log-card h4 { color: white; margin-bottom: 10px; font-size: 1.1rem; }
+    .log-card p { font-size: 0.9rem; color: #94a3b8; line-height: 1.6; }
+
+    .discovery-list { list-style: none; padding: 0; }
+    .discovery-list li { position: relative; padding-left: 25px; margin-bottom: 15px; color: #cbd5e1; line-height: 1.7; }
+    .discovery-list li::before { content: '✦'; position: absolute; left: 0; color: var(--gold-primary); }
+
+    .food-expert-box { padding: 25px; border-left: 3px solid var(--gold-primary); font-style: italic; color: #fff; font-size: 1.1rem; background: rgba(212,175,55,0.05); border-radius: 0 12px 12px 0; }
+
+    .iti-steps { display: flex; flex-direction: column; gap: 12px; }
+    .iti-step { background: rgba(212,175,55,0.05); padding: 15px 20px; border-radius: 8px; color: #fff; font-weight: 600; font-size: 0.95rem; }
+    .iti-step span { color: var(--gold-primary); font-weight: 800; margin-right: 15px; }
+
+    .survival-tips-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    .s-tip { display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.03); padding: 12px 20px; border-radius: 40px; color: #fff; font-size: 0.9rem; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .animate-fade-in { animation: fadeIn 1s ease-out forwards; }
+    @keyframes revealUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+    /* Search Bar Pro */
+    .search-pro-container { margin-bottom: 50px; position: relative; z-index: 10; }
+    .search-wrap { 
+      max-width: 800px; margin: 0 auto; position: relative;
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 20px; padding: 5px; backdrop-filter: blur(10px);
+      transition: 0.4s;
+    }
+    .search-wrap:focus-within { border-color: var(--gold-primary); box-shadow: 0 0 40px rgba(212,175,55,0.1); }
+    .search-icon { position: absolute; left: 30px; top: 50%; transform: translateY(-50%); color: var(--gold-primary); font-size: 1.2rem; }
+    .search-wrap input { 
+      width: 100%; background: none; border: none; padding: 18px 20px 18px 70px; 
+      color: #f1f5f9; font-size: 1.1rem; outline: none;
+    }
+
+    .card-footer-pro { display: flex; justify-content: space-between; align-items: center; }
+    .card-actions-minimal { display: flex; gap: 20px; color: #64748b; font-size: 1rem; }
+    .heart-btn:hover { color: #ef4444; }
+    .share-btn:hover { color: var(--gold-primary); }
+
+    .mt-40 { margin-top: 40px; }
+    .ml-2 { margin-left: 8px; }
   `]
 })
-export class PoiListComponent implements OnInit {
+export class PoiListComponent implements OnInit, OnDestroy {
   private service = inject(CatalogService);
+  private el = inject(ElementRef);
+
   pois = signal<POI[]>([]);
   loading = signal(true);
   selectedRegion = signal<string>('ALL');
   selectedPoi = signal<POI | null>(null);
+  searchTerm = signal<string>('');
 
-  // Compute filtered POIs based on region
+  activeIndex = signal(0);
+  private timerId?: any;
+
+  featuredPois = computed(() => {
+    const list = this.pois();
+    if (list.length === 0) return [];
+    return [...list].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 8);
+  });
+
+  getUpcomingPois = computed(() => {
+    const all = this.featuredPois();
+    const idx = this.activeIndex();
+    if (all.length <= 1) return [];
+    const upcoming = [];
+    for (let i = 1; i <= 3; i++) {
+      upcoming.push(all[(idx + i) % all.length]);
+    }
+    return upcoming;
+  });
+
   filteredPois = computed(() => {
-    const list = this.pois();
+    let list = this.pois();
     const region = this.selectedRegion();
-    if (region === 'ALL') return list;
-    return list.filter(p => p.region === region);
+    const query = this.searchTerm().toLowerCase();
+
+    if (region !== 'ALL') {
+      list = list.filter(p => p.region === region);
+    }
+
+    if (query) {
+      list = list.filter(p => 
+        p.name.toLowerCase().includes(query) || 
+        p.city.toLowerCase().includes(query) || 
+        p.category.toLowerCase().includes(query)
+      );
+    }
+
+    return list;
   });
 
-  // Decide the featured POI (First HIGH RATING one, or just the first)
-  featuredPoi = computed(() => {
-    const list = this.pois();
-    if (list.length === 0) return null;
-    return list.find(p => p.rating && p.rating >= 4.8) || list[0];
-  });
+  constructor() {
+    effect(() => {
+      const index = this.activeIndex();
+      this.animateSlide(index);
+    });
+  }
 
   ngOnInit() {
     this.service.getPOIs().subscribe({
       next: (res) => {
-        if (res.success) this.pois.set(res.data);
+        if (res.success) {
+          this.pois.set(res.data);
+          this.startTimer();
+        }
         this.loading.set(false);
       }
     });
   }
 
+  ngOnDestroy() { this.stopTimer(); }
+
+  startTimer() {
+    this.stopTimer();
+    this.timerId = setInterval(() => this.nextSlide(), 8000);
+  }
+
+  stopTimer() { if (this.timerId) clearInterval(this.timerId); }
+
+  nextSlide() {
+    const total = this.featuredPois().length;
+    if (total === 0) return;
+    this.activeIndex.set((this.activeIndex() + 1) % total);
+  }
+
+  prevSlide() {
+    const total = this.featuredPois().length;
+    if (total === 0) return;
+    this.activeIndex.set((this.activeIndex() - 1 + total) % total);
+  }
+
+  goToSlideByPoi(poi: POI) {
+    const idx = this.featuredPois().findIndex(p => p.id === poi.id);
+    if (idx !== -1) {
+      this.activeIndex.set(idx);
+      this.startTimer();
+    }
+  }
+
+  private animateSlide(index: number) {
+    setTimeout(() => {
+      const container = this.el.nativeElement.querySelector('.guide-hero');
+      if (!container) return;
+
+      const activeSlide = container.querySelector('.slide.active');
+      if (!activeSlide) return;
+
+      const title = activeSlide.querySelector('.hero-title');
+      const desc = activeSlide.querySelector('.hero-desc');
+      const meta = activeSlide.querySelectorAll('.meta-item');
+      const btn = activeSlide.querySelector('.btn-pro-gold');
+      const tag = activeSlide.querySelector('.trend-tag');
+      const bg = activeSlide.querySelector('.hero-bg');
+
+      // Main Entry Animation
+      const tl = gsap.timeline();
+
+      // Ensure Background is visible
+      gsap.set(bg, { opacity: 1, scale: 1, filter: 'blur(0px)' });
+
+      tl.fromTo(tag, { x: -50, opacity: 0 }, { x: 0, opacity: 1, duration: 0.8, ease: 'power4.out' }, '+=0.2')
+        .fromTo(title, { y: 100, opacity: 0 }, { y: 0, opacity: 1, duration: 1, ease: 'power4.out' }, '-=0.6')
+        .fromTo(desc, { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 1, ease: 'power4.out' }, '-=0.8')
+        .fromTo(meta, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: 'power4.out' }, '-=0.6')
+        .fromTo(btn, { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.8, ease: 'back.out(1.7)' }, '-=0.4');
+
+      // Animate Thumbnails
+      gsap.fromTo('.thumb-card-pro',
+        { x: 100, opacity: 0 },
+        { x: 0, opacity: 1, duration: 1, stagger: 0.1, ease: 'power4.out', delay: 0.5 }
+      );
+    }, 0);
+  }
+
+  padZero(n: number): string { return n < 10 ? `0${n}` : `${n}`; }
+
   extractImage(poi: POI): string {
     const fallback = 'https://images.unsplash.com/photo-1548013146-72479768bbaa?auto=format&fit=crop&q=80&w=1200';
-    if (!poi.imagesJson || poi.imagesJson === 'null' || poi.imagesJson === '[]') {
-      return fallback;
-    }
+    if (!poi.imagesJson || poi.imagesJson === 'null' || poi.imagesJson === '[]') return fallback;
     try {
       const imgs = JSON.parse(poi.imagesJson);
       return imgs && imgs.length > 0 ? imgs[0] : fallback;
-    } catch (e) {
-      return fallback;
-    }
+    } catch { return fallback; }
   }
 
   truncateDesc(desc?: string, length: number = 100): string {
     if (!desc) return '';
-    if (desc.length <= length) return desc;
-    return desc.substring(0, length).trim() + '...';
+    return desc.length <= length ? desc : desc.substring(0, length).trim() + '...';
   }
 
   openDetail(poi: POI) {
@@ -277,5 +653,26 @@ export class PoiListComponent implements OnInit {
     this.selectedPoi.set(null);
     document.body.style.overflow = '';
   }
-}
 
+  onSearch(event: any) {
+    this.searchTerm.set(event.target.value);
+  }
+
+  askAI() {
+    alert("Cửa sổ Trợ lý AI đang được khởi tạo. Bạn có thể hỏi về bất kỳ địa danh nào tại đây!");
+  }
+
+  getHandbook(poi: POI) {
+    if (!poi.handbookJson) return null;
+    try {
+      return JSON.parse(poi.handbookJson);
+    } catch { return null; }
+  }
+
+  scrollInternal(sectionId: string) {
+    const el = document.getElementById(sectionId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+}

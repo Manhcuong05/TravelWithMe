@@ -39,5 +39,8 @@ public class POI {
     @Column(columnDefinition = "TEXT")
     private String imagesJson;
 
+    @Column(columnDefinition = "TEXT")
+    private String handbookJson;
+
     private double averageSpend; // Average spending at this location
 }

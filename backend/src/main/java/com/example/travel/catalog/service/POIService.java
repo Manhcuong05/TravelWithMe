@@ -35,6 +35,7 @@ public class POIService {
                 .region(request.getRegion())
                 .bestTimeToVisit(request.getBestTimeToVisit())
                 .tips(request.getTips())
+                .handbookJson(request.getHandbookJson())
                 .build();
         return mapToResponse(poiRepository.save(poi));
     }
@@ -55,6 +56,7 @@ public class POIService {
         poi.setRegion(request.getRegion());
         poi.setBestTimeToVisit(request.getBestTimeToVisit());
         poi.setTips(request.getTips());
+        poi.setHandbookJson(request.getHandbookJson());
 
         return mapToResponse(poiRepository.save(poi));
     }
@@ -104,6 +106,7 @@ public class POIService {
                 .rating(poi.getRating() != null ? poi.getRating() : 0.0)
                 .averageSpend(poi.getAverageSpend())
                 .imagesJson(poi.getImagesJson())
+                .handbookJson(poi.getHandbookJson())
                 .build();
     }
 }
