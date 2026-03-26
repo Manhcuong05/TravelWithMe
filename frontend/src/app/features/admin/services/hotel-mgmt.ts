@@ -55,6 +55,20 @@ import { HotelService, Hotel } from '../../../core/services/hotel.service';
               <label>Mô tả</label>
               <textarea formControlName="description" rows="3"></textarea>
             </div>
+
+            <div class="form-group">
+              <label>📍 Vĩ độ (Latitude)</label>
+              <input type="number" step="any" formControlName="latitude" placeholder="VD: 10.7769">
+            </div>
+
+            <div class="form-group">
+              <label>📍 Kinh độ (Longitude)</label>
+              <input type="number" step="any" formControlName="longitude" placeholder="VD: 106.7009">
+            </div>
+
+            <div class="form-group full-width coord-hint">
+              <span>💡 Lấy tọa độ: vào Google Maps → chuột phải vào địa điểm → copy số đầu tiên (vĩ độ) và số thứ hai (kinh độ)</span>
+            </div>
           </div>
 
           <div class="modal-actions">
@@ -82,6 +96,7 @@ import { HotelService, Hotel } from '../../../core/services/hotel.service';
     
     .modal-actions { display: flex; gap: 15px; margin-top: 35px; }
     .modal-actions button { flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; }
+    .coord-hint { background: rgba(201,168,76,0.07); border: 1px dashed rgba(201,168,76,0.3); border-radius: 10px; padding: 10px 14px !important; font-size: 0.78rem; color: var(--text-muted); }
   `]
 })
 export class HotelMgmtComponent implements OnInit {
@@ -98,7 +113,9 @@ export class HotelMgmtComponent implements OnInit {
         description: [''],
         address: ['', Validators.required],
         city: ['', Validators.required],
-        starRating: [3, [Validators.required, Validators.min(1), Validators.max(5)]]
+        starRating: [3, [Validators.required, Validators.min(1), Validators.max(5)]],
+        latitude: [null as number | null],
+        longitude: [null as number | null]
     });
 
     columns: Column[] = [
@@ -125,7 +142,9 @@ export class HotelMgmtComponent implements OnInit {
                 description: hotel.description,
                 address: hotel.address,
                 city: hotel.city,
-                starRating: hotel.starRating
+                starRating: hotel.starRating,
+                latitude: hotel.latitude ?? null,
+                longitude: hotel.longitude ?? null
             });
         } else {
             this.editingHotel.set(null);

@@ -31,6 +31,9 @@ public class TourService {
                 .durationDays(request.getDurationDays())
                 .highlights(request.getHighlights())
                 .imagesJson(toJson(request.getImages()))
+                .latitude(request.getLatitude())
+                .longitude(request.getLongitude())
+                .streetViewUrl(request.getStreetViewUrl())
                 .build();
         return mapToResponse(tourRepository.save(tour));
     }
@@ -46,6 +49,9 @@ public class TourService {
         tour.setDurationDays(request.getDurationDays());
         tour.setHighlights(request.getHighlights());
         tour.setImagesJson(toJson(request.getImages()));
+        tour.setLatitude(request.getLatitude());
+        tour.setLongitude(request.getLongitude());
+        tour.setStreetViewUrl(request.getStreetViewUrl());
 
         return mapToResponse(tourRepository.save(tour));
     }
@@ -105,6 +111,9 @@ public class TourService {
                             ? Arrays.asList(tour.getPoiIds().split(","))
                             : List.of())
                     .aiSuggestions(tour.getAiSuggestions())
+                    .latitude(tour.getLatitude())
+                    .longitude(tour.getLongitude())
+                    .streetViewUrl(tour.getStreetViewUrl())
                     .build();
             log.info("Successfully mapped tour {}", tour.getId());
             return response;

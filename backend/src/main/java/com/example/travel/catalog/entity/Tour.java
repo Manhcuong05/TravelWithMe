@@ -27,6 +27,11 @@ public class Tour {
 
     private String location;
 
+    // Tọa độ địa lý - dùng cho Google Maps & Street View
+    private Double latitude;
+    private Double longitude;
+    private String streetViewUrl; // URL tùy chỉnh nếu muốn nhúng Street View cụ thể
+
     private double price;
 
     private int durationDays;

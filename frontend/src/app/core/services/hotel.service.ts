@@ -24,6 +24,9 @@ export interface Hotel {
     imageUrl?: string;
     images?: string[];
     rooms?: HotelRoom[];
+    latitude?: number;
+    longitude?: number;
+    streetViewUrl?: string;
 }
 
 @Injectable({

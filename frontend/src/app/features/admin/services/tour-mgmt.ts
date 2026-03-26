@@ -54,6 +54,20 @@ import { CatalogService, Tour } from '../../../core/services/catalog.service';
               <label>Điểm nổi bật (Cách nhau bằng dấu phẩy)</label>
               <input type="text" formControlName="highlights" placeholder="Khách sạn 5 sao, Buffet sáng...">
             </div>
+
+            <div class="form-group location-hint">
+              <label>📍 Vĩ độ (Latitude)</label>
+              <input type="number" step="any" formControlName="latitude" placeholder="VD: 15.8801">
+            </div>
+
+            <div class="form-group">
+              <label>📍 Kinh độ (Longitude)</label>
+              <input type="number" step="any" formControlName="longitude" placeholder="VD: 108.3380">
+            </div>
+
+            <div class="form-group full-width coord-hint">
+              <span>💡 Lấy tọa độ: vào Google Maps → chuột phải vào địa điểm → copy số đầu tiên (vĩ độ) và số thứ hai (kinh độ)</span>
+            </div>
           </div>
 
           <div class="modal-actions">
@@ -80,6 +94,7 @@ import { CatalogService, Tour } from '../../../core/services/catalog.service';
     
     .modal-actions { display: flex; gap: 15px; margin-top: 35px; }
     .modal-actions button { flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; cursor: pointer; }
+    .coord-hint { background: rgba(201,168,76,0.07); border: 1px dashed rgba(201,168,76,0.3); border-radius: 10px; padding: 10px 14px !important; font-size: 0.78rem; color: var(--text-muted); }
   `]
 })
 export class TourMgmtComponent implements OnInit {
@@ -97,7 +112,9 @@ export class TourMgmtComponent implements OnInit {
         location: ['', Validators.required],
         price: [0, [Validators.required, Validators.min(0)]],
         durationDays: [1, [Validators.required, Validators.min(1)]],
-        highlights: ['']
+        highlights: [''],
+        latitude: [null as number | null],
+        longitude: [null as number | null]
     });
 
     columns: Column[] = [
@@ -126,7 +143,9 @@ export class TourMgmtComponent implements OnInit {
                 location: tour.location,
                 price: tour.price,
                 durationDays: tour.durationDays || 1,
-                highlights: tour.highlights?.join(', ') || ''
+                highlights: tour.highlights?.join(', ') || '',
+                latitude: (tour as any).latitude ?? null,
+                longitude: (tour as any).longitude ?? null
             });
         } else {
             this.editingTour.set(null);

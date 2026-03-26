@@ -24,4 +24,9 @@ public class TourResponse {
     private String flightId;
     private List<String> poiIds;
     private String aiSuggestions;
+
+    // Tọa độ địa lý
+    private Double latitude;
+    private Double longitude;
+    private String streetViewUrl;
 }
