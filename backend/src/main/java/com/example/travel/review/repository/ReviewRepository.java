@@ -12,4 +12,6 @@ public interface ReviewRepository extends JpaRepository<Review, String> {
     List<Review> findByServiceIdAndServiceType(String serviceId, ServiceType serviceType);
 
     List<Review> findByUserId(String userId);
+
+    boolean existsByUserIdAndServiceIdAndServiceType(String userId, String serviceId, ServiceType serviceType);
 }

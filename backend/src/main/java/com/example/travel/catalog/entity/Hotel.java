@@ -30,6 +30,11 @@ public class Hotel {
     private String city;
     private String country;
 
+    // Tọa độ địa lý - dùng cho Google Maps & Street View
+    private Double latitude;
+    private Double longitude;
+    private String streetViewUrl; // URL tùy chỉnh nếu muốn nhúng Street View cụ thể
+
     private double rating;
     private int starRating; // 1-5 stars
 

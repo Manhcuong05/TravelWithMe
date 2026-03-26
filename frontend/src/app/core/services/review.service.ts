@@ -35,4 +35,10 @@ export class ReviewService {
             params: { type }
         });
     }
+
+    canReview(serviceId: string, serviceType: string): Observable<ApiResponse<{ canReview: boolean }>> {
+        return this.http.get<ApiResponse<{ canReview: boolean }>>(`${this.API_URL}/can-review`, {
+            params: { serviceId, serviceType }
+        });
+    }
 }

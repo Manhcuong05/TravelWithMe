@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { CatalogService, Tour } from '../../core/services/catalog.service';
 import { BookingService } from '../../core/services/booking.service';
 import { ReviewsComponent } from '../review/review';
@@ -81,6 +82,29 @@ import { ReviewsComponent } from '../review/review';
             </div>
           </div>
 
+          <!-- 📍 Vị Trí & Khám Phá 360° -->
+          <div class="location-block glass-effect" *ngIf="tour()?.latitude && tour()?.longitude">
+            <div class="location-header">
+              <h2 class="luxury-font">📍 Vị Trí & Khám Phá</h2>
+              <a [href]="getGoogleMapsUrl()" target="_blank" rel="noopener" class="btn-maps">
+                <span>🗺️</span> Xem trên Google Maps
+              </a>
+            </div>
+            <p class="location-address">{{ tour()?.location }}</p>
+            <div class="map-container">
+              <iframe 
+                [src]="getMapEmbedUrl()"
+                class="map-iframe"
+                allowfullscreen
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+              </iframe>
+              <div class="map-overlay-label">
+                <span>360° Street View có thể xem trong Maps</span>
+              </div>
+            </div>
+          </div>
+
           <!-- Reviews Section -->
           <div class="reviews-wrapper" *ngIf="tour()?.id">
             <app-reviews [serviceId]="tour()!.id" serviceType="TOUR"></app-reviews>
@@ -108,8 +132,24 @@ import { ReviewsComponent } from '../review/review';
               </div>
             </div>
 
-            <button (click)="onBook()" class="btn-gold w-full mt-4">
-              Đặt Ngay Combo Này
+            <!-- Date Picker Section -->
+            <div class="date-picker-section">
+              <label class="date-label">📅 Ngày Khởi Hành</label>
+              <input 
+                type="date" 
+                class="date-input"
+                [(ngModel)]="departureDate"
+                [min]="today"
+                (change)="onDepartureDateChange()">
+              
+              <div class="return-date-preview" *ngIf="returnDate">
+                <span class="return-label">🏠 Ngày về dự kiến</span>
+                <span class="return-value">{{ returnDate | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+
+            <button (click)="onBook()" class="btn-gold w-full mt-4" [disabled]="!departureDate">
+              {{ departureDate ? 'Đặt Ngay Combo Này' : 'Chọn Ngày Xuất Phát' }}
             </button>
             <p class="disclaimer">Giá trọn gói đã bao gồm toàn bộ dịch vụ trong combo cao cấp.</p>
           </div>
@@ -148,6 +188,17 @@ import { ReviewsComponent } from '../review/review';
     .ai-icon { font-size: 2.5rem; }
     .ai-content { border-left: 3px solid var(--gold-primary); padding-left: 20px; font-style: italic; color: var(--text-secondary); }
 
+    /* Location & 360 Map */
+    .location-block { padding: 40px; margin-bottom: 40px; }
+    .location-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 12px; }
+    .location-header h2 { font-size: 2rem; color: var(--gold-primary); margin: 0; }
+    .location-address { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px; }
+    .btn-maps { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #1a73e8, #0d5bca); color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; transition: all 0.3s ease; white-space: nowrap; }
+    .btn-maps:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26, 115, 232, 0.4); }
+    .map-container { position: relative; border-radius: 16px; overflow: hidden; height: 420px; border: 1px solid var(--glass-border); }
+    .map-iframe { width: 100%; height: 100%; border: none; display: block; }
+    .map-overlay-label { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; letter-spacing: 0.5px; backdrop-filter: blur(8px); white-space: nowrap; pointer-events: none; }
+
     .sticky-sidebar { position: sticky; top: 120px; height: fit-content; }
     .booking-summary { padding: 40px; }
     .booking-summary h3 { font-size: 1.8rem; margin-bottom: 30px; color: var(--gold-primary); text-align: center; }
@@ -158,6 +209,17 @@ import { ReviewsComponent } from '../review/review';
     .price-sub { font-size: 0.85rem; color: var(--text-muted); }
 
     .summary-item { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--glass-border); font-size: 0.95rem; }
+
+    /* Date Picker */
+    .date-picker-section { margin: 24px 0; }
+    .date-label { display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--gold-primary); letter-spacing: 1px; margin-bottom: 10px; }
+    .date-input { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); color: var(--text-primary); padding: 12px 14px; border-radius: 8px; font-size: 0.95rem; cursor: pointer; transition: border-color 0.3s; box-sizing: border-box; }
+    .date-input:focus { outline: none; border-color: var(--gold-primary); }
+    .date-input::-webkit-calendar-picker-indicator { filter: invert(1) brightness(0.7); cursor: pointer; }
+    .return-date-preview { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding: 10px 14px; background: rgba(201, 168, 76, 0.08); border-radius: 8px; border: 1px solid rgba(201, 168, 76, 0.3); }
+    .return-label { font-size: 0.8rem; color: var(--text-secondary); }
+    .return-value { font-size: 0.9rem; font-weight: 600; color: var(--gold-primary); }
+
     .w-full { width: 100%; }
     .mt-4 { margin-top: 20px; }
     .disclaimer { font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 20px; line-height: 1.4; }
@@ -168,8 +230,12 @@ export class TourDetailComponent implements OnInit {
   private router = inject(Router);
   private catalogService = inject(CatalogService);
   private bookingService = inject(BookingService);
+  private sanitizer = inject(DomSanitizer);
 
   tour = signal<any | null>(null);
+  departureDate: string = '';
+  returnDate: Date | null = null;
+  today = new Date().toISOString().split('T')[0];
 
   ngOnInit() {
     const id = this.route.snapshot.params['id'];
@@ -180,16 +246,45 @@ export class TourDetailComponent implements OnInit {
     });
   }
 
+  getMapEmbedUrl(): SafeResourceUrl {
+    const t = this.tour();
+    if (!t?.latitude || !t?.longitude) return this.sanitizer.bypassSecurityTrustResourceUrl('');
+    const url = `https://maps.google.com/maps?q=${t.latitude},${t.longitude}&z=15&output=embed&t=k`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  getGoogleMapsUrl(): string {
+    const t = this.tour();
+    if (!t?.latitude || !t?.longitude) return '#';
+    return `https://www.google.com/maps?q=${t.latitude},${t.longitude}&z=15`;
+  }
+
+  onDepartureDateChange() {
+    const currentTour = this.tour();
+    if (!this.departureDate || !currentTour?.durationDays) {
+      this.returnDate = null;
+      return;
+    }
+    const dep = new Date(this.departureDate);
+    dep.setDate(dep.getDate() + currentTour.durationDays);
+    this.returnDate = dep;
+  }
+
   onBook() {
     const currentTour = this.tour();
     if (!currentTour) return;
+    if (!this.departureDate) {
+      alert('Vui lòng chọn ngày khởi hành!');
+      return;
+    }
 
     this.bookingService.createBooking({
       items: [
         {
           type: 'TOUR',
           serviceId: currentTour.id,
-          quantity: 1, // Defaulting to 1 for the combo
+          quantity: 1,
+          checkInDate: this.departureDate,   // ngày đi - backend sẽ tự tính ngày về
         }
       ]
     }).subscribe({

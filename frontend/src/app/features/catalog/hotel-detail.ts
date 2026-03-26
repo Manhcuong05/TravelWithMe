@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { HotelService, Hotel } from '../../core/services/hotel.service';
 import { BookingService } from '../../core/services/booking.service';
 import { ReviewsComponent } from '../review/review';
@@ -59,6 +60,29 @@ import { ReviewsComponent } from '../review/review';
                     {{ selectedRoomId() === room.id ? 'Đã chọn' : 'Chọn phòng' }}
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 📍 Vị Trí & Khám Phá 360° -->
+          <div class="location-block glass-effect" *ngIf="hotel()?.latitude && hotel()?.longitude">
+            <div class="location-header">
+              <h2 class="luxury-font">📍 Vị Trí & Khám Phá</h2>
+              <a [href]="getGoogleMapsUrl()" target="_blank" rel="noopener" class="btn-maps">
+                <span>🗺️</span> Xem trên Google Maps
+              </a>
+            </div>
+            <p class="location-address">{{ hotel()?.address }}, {{ hotel()?.city }}</p>
+            <div class="map-container">
+              <iframe 
+                [src]="getMapEmbedUrl()"
+                class="map-iframe"
+                allowfullscreen
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+              </iframe>
+              <div class="map-overlay-label">
+                <span>360° Street View có thể xem trong Maps</span>
               </div>
             </div>
           </div>
@@ -160,6 +184,17 @@ import { ReviewsComponent } from '../review/review';
     .select-btn { margin-top: 15px; padding: 8px 20px; border-radius: 6px; border: 1px solid var(--gold-primary); color: var(--gold-primary); font-size: 0.85rem; font-weight: 600; text-align: center; transition: var(--transition-smooth); }
     .select-btn.is-selected { background: var(--gold-primary); color: var(--bg-primary); }
     .room-card:not(.selected):hover .select-btn { background: rgba(184, 134, 11, 0.1); }
+
+    /* Location & 360 Map */
+    .location-block { padding: 40px; margin-bottom: 40px; }
+    .location-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 12px; }
+    .location-header h2 { font-size: 2rem; color: var(--gold-primary); margin: 0; }
+    .location-address { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px; }
+    .btn-maps { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #1a73e8, #0d5bca); color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; transition: all 0.3s ease; white-space: nowrap; }
+    .btn-maps:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26, 115, 232, 0.4); }
+    .map-container { position: relative; border-radius: 16px; overflow: hidden; height: 420px; border: 1px solid var(--glass-border); }
+    .map-iframe { width: 100%; height: 100%; border: none; display: block; }
+    .map-overlay-label { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; letter-spacing: 0.5px; backdrop-filter: blur(8px); white-space: nowrap; pointer-events: none; }
   `]
 })
 export class HotelDetailComponent implements OnInit {
@@ -167,6 +202,7 @@ export class HotelDetailComponent implements OnInit {
   private router = inject(Router);
   private hotelService = inject(HotelService);
   private bookingService = inject(BookingService);
+  private sanitizer = inject(DomSanitizer);
 
   hotel = signal<Hotel | null>(null);
   selectedRoomId = signal<string | null>(null);
@@ -189,6 +225,20 @@ export class HotelDetailComponent implements OnInit {
         if (res.success) this.hotel.set(res.data);
       }
     });
+  }
+
+  getMapEmbedUrl(): SafeResourceUrl {
+    const h = this.hotel();
+    if (!h?.latitude || !h?.longitude) return this.sanitizer.bypassSecurityTrustResourceUrl('');
+    // Dùng Google Maps Embed - không cần API key, hỗ trợ Street View bên trong
+    const url = `https://maps.google.com/maps?q=${h.latitude},${h.longitude}&z=17&output=embed&t=k`;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  getGoogleMapsUrl(): string {
+    const h = this.hotel();
+    if (!h?.latitude || !h?.longitude) return '#';
+    return `https://www.google.com/maps?q=${h.latitude},${h.longitude}&z=17`;
   }
 
   calculateNights() {

@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/reviews")
@@ -30,5 +31,18 @@ public class ReviewController {
             @PathVariable String serviceId,
             @RequestParam ServiceType type) {
         return ApiResponse.success(reviewService.getServiceReviews(serviceId, type));
+    }
+
+    /**
+     * Kiểm tra user đăng nhập có thể đánh giá tour/dịch vụ này không.
+     * Trả về { canReview: true/false }
+     */
+    @GetMapping("/can-review")
+    @PreAuthorize("hasAnyRole('TRAVELER', 'CTV', 'ADMIN')")
+    public ApiResponse<Map<String, Boolean>> canReview(
+            @RequestParam String serviceId,
+            @RequestParam ServiceType serviceType) {
+        boolean can = reviewService.canUserReview(serviceId, serviceType);
+        return ApiResponse.success(Map.of("canReview", can));
     }
 }

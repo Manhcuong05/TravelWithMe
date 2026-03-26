@@ -80,6 +80,76 @@ public class EmailService {
         }
     }
 
+    @Async
+    public void sendReviewReminderEmail(String toEmail, String customerName, String tourName, String tourId) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail, "TravelWithMe");
+            helper.setTo(toEmail);
+            helper.setSubject("⭐ Hành Trình Đã Kết Thúc - Chia Sẻ Trải Nghiệm Của Bạn!");
+            helper.setText(buildReviewReminderHtml(customerName, tourName, tourId), true);
+
+            mailSender.send(message);
+            log.info("Review reminder email sent to {} for tour {}", toEmail, tourId);
+        } catch (Exception e) {
+            log.error("Failed to send review reminder email to {} for tour {}", toEmail, tourId, e);
+        }
+    }
+
+    private String buildReviewReminderHtml(String customerName, String tourName, String tourId) {
+        String reviewUrl = "http://localhost:4200/tours/" + tourId;
+        return """
+                <!DOCTYPE html>
+                <html lang="vi">
+                <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+                <body style="margin: 0; padding: 0; background-color: #0a0a0a; font-family: 'Helvetica Neue', Arial, sans-serif;">
+                    <table width="100%%" cellpadding="0" cellspacing="0" style="background-color: #0a0a0a; padding: 40px 0;">
+                        <tr><td align="center">
+                            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #111111; border: 1px solid #2a2a2a; border-radius: 12px; overflow: hidden; max-width: 600px;">
+                                <tr>
+                                    <td style="padding: 40px; text-align: center; border-bottom: 1px solid #c9a84c;">
+                                        <h1 style="margin: 0; font-size: 26px; font-weight: 300; letter-spacing: 4px; color: #c9a84c; text-transform: uppercase;">TravelWithMe</h1>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 40px; text-align: center;">
+                                        <div style="font-size: 48px; margin-bottom: 20px;">✈️</div>
+                                        <h2 style="color: #ffffff; font-size: 22px; font-weight: 400; margin-bottom: 16px;">Chuyến Đi Đã Kết Thúc!</h2>
+                                        <p style="color: #cccccc; font-size: 15px; line-height: 1.8; margin-bottom: 8px;">
+                                            Xin chào <strong style="color: #c9a84c;">%s</strong>,
+                                        </p>
+                                        <p style="color: #cccccc; font-size: 15px; line-height: 1.8; margin-bottom: 24px;">
+                                            Chuyến đi <strong style="color: #ffffff;">%s</strong> của bạn vừa kết thúc.<br>
+                                            TravelWithMe rất mong được nghe cảm nhận thực tế của bạn để phục vụ<br>
+                                            cộng đồng du lịch ngày một tốt hơn! 🌟
+                                        </p>
+                                        <div style="margin: 32px 0;">
+                                            <div style="font-size: 32px; color: #c9a84c; letter-spacing: 4px; margin-bottom: 8px;">★ ★ ★ ★ ★</div>
+                                            <p style="color: #888; font-size: 13px;">Đánh giá của bạn rất có giá trị với chúng tôi</p>
+                                        </div>
+                                        <a href="%s" style="display: inline-block; background: linear-gradient(135deg, #c9a84c, #f0d080); color: #000; text-decoration: none; padding: 14px 36px; border-radius: 8px; font-weight: 700; font-size: 15px; letter-spacing: 1px; text-transform: uppercase;">
+                                            Đánh Giá Ngay
+                                        </a>
+                                        <p style="color: #666; font-size: 12px; margin-top: 24px;">
+                                            Nếu nút bấm không hoạt động, hãy truy cập: <a href="%s" style="color: #c9a84c;">%s</a>
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="background-color: #0a0a0a; padding: 24px; text-align: center; border-top: 1px solid #2a2a2a;">
+                                        <p style="margin: 0; font-size: 11px; letter-spacing: 2px; color: #444; text-transform: uppercase;">© 2025 TravelWithMe — Premium Travel Experience</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td></tr>
+                    </table>
+                </body>
+                </html>
+                """.formatted(customerName, tourName, reviewUrl, reviewUrl, reviewUrl);
+    }
+
     private String buildEmailHtml(Booking booking, String customerName) {
         NumberFormat currencyFormat = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
 

@@ -29,4 +29,9 @@ public class TourRequest {
 
     private String highlights;
     private List<String> images;
+
+    // Tọa độ địa lý
+    private Double latitude;
+    private Double longitude;
+    private String streetViewUrl;
 }
