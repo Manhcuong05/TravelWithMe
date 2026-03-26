@@ -174,6 +174,10 @@ public class BookingService {
                             .orElseThrow(
                                     () -> new BusinessException("SERVICE_NOT_FOUND", "Không tìm thấy tour du lịch"));
                     price = tour.getPrice();
+                    // Tự động tính ngày về nếu có ngày đi
+                    if (itemReq.getCheckInDate() != null && itemReq.getCheckOutDate() == null) {
+                        itemReq.setCheckOutDate(itemReq.getCheckInDate().plusDays(tour.getDurationDays()));
+                    }
                     break;
                 case POI:
                     throw new BusinessException("NOT_BOOKABLE", "Địa điểm tham quan không thể đặt chỗ trực tiếp");

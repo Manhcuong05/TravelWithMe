@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Repository
 public interface BookingItemRepository extends JpaRepository<BookingItem, String> {
@@ -22,4 +23,10 @@ public interface BookingItemRepository extends JpaRepository<BookingItem, String
                         @Param("serviceType") ServiceType serviceType,
                         @Param("checkInDate") LocalDate checkInDate,
                         @Param("checkOutDate") LocalDate checkOutDate);
+
+        @Query("SELECT bi FROM BookingItem bi " +
+                        "WHERE bi.serviceType = 'TOUR' " +
+                        "AND bi.checkOutDate = :date " +
+                        "AND bi.booking.status NOT IN ('CANCELLED', 'REFUNDED')")
+        List<BookingItem> findTourItemsByCheckOutDate(@Param("date") LocalDate date);
 }

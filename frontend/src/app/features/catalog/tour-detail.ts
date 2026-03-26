@@ -108,8 +108,24 @@ import { ReviewsComponent } from '../review/review';
               </div>
             </div>
 
-            <button (click)="onBook()" class="btn-gold w-full mt-4">
-              Đặt Ngay Combo Này
+            <!-- Date Picker Section -->
+            <div class="date-picker-section">
+              <label class="date-label">📅 Ngày Khởi Hành</label>
+              <input 
+                type="date" 
+                class="date-input"
+                [(ngModel)]="departureDate"
+                [min]="today"
+                (change)="onDepartureDateChange()">
+              
+              <div class="return-date-preview" *ngIf="returnDate">
+                <span class="return-label">🏠 Ngày về dự kiến</span>
+                <span class="return-value">{{ returnDate | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+
+            <button (click)="onBook()" class="btn-gold w-full mt-4" [disabled]="!departureDate">
+              {{ departureDate ? 'Đặt Ngay Combo Này' : 'Chọn Ngày Xuất Phát' }}
             </button>
             <p class="disclaimer">Giá trọn gói đã bao gồm toàn bộ dịch vụ trong combo cao cấp.</p>
           </div>
@@ -158,6 +174,17 @@ import { ReviewsComponent } from '../review/review';
     .price-sub { font-size: 0.85rem; color: var(--text-muted); }
 
     .summary-item { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--glass-border); font-size: 0.95rem; }
+
+    /* Date Picker */
+    .date-picker-section { margin: 24px 0; }
+    .date-label { display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--gold-primary); letter-spacing: 1px; margin-bottom: 10px; }
+    .date-input { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); color: var(--text-primary); padding: 12px 14px; border-radius: 8px; font-size: 0.95rem; cursor: pointer; transition: border-color 0.3s; box-sizing: border-box; }
+    .date-input:focus { outline: none; border-color: var(--gold-primary); }
+    .date-input::-webkit-calendar-picker-indicator { filter: invert(1) brightness(0.7); cursor: pointer; }
+    .return-date-preview { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding: 10px 14px; background: rgba(201, 168, 76, 0.08); border-radius: 8px; border: 1px solid rgba(201, 168, 76, 0.3); }
+    .return-label { font-size: 0.8rem; color: var(--text-secondary); }
+    .return-value { font-size: 0.9rem; font-weight: 600; color: var(--gold-primary); }
+
     .w-full { width: 100%; }
     .mt-4 { margin-top: 20px; }
     .disclaimer { font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 20px; line-height: 1.4; }
@@ -170,6 +197,9 @@ export class TourDetailComponent implements OnInit {
   private bookingService = inject(BookingService);
 
   tour = signal<any | null>(null);
+  departureDate: string = '';
+  returnDate: Date | null = null;
+  today = new Date().toISOString().split('T')[0];
 
   ngOnInit() {
     const id = this.route.snapshot.params['id'];
@@ -180,16 +210,32 @@ export class TourDetailComponent implements OnInit {
     });
   }
 
+  onDepartureDateChange() {
+    const currentTour = this.tour();
+    if (!this.departureDate || !currentTour?.durationDays) {
+      this.returnDate = null;
+      return;
+    }
+    const dep = new Date(this.departureDate);
+    dep.setDate(dep.getDate() + currentTour.durationDays);
+    this.returnDate = dep;
+  }
+
   onBook() {
     const currentTour = this.tour();
     if (!currentTour) return;
+    if (!this.departureDate) {
+      alert('Vui lòng chọn ngày khởi hành!');
+      return;
+    }
 
     this.bookingService.createBooking({
       items: [
         {
           type: 'TOUR',
           serviceId: currentTour.id,
-          quantity: 1, // Defaulting to 1 for the combo
+          quantity: 1,
+          checkInDate: this.departureDate,   // ngày đi - backend sẽ tự tính ngày về
         }
       ]
     }).subscribe({
