@@ -6,6 +6,7 @@ import { ApiResponse } from '../../data/models/auth.model';
 export interface Tour {
     id: string;
     title: string;
+    tourType?: string;
     location: string;
     price: number;
     duration: string;

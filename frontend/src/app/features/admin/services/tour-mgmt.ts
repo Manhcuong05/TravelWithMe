@@ -42,6 +42,11 @@ import { SafePipe } from '../../../shared/pipes/safe.pipe';
             </div>
 
             <div class="form-group">
+              <label>Loại Tour (VD: Gia Đình, Sinh Viên...)</label>
+              <input type="text" formControlName="tourType" placeholder="Nhập loại tour">
+            </div>
+
+            <div class="form-group">
               <label>Giá (VNĐ)</label>
               <input type="number" formControlName="price">
             </div>
@@ -163,6 +168,7 @@ export class TourMgmtComponent implements OnInit {
     location: ['', Validators.required],
     price: [0, [Validators.required, Validators.min(0)]],
     durationDays: [1, [Validators.required, Validators.min(1)]],
+    tourType: [''],
     imageUrl: [''],
     highlights: [''],
     latitude: [null as number | null],
@@ -172,6 +178,7 @@ export class TourMgmtComponent implements OnInit {
   columns: Column[] = [
     { key: 'title', label: 'Tên Tour' },
     { key: 'location', label: 'Địa điểm' },
+    { key: 'tourType', label: 'Loại Tour' },
     { key: 'price', label: 'Giá', type: 'price' },
     { key: 'durationDays', label: 'Số ngày' }
   ];
@@ -222,6 +229,7 @@ export class TourMgmtComponent implements OnInit {
         location: tour.location,
         price: tour.price,
         durationDays: tour.durationDays || 1,
+        tourType: tour.tourType || '',
         imageUrl: tour.imageUrl || '',
         highlights: tour.highlights?.join(', ') || '',
         latitude: (tour as any).latitude ?? null,
