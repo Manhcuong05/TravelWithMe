@@ -35,11 +35,11 @@ import { RouterLink } from '@angular/router';
         <div class="links-col">
           <h4 class="font-light tracking-wide section-title">Về Chúng Tôi</h4>
           <ul class="font-light pro-links">
-            <li><a routerLink="/">Câu Chuyện Thương Hiệu</a></li>
-            <li><a routerLink="/">Đội Ngũ Chuyên Gia</a></li>
-            <li><a routerLink="/">Chính Sách Bảo Mật</a></li>
-            <li><a routerLink="/">Điều Khoản Dịch Vụ</a></li>
-            <li><a routerLink="/">Liên Hệ Trợ Giúp</a></li>
+            <li><a routerLink="/about/brand-story">Câu Chuyện Thương Hiệu</a></li>
+            <li><a routerLink="/about/expert-team">Đội Ngũ Chuyên Gia</a></li>
+            <li><a routerLink="/about/privacy">Chính Sách Bảo Mật</a></li>
+            <li><a routerLink="/about/terms">Điều Khoản Dịch Vụ</a></li>
+            <li><a routerLink="/about/contact">Liên Hệ Trợ Giúp</a></li>
           </ul>
         </div>
 

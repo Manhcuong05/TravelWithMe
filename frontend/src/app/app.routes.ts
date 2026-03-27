@@ -18,6 +18,11 @@ export const routes: Routes = [
     { path: "bookings/:id", loadComponent: () => import("./features/booking/booking-detail.component").then(m => m.BookingDetailComponent) },
     { path: "itinerary", loadComponent: () => import("./features/itinerary/itinerary").then(m => m.ItineraryComponent) },
     { path: "itinerary/:id", loadComponent: () => import("./features/itinerary/itinerary").then(m => m.ItineraryComponent) },
+    { path: "about/brand-story", loadComponent: () => import("./features/about/brand-story").then(m => m.BrandStoryComponent) },
+    { path: "about/expert-team", loadComponent: () => import("./features/about/expert-team").then(m => m.ExpertTeamComponent) },
+    { path: "about/privacy", loadComponent: () => import("./features/about/privacy-policy").then(m => m.PrivacyPolicyComponent) },
+    { path: "about/terms", loadComponent: () => import("./features/about/terms-of-service").then(m => m.TermsOfServiceComponent) },
+    { path: "about/contact", loadComponent: () => import("./features/about/contact-support").then(m => m.ContactSupportComponent) },
     { path: "profile", loadComponent: () => import("./features/auth/profile").then(m => m.ProfileComponent) },
     { path: "favorites", loadComponent: () => import("./features/favorites/favorites").then(m => m.FavoritesComponent) },
     {
