@@ -1,5 +1,6 @@
 package com.example.travel.catalog.service;
 
+import com.example.travel.core.exception.BusinessException;
 import com.example.travel.catalog.dto.TourRequest;
 import com.example.travel.catalog.dto.TourResponse;
 import com.example.travel.catalog.entity.Tour;
@@ -40,7 +41,7 @@ public class TourService {
 
     public TourResponse updateTour(String id, TourRequest request) {
         Tour tour = tourRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tour"));
+                .orElseThrow(() -> new BusinessException("TOUR_NOT_FOUND", "Không tìm thấy tour"));
 
         tour.setTitle(request.getTitle());
         tour.setDescription(request.getDescription());
@@ -58,7 +59,7 @@ public class TourService {
 
     public void deleteTour(String id) {
         if (!tourRepository.existsById(id)) {
-            throw new RuntimeException("Không tìm thấy tour để xóa");
+            throw new BusinessException("TOUR_NOT_FOUND", "Không tìm thấy tour để xóa");
         }
         tourRepository.deleteById(id);
     }
@@ -89,7 +90,7 @@ public class TourService {
         log.info("Fetching tour with ID: {}", id);
         return tourRepository.findById(id)
                 .map(this::mapToResponse)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tour với ID: " + id));
+                .orElseThrow(() -> new BusinessException("TOUR_NOT_FOUND", "Không tìm thấy tour với ID: " + id));
     }
 
     private TourResponse mapToResponse(Tour tour) {

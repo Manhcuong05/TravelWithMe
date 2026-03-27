@@ -7,6 +7,12 @@ import com.example.travel.core.exception.BusinessException;
 import com.example.travel.core.util.SecurityUtil;
 import com.example.travel.identity.entity.User;
 import com.example.travel.identity.repository.UserRepository;
+import com.example.travel.catalog.repository.TourRepository;
+import com.example.travel.catalog.repository.HotelRepository;
+import com.example.travel.catalog.repository.POIRepository;
+import com.example.travel.catalog.entity.Tour;
+import com.example.travel.catalog.entity.Hotel;
+import com.example.travel.catalog.entity.POI;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +30,9 @@ public class ItineraryService {
         private final GeminiService geminiService;
         private final ItineraryRepository itineraryRepository;
         private final UserRepository userRepository;
+        private final TourRepository tourRepository;
+        private final HotelRepository hotelRepository;
+        private final POIRepository poiRepository;
         private final ObjectMapper objectMapper;
 
         public ItineraryResponse createItinerary(String destination, Integer days, String preferences) {
@@ -36,16 +45,43 @@ public class ItineraryService {
 
                 log.info("Generating itinerary for destination: {}, days: {}", destination, days);
 
+                // Fetch context from database
+                List<Tour> relatedTours = tourRepository.findByLocation(destination);
+                List<Hotel> relatedHotels = hotelRepository.findByCity(destination);
+                List<POI> relatedPois = poiRepository.findByCity(destination);
+
+                StringBuilder contextBuilder = new StringBuilder();
+                contextBuilder.append("\nDỮ LIỆU THỰC TẾ TỪ HỆ THỐNG (Hãy ưu tiên sử dụng các địa danh này):\n");
+                
+                contextBuilder.append("- ĐỊA DANH (POI): ");
+                relatedPois.forEach(p -> contextBuilder.append(p.getName()).append(" (ID: ").append(p.getId()).append("), "));
+                
+                contextBuilder.append("\n- KHÁCH SẠN: ");
+                relatedHotels.forEach(h -> contextBuilder.append(h.getName()).append(" (ID: ").append(h.getId()).append("), "));
+                
+                contextBuilder.append("\n- TOUR CÓ SẴN: ");
+                relatedTours.forEach(t -> contextBuilder.append(t.getTitle()).append(" (ID: ").append(t.getId()).append("), "));
+
+                if (relatedPois.isEmpty() && relatedHotels.isEmpty() && relatedTours.isEmpty()) {
+                    contextBuilder.append("\nLƯU Ý QUAN TRỌNG: Hiện tại hệ thống KHÔNG có dữ liệu thực tế nào cho địa điểm này. Vui lòng để danh sách 'recommendations' TRỐNG [].\n");
+                }
+
                 String prompt = String.format(
-                                "Hãy đóng vai một chuyên gia du lịch. Lập lịch trình %d ngày tại %s. " +
-                                                "Sở thích: %s. " +
-                                                "YÊU CẦU: Trả về duy nhất định dạng JSON, không văn bản dư thừa. " +
-                                                "Cấu trúc JSON: { \"title\": \"...\", \"days\": [ { \"day\": 1, \"activities\": [ { \"time\": \"08:00\", \"activity\": \"...\", \"location\": \"...\", \"notes\": \"...\" } ] } ] }",
-                                days, destination, preferences);
+                                "Hãy đóng vai một chuyên gia du lịch cao cấp. Lập lịch trình %d ngày tại %s. " +
+                                                "Sở thích khách hàng: %s. %s\n\n" +
+                                                "YÊU CẦU NGHIÊM NGẶT: \n" +
+                                                "1. Trả về duy nhất định dạng JSON.\n" +
+                                                "2. Trong phần 'recommendations', CHỈ được sử dụng các ID đã cung cấp ở trên. TUYỆT ĐỐI không tự chế ID giả.\n" +
+                                                "3. Nếu không có ID thật nào từ dữ liệu phía trên phù hợp, hãy để 'recommendations': [].\n" +
+                                                "4. Cấu trúc JSON: { \n" +
+                                                "  \"title\": \"...\", \n" +
+                                                "  \"days\": [ { \"day\": 1, \"activities\": [ { \"time\": \"08:00\", \"activity\": \"...\", \"location\": \"...\", \"notes\": \"...\" } ] } ],\n" +
+                                                "  \"recommendations\": [ { \"id\": \"...\", \"type\": \"TOUR|HOTEL|POI\", \"name\": \"...\" } ]\n" +
+                                                "}",
+                                days, destination, preferences, contextBuilder.toString());
 
                 String rawJson = geminiService.generateItinerary(prompt);
-                log.info("Gemini raw response length: {}", rawJson != null ? rawJson.length() : 0);
-                log.debug("Gemini raw response: {}", rawJson);
+                log.info("Gemini raw response generated for {}", destination);
 
                 Itinerary itinerary = Itinerary.builder()
                                 .userId(user.getId())
@@ -87,9 +123,10 @@ public class ItineraryService {
         private ItineraryResponse mapToResponse(Itinerary itinerary) {
                 String title = null;
                 List<ItineraryResponse.DayPlan> days = null;
+                ItineraryResponse.ItineraryContent content = null;
                 try {
                         String cleanJson = extractJson(itinerary.getGeneratedContentJson());
-                        ItineraryResponse.ItineraryContent content = objectMapper.readValue(cleanJson,
+                        content = objectMapper.readValue(cleanJson,
                                         ItineraryResponse.ItineraryContent.class);
                         if (content != null) {
                                 title = content.getTitle();
@@ -107,6 +144,7 @@ public class ItineraryService {
                                 .userPreferences(itinerary.getUserPreferences())
                                 .title(title)
                                 .days(days)
+                                .recommendations(content != null ? content.getRecommendations() : null)
                                 .saved(itinerary.getSaved() != null && itinerary.getSaved())
                                 .build();
         }

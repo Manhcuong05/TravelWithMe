@@ -20,7 +20,15 @@ export interface ItineraryResponse {
     durationDays: number;
     userPreferences?: string;
     days: ItineraryDay[];
+    recommendations?: Recommendation[];
     saved?: boolean;
+}
+
+export interface Recommendation {
+    id: string;
+    type: 'TOUR' | 'HOTEL' | 'POI';
+    name: string;
+    imageUrl?: string;
 }
 
 @Injectable({

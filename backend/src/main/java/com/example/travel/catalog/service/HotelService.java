@@ -1,5 +1,6 @@
 package com.example.travel.catalog.service;
 
+import com.example.travel.core.exception.BusinessException;
 import com.example.travel.catalog.dto.HotelRequest;
 import com.example.travel.catalog.dto.HotelResponse;
 import com.example.travel.catalog.dto.HotelRoomResponse;
@@ -44,7 +45,7 @@ public class HotelService {
 
     public HotelResponse getHotelById(String id, LocalDate checkIn, LocalDate checkOut) {
         Hotel hotel = hotelRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách sạn"));
+                .orElseThrow(() -> new BusinessException("HOTEL_NOT_FOUND", "Không tìm thấy khách sạn"));
         return mapToResponse(hotel, checkIn, checkOut);
     }
 
@@ -66,7 +67,7 @@ public class HotelService {
 
     public HotelResponse updateHotel(String id, HotelRequest request) {
         Hotel hotel = hotelRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách sạn"));
+                .orElseThrow(() -> new BusinessException("HOTEL_NOT_FOUND", "Không tìm thấy khách sạn"));
 
         hotel.setName(request.getName());
         hotel.setDescription(request.getDescription());
@@ -84,7 +85,7 @@ public class HotelService {
 
     public void deleteHotel(String id) {
         if (!hotelRepository.existsById(id)) {
-            throw new RuntimeException("Không tìm thấy khách sạn để xóa");
+            throw new BusinessException("HOTEL_NOT_FOUND", "Không tìm thấy khách sạn để xóa");
         }
         hotelRepository.deleteById(id);
     }

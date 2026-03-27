@@ -1,5 +1,6 @@
 package com.example.travel.catalog.service;
 
+import com.example.travel.core.exception.BusinessException;
 import com.example.travel.catalog.dto.POIRequest;
 import com.example.travel.catalog.dto.POIResponse;
 import com.example.travel.catalog.entity.POI;
@@ -42,7 +43,7 @@ public class POIService {
 
     public POIResponse updatePOI(String id, POIRequest request) {
         POI poi = poiRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy địa điểm tham quan"));
+                .orElseThrow(() -> new BusinessException("POI_NOT_FOUND", "Không tìm thấy địa điểm tham quan"));
 
         poi.setName(request.getName());
         poi.setDescription(request.getDescription());
@@ -63,7 +64,7 @@ public class POIService {
 
     public void deletePOI(String id) {
         if (!poiRepository.existsById(id)) {
-            throw new RuntimeException("Không tìm thấy địa điểm để xóa");
+            throw new BusinessException("POI_NOT_FOUND", "Không tìm thấy địa điểm để xóa");
         }
         poiRepository.deleteById(id);
     }

@@ -40,6 +40,10 @@ import { ItineraryService, ItineraryResponse } from '../../core/services/itinera
           <button (click)="generate()" class="btn-gold w-full" [disabled]="loading()">
             {{ loading() ? 'Đang kiến tạo hành trình...' : 'Tạo lịch trình' }}
           </button>
+          
+          <div class="alert alert-error glass-effect mt-15 animate-fade-in" *ngIf="errorMessage()">
+            <i class="fas fa-exclamation-triangle mr-2"></i> {{ errorMessage() }}
+          </div>
         </div>
 
         <div *ngIf="loading()" class="loading-container">
@@ -72,6 +76,38 @@ import { ItineraryService, ItineraryResponse } from '../../core/services/itinera
                 </div>
               </div>
             </div>
+          </div>
+          
+          <!-- AI Recommendations Section -->
+          <div class="recommendations-section mt-60 animate-fade-in" *ngIf="itinerary()?.recommendations?.length">
+            <div class="section-title-pro">
+              <span class="pro-tag">SẢN PHẨM GỢI Ý</span>
+              <h2 class="luxury-font">Dành Riêng Cho Hành Trình Của Bạn</h2>
+              <p>Các lựa chọn tour và khách sạn thực tế phù hợp nhất với kế hoạch này.</p>
+            </div>
+            
+            <div class="recommendations-grid" *ngIf="itinerary()?.recommendations?.length; else noRecs">
+              <div *ngFor="let rec of itinerary()?.recommendations" class="rec-card glass-effect hover-up">
+                <div class="rec-type-badge">{{ rec.type }}</div>
+                <div class="rec-icon">
+                  <i class="fas" [class.fa-hotel]="rec.type === 'HOTEL'" [class.fa-map-marked-alt]="rec.type === 'TOUR'" [class.fa-monument]="rec.type === 'POI'"></i>
+                </div>
+                <div class="rec-content">
+                  <h3>{{ rec.name }}</h3>
+                  <button class="btn-view-rec" [routerLink]="getRecLink(rec)">
+                    Xem chi tiết <i class="fas fa-external-link-alt ml-2"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <ng-template #noRecs>
+              <div class="no-recommendations glass-effect p-40">
+                <i class="fas fa-info-circle mb-15"></i>
+                <p>Hiện tại hệ thống chưa có dữ liệu Tour hoặc Khách sạn thực tế tại khu vực này trong cơ sở dữ liệu.</p>
+                <span class="sub-text">Bạn vẫn có thể tham khảo lịch trình AI gợi ý phía trên!</span>
+              </div>
+            </ng-template>
           </div>
         </div>
       </div>
@@ -124,6 +160,32 @@ import { ItineraryService, ItineraryResponse } from '../../core/services/itinera
     .act-details h3 { font-size: 1.2rem; margin-bottom: 8px; font-family: 'Playfair Display', serif; }
     .loc { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; }
     .notes { font-size: 0.85rem; color: var(--text-muted); font-style: italic; }
+
+    /* Recommendations Styling */
+    .mt-60 { margin-top: 60px; }
+    .section-title-pro { text-align: center; margin-bottom: 40px; }
+    .pro-tag { display: inline-block; background: rgba(212, 175, 55, 0.1); color: var(--gold-primary); padding: 5px 15px; border-radius: 20px; font-size: 0.65rem; font-weight: 800; letter-spacing: 2px; margin-bottom: 15px; }
+    .section-title-pro h2 { font-size: 2.2rem; margin-bottom: 10px; }
+    .section-title-pro p { color: var(--text-secondary); font-size: 0.95rem; }
+
+    .recommendations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+    .rec-card { padding: 30px; position: relative; display: flex; align-items: center; gap: 20px; overflow: hidden; }
+    .rec-type-badge { position: absolute; top: 12px; right: 12px; font-size: 0.6rem; font-weight: 800; color: var(--gold-primary); opacity: 0.5; }
+    .rec-icon { width: 50px; height: 50px; border-radius: 50%; background: rgba(212, 175, 55, 0.1); display: flex; align-items: center; justify-content: center; color: var(--gold-primary); font-size: 1.2rem; }
+    .rec-content h3 { font-size: 1.1rem; margin-bottom: 10px; color: #fff; font-family: 'Playfair Display', serif; }
+    .btn-view-rec { background: transparent; border: none; color: var(--gold-primary); font-size: 0.8rem; font-weight: 700; cursor: pointer; padding: 0; display: flex; align-items: center; }
+    .btn-view-rec:hover { color: #fff; }
+    .ml-2 { margin-left: 8px; }
+    .hover-up:hover { transform: translateY(-10px); border-color: var(--gold-primary); }
+
+    .no-recommendations { text-align: center; color: var(--text-secondary); border: 1px dashed rgba(255,255,255,0.1); border-radius: 15px; }
+    .no-recommendations i { font-size: 2rem; color: var(--gold-primary); opacity: 0.5; }
+    .p-40 { padding: 40px; }
+    .mb-15 { margin-bottom: 15px; }
+    .mt-15 { margin-top: 15px; }
+    .mr-2 { margin-right: 8px; }
+    .sub-text { font-size: 0.8rem; opacity: 0.7; display: block; margin-top: 10px; }
+    .alert-error { background: rgba(255, 68, 68, 0.1); color: #ff4444; border: 1px solid rgba(255, 68, 68, 0.2); padding: 15px; border-radius: 8px; font-size: 0.9rem; }
   `]
 })
 export class ItineraryComponent implements OnInit {
@@ -133,6 +195,7 @@ export class ItineraryComponent implements OnInit {
   request = { destination: '', days: 3, preferences: '' };
   itinerary = signal<ItineraryResponse | null>(null);
   loading = signal<boolean>(false);
+  errorMessage = signal<string | null>(null);
   isViewingSaved = signal<boolean>(false);
 
   ngOnInit() {
@@ -157,16 +220,25 @@ export class ItineraryComponent implements OnInit {
   }
 
   generate() {
-    if (!this.request.destination) return;
-
+    if (!this.request.destination || this.loading()) return;
+ 
     this.loading.set(true);
+    this.errorMessage.set(null);
     this.itinerary.set(null);
     this.service.generate(this.request).subscribe({
       next: (res) => {
-        if (res.success) this.itinerary.set(res.data);
+        if (res.success) {
+          this.itinerary.set(res.data);
+        } else {
+          this.errorMessage.set(res.message || 'Không thể tạo lịch trình.');
+        }
         this.loading.set(false);
       },
-      error: () => this.loading.set(false)
+      error: (err) => {
+        console.error(err);
+        this.errorMessage.set('Rất tiếc, hệ thống AI đang bận hoặc gặp sự cố. Vui lòng thử lại sau giây lát.');
+        this.loading.set(false);
+      }
     });
   }
 
@@ -191,5 +263,12 @@ export class ItineraryComponent implements OnInit {
 
   print() {
     window.print();
+  }
+
+  getRecLink(rec: any): string {
+    if (rec.type === 'HOTEL') return `/hotels/${rec.id}`;
+    if (rec.type === 'TOUR') return `/tours/${rec.id}`;
+    if (rec.type === 'POI') return `/pois`; // POI doesn't have a single-page detail usually, opens list
+    return '/';
   }
 }

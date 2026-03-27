@@ -18,6 +18,7 @@ public class ItineraryResponse {
     private String userPreferences;
     private String title;
     private List<DayPlan> days;
+    private List<Recommendation> recommendations;
     private boolean saved;
 
     @Data
@@ -26,6 +27,18 @@ public class ItineraryResponse {
     public static class ItineraryContent {
         private String title;
         private List<DayPlan> days;
+        private List<Recommendation> recommendations;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Recommendation {
+        private String id;
+        private String type; // TOUR, HOTEL, POI
+        private String name;
+        private String imageUrl;
     }
 
     @Data
