@@ -10,26 +10,16 @@ import { FormsModule } from '@angular/forms';
   imports: [CommonModule, RouterModule, FormsModule],
   template: `
     <section class="tour-list-page animate-fade-in">
-      <!-- Hero Section from Image 1 -->
+      <!-- Hero Section: Titles now inside Hero for focus -->
       <div class="hero-header">
-        <div class="hero-content">
-          <div class="search-box-wrapper animate-slide-up">
-            <div class="search-box">
-              <i class="fas fa-search search-icon"></i>
-              <input type="text" [(ngModel)]="searchQuery" placeholder="Bạn có ý tưởng gì cho chuyến đi tiếp theo không?">
-              <button class="btn-search">Tìm kiếm</button>
-            </div>
-          </div>
+        <div class="hero-content animate-slide-up">
+          <span class="pro-label-hero">BEST TOUR DU LỊCH</span>
+          <h1 class="luxury-font main-title-hero">Hành Trình Độc Bản</h1>
+          <p class="subtitle-hero">Khám phá những điểm đến thượng lưu được thiết kế riêng cho bạn</p>
         </div>
       </div>
 
-      <div class="container main-content mt-60">
-        <div class="section-title-row mb-40 text-center">
-           <span class="pro-label">BST TOUR DU LỊCH</span>
-           <h2 class="section-title luxury-font">Hành Trình Độc Bản</h2>
-           <p class="subtitle-pro">Khám phá những điểm đến thượng lưu được thiết kế riêng cho bạn</p>
-        </div>
-
+      <div class="container main-content">
         <!-- Reference Style Categories -->
         <div class="category-filters mb-50">
            <button 
@@ -84,19 +74,24 @@ import { FormsModule } from '@angular/forms';
   styles: [`
     .tour-list-page { background: #050a14; color: #fff; min-height: 100vh; padding-bottom: 100px; }
     
-    /* Hero Section from Reference */
+    /* Hero Section: Titles Focus */
     .hero-header { 
-      height: 450px; 
-      background: linear-gradient(rgba(0,0,0,0.3), rgba(5,10,20,1)), 
+      height: 550px; 
+      background: linear-gradient(rgba(0,0,0,0.5), rgba(5,10,20,1)), 
                   url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&q=80&w=1600');
       background-size: cover;
       background-position: center;
       display: flex;
       align-items: center;
       justify-content: center;
+      margin-bottom: -60px; /* Overlap effect */
     }
     .hero-content { width: 100%; max-width: 900px; padding: 0 20px; text-align: center; }
     
+    .pro-label-hero { font-size: 0.9rem; font-weight: 800; color: var(--gold-primary); letter-spacing: 6px; text-transform: uppercase; margin-bottom: 25px; display: block; opacity: 0.9; }
+    .main-title-hero { font-size: 4.5rem; margin-bottom: 25px; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .subtitle-hero { color: #e2e8f0; font-size: 1.35rem; opacity: 0.8; max-width: 700px; margin: 0 auto; line-height: 1.6; }
+
     .search-box { 
       background: rgba(255,255,255,0.04); border: 1px solid rgba(212,175,55,0.25); border-radius: 60px; padding: 8px 8px 8px 30px; 
       display: flex; align-items: center; gap: 15px; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
@@ -109,7 +104,8 @@ import { FormsModule } from '@angular/forms';
     .btn-search { background: var(--gold-gradient); color: #000; border: none; padding: 12px 40px; border-radius: 50px; font-weight: 800; cursor: pointer; transition: 0.3s; letter-spacing: 1px; }
     .btn-search:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(212, 175, 55, 0.5); }
 
-    .container { max-width: 1400px; margin: 0 auto; padding: 0 30px; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 30px; position: relative; z-index: 10; }
+    .main-content { min-height: 500px; }
     .mt-60 { margin-top: 80px; }
     .mb-30 { margin-bottom: 30px; }
     .mb-40 { margin-bottom: 50px; }
@@ -183,11 +179,11 @@ import { FormsModule } from '@angular/forms';
 })
 export class TourListComponent implements OnInit {
   private service = inject(CatalogService);
-  
+
   tours = signal<Tour[]>([]);
   loading = signal(true);
   searchQuery = '';
-  
+
   categories = ['Tất cả', 'Gia Đình', 'Sinh Viên', 'Cặp Đôi', 'Luxury', 'Mạo Hiểm'];
   selectedCategory = signal('Tất cả');
 
@@ -201,12 +197,12 @@ export class TourListComponent implements OnInit {
     }
 
     if (query) {
-      list = list.filter(t => 
-        t.title.toLowerCase().includes(query) || 
+      list = list.filter(t =>
+        t.title.toLowerCase().includes(query) ||
         t.location.toLowerCase().includes(query)
       );
     }
-    
+
     return list;
   });
 

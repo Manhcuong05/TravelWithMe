@@ -26,6 +26,7 @@ public class TourService {
     public TourResponse saveTour(TourRequest request) {
         Tour tour = Tour.builder()
                 .title(request.getTitle())
+                .tourType(request.getTourType())
                 .description(request.getDescription())
                 .location(request.getLocation())
                 .price(request.getPrice())
@@ -44,6 +45,7 @@ public class TourService {
                 .orElseThrow(() -> new BusinessException("TOUR_NOT_FOUND", "Không tìm thấy tour"));
 
         tour.setTitle(request.getTitle());
+        tour.setTourType(request.getTourType());
         tour.setDescription(request.getDescription());
         tour.setLocation(request.getLocation());
         tour.setPrice(request.getPrice());
@@ -99,6 +101,7 @@ public class TourService {
             TourResponse response = TourResponse.builder()
                     .id(tour.getId())
                     .title(tour.getTitle())
+                    .tourType(tour.getTourType())
                     .description(tour.getDescription())
                     .location(tour.getLocation())
                     .price(tour.getPrice())

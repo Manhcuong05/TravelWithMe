@@ -13,6 +13,7 @@ import java.util.List;
 public class TourResponse {
     private String id;
     private String title;
+    private String tourType;
     private String description;
     private String location;
     private double price;

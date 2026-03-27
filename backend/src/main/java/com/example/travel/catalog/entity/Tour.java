@@ -22,6 +22,9 @@ public class Tour {
     @Column(nullable = false)
     private String title;
 
+    @Column(name = "tour_type")
+    private String tourType; // e.g., "Gia Đình", "Sinh Viên", "Luxury"
+
     @Column(columnDefinition = "TEXT")
     private String description;
 

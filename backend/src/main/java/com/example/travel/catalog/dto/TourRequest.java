@@ -18,6 +18,7 @@ public class TourRequest {
     @NotBlank(message = "Tiêu đề tour không được để trống")
     private String title;
 
+    private String tourType;
     private String description;
     private String location;
 
