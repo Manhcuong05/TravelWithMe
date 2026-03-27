@@ -260,7 +260,7 @@ export class HotelDetailComponent implements OnInit {
       const diff = end.getTime() - start.getTime();
       const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
       this.nights.set(days > 0 ? days : 0);
-      
+
       if (days > 0) {
         this.loadHotel();
       }

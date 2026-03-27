@@ -45,25 +45,29 @@ public class ItineraryService {
 
                 log.info("Generating itinerary for destination: {}, days: {}", destination, days);
 
-                // Fetch context from database
-                List<Tour> relatedTours = tourRepository.findByLocation(destination);
-                List<Hotel> relatedHotels = hotelRepository.findByCity(destination);
-                List<POI> relatedPois = poiRepository.findByCity(destination);
+                // Fetch context from database with fuzzy search
+                List<Tour> relatedTours = tourRepository.findByLocationContainingIgnoreCase(destination);
+                List<Hotel> relatedHotels = hotelRepository.findByCityContainingIgnoreCase(destination);
+                List<POI> relatedPois = poiRepository.findByCityContainingIgnoreCase(destination);
 
                 StringBuilder contextBuilder = new StringBuilder();
                 contextBuilder.append("\nDỮ LIỆU THỰC TẾ TỪ HỆ THỐNG (Hãy ưu tiên sử dụng các địa danh này):\n");
-                
+
                 contextBuilder.append("- ĐỊA DANH (POI): ");
-                relatedPois.forEach(p -> contextBuilder.append(p.getName()).append(" (ID: ").append(p.getId()).append("), "));
-                
+                relatedPois.forEach(p -> contextBuilder.append(p.getName()).append(" (ID: ").append(p.getId())
+                                .append("), "));
+
                 contextBuilder.append("\n- KHÁCH SẠN: ");
-                relatedHotels.forEach(h -> contextBuilder.append(h.getName()).append(" (ID: ").append(h.getId()).append("), "));
-                
+                relatedHotels.forEach(h -> contextBuilder.append(h.getName()).append(" (ID: ").append(h.getId())
+                                .append("), "));
+
                 contextBuilder.append("\n- TOUR CÓ SẴN: ");
-                relatedTours.forEach(t -> contextBuilder.append(t.getTitle()).append(" (ID: ").append(t.getId()).append("), "));
+                relatedTours.forEach(t -> contextBuilder.append(t.getTitle()).append(" (ID: ").append(t.getId())
+                                .append("), "));
 
                 if (relatedPois.isEmpty() && relatedHotels.isEmpty() && relatedTours.isEmpty()) {
-                    contextBuilder.append("\nLƯU Ý QUAN TRỌNG: Hiện tại hệ thống KHÔNG có dữ liệu thực tế nào cho địa điểm này. Vui lòng để danh sách 'recommendations' TRỐNG [].\n");
+                        contextBuilder.append(
+                                        "\nLƯU Ý QUAN TRỌNG: Hiện tại hệ thống KHÔNG có dữ liệu thực tế nào cho địa điểm này. Vui lòng để danh sách 'recommendations' TRỐNG [].\n");
                 }
 
                 String prompt = String.format(
@@ -71,12 +75,16 @@ public class ItineraryService {
                                                 "Sở thích khách hàng: %s. %s\n\n" +
                                                 "YÊU CẦU NGHIÊM NGẶT: \n" +
                                                 "1. Trả về duy nhất định dạng JSON.\n" +
-                                                "2. Trong phần 'recommendations', CHỈ được sử dụng các ID đã cung cấp ở trên. TUYỆT ĐỐI không tự chế ID giả.\n" +
-                                                "3. Nếu không có ID thật nào từ dữ liệu phía trên phù hợp, hãy để 'recommendations': [].\n" +
+                                                "2. Trong phần 'recommendations', CHỈ được sử dụng các ID đã cung cấp ở trên. TUYỆT ĐỐI không tự chế ID giả.\n"
+                                                +
+                                                "3. Nếu không có ID thật nào từ dữ liệu phía trên phù hợp, hãy để 'recommendations': [].\n"
+                                                +
                                                 "4. Cấu trúc JSON: { \n" +
                                                 "  \"title\": \"...\", \n" +
-                                                "  \"days\": [ { \"day\": 1, \"activities\": [ { \"time\": \"08:00\", \"activity\": \"...\", \"location\": \"...\", \"notes\": \"...\" } ] } ],\n" +
-                                                "  \"recommendations\": [ { \"id\": \"...\", \"type\": \"TOUR|HOTEL|POI\", \"name\": \"...\" } ]\n" +
+                                                "  \"days\": [ { \"day\": 1, \"activities\": [ { \"time\": \"08:00\", \"activity\": \"...\", \"location\": \"...\", \"notes\": \"...\" } ] } ],\n"
+                                                +
+                                                "  \"recommendations\": [ { \"id\": \"...\", \"type\": \"TOUR|HOTEL|POI\", \"name\": \"...\" } ]\n"
+                                                +
                                                 "}",
                                 days, destination, preferences, contextBuilder.toString());
 

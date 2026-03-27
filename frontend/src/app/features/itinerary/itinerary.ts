@@ -79,7 +79,7 @@ import { ItineraryService, ItineraryResponse } from '../../core/services/itinera
           </div>
           
           <!-- AI Recommendations Section -->
-          <div class="recommendations-section mt-60 animate-fade-in" *ngIf="itinerary()?.recommendations?.length">
+          <div class="recommendations-section mt-60 animate-fade-in">
             <div class="section-title-pro">
               <span class="pro-tag">SẢN PHẨM GỢI Ý</span>
               <h2 class="luxury-font">Dành Riêng Cho Hành Trình Của Bạn</h2>
@@ -104,8 +104,8 @@ import { ItineraryService, ItineraryResponse } from '../../core/services/itinera
             <ng-template #noRecs>
               <div class="no-recommendations glass-effect p-40">
                 <i class="fas fa-info-circle mb-15"></i>
-                <p>Hiện tại hệ thống chưa có dữ liệu Tour hoặc Khách sạn thực tế tại khu vực này trong cơ sở dữ liệu.</p>
-                <span class="sub-text">Bạn vẫn có thể tham khảo lịch trình AI gợi ý phía trên!</span>
+                <p>Hệ thống hiện tại chưa có Tour hoặc Khách sạn thực tế đáp ứng hoàn toàn hành trình AI gợi ý phía trên.</p>
+                <span class="sub-text">Chúng tôi đang nỗ lực cập nhật thêm nhiều lựa chọn mới cho khu vực này!</span>
               </div>
             </ng-template>
           </div>

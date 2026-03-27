@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface TourRepository extends JpaRepository<Tour, String> {
     List<Tour> findByLocation(String location);
+    List<Tour> findByLocationContainingIgnoreCase(String location);
 }

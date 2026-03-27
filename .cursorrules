@@ -1,0 +1,6 @@
+# Global Project Rules
+
+1. Before starting the backend server or running tests, always kill any processes on port 8080: `lsof -t -i:8080 | xargs kill -9 || true`.
+2. AI recommendations (ItineraryService) must always be filtered against valid database IDs using the `filterRecommendations` method.
+3. For missing resources, the backend should return 404 Not Found (via BusinessException with _NOT_FOUND code).
+4. Maintain Luxury Glassmorphism UI throughout the application.

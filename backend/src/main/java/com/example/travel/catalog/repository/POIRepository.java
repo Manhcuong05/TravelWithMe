@@ -9,6 +9,7 @@ import java.util.List;
 @Repository
 public interface POIRepository extends JpaRepository<POI, String> {
     List<POI> findByCity(String city);
+    List<POI> findByCityContainingIgnoreCase(String city);
 
     List<POI> findByCategory(String category);
 }
