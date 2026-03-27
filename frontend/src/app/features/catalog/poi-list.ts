@@ -1,12 +1,13 @@
 import { Component, inject, OnInit, OnDestroy, signal, computed, effect, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CatalogService, POI } from '../../core/services/catalog.service';
+import { SafePipe } from '../../shared/pipes/safe.pipe';
 import { gsap } from 'gsap';
 
 @Component({
   selector: 'app-poi-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, SafePipe],
   template: `
     <!-- Feature Hero Carousel - Pro Max Edition -->
     <section class="guide-hero animate-fade-in" *ngIf="featuredPois().length > 0" (mouseenter)="stopTimer()" (mouseleave)="startTimer()">
@@ -214,6 +215,27 @@ import { gsap } from 'gsap';
                   <div class="section-label">PHẦN 1: TỔNG QUAN</div>
                   <div class="article-intro">
                     <p class="drop-cap">{{ detailPoi.description }}</p>
+                  </div>
+                  
+                  <!-- Map Integration Pro -->
+                  <div class="map-section-modal mt-40" *ngIf="detailPoi.latitude && detailPoi.longitude">
+                    <div class="section-label">BẢN ĐỒ VỊ TRÍ</div>
+                    <div class="map-modal-container glass-morph">
+                        <iframe 
+                            width="100%" 
+                            height="350" 
+                            frameborder="0" 
+                            style="border:0;" 
+                            [src]="getMapUrl(detailPoi) | safe" 
+                            allowfullscreen>
+                        </iframe>
+                        <div class="map-modal-footer">
+                            <span>📍 {{ detailPoi.address }}</span>
+                            <a [href]="'https://www.google.com/maps?q=' + detailPoi.latitude + ',' + detailPoi.longitude" target="_blank" class="btn-maps-link">
+                                Mở trong Google Maps <i class="fas fa-external-link-alt ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
                   </div>
                 </section>
 
@@ -493,6 +515,15 @@ import { gsap } from 'gsap';
 
     .mt-40 { margin-top: 40px; }
     .ml-2 { margin-left: 8px; }
+    .ml-1 { margin-left: 4px; }
+
+    /* Map Modal Addition */
+    .map-section-modal { margin-bottom: 50px; }
+    .map-modal-container { border-radius: 20px; overflow: hidden; border: 1px solid rgba(212,175,55,0.3); }
+    .map-modal-footer { padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); border-top: 1px solid rgba(255,255,255,0.05); }
+    .map-modal-footer span { font-size: 0.9rem; color: #94a3b8; }
+    .btn-maps-link { color: var(--gold-primary); text-decoration: none; font-size: 0.85rem; font-weight: 700; transition: 0.3s; }
+    .btn-maps-link:hover { color: #fff; }
   `]
 })
 export class PoiListComponent implements OnInit, OnDestroy {
@@ -504,7 +535,7 @@ export class PoiListComponent implements OnInit, OnDestroy {
   selectedRegion = signal<string>('ALL');
   selectedPoi = signal<POI | null>(null);
   searchTerm = signal<string>('');
-
+  
   activeIndex = signal(0);
   private timerId?: any;
 
@@ -562,6 +593,11 @@ export class PoiListComponent implements OnInit, OnDestroy {
         this.loading.set(false);
       }
     });
+  }
+
+  getMapUrl(poi: POI): string {
+    if (!poi.latitude || !poi.longitude) return '';
+    return `https://maps.google.com/maps?q=${poi.latitude},${poi.longitude}&z=15&output=embed`;
   }
 
   ngOnDestroy() { this.stopTimer(); }

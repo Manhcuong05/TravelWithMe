@@ -26,4 +26,5 @@ public class POIResponse {
     private double averageSpend;
     private String imagesJson;
     private String handbookJson;
+    private String imageUrl;
 }

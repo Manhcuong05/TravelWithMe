@@ -57,6 +57,9 @@ public class HotelService {
                 .country(request.getCountry())
                 .starRating(request.getStarRating())
                 .imagesJson(toJson(request.getImages()))
+                .latitude(request.getLatitude())
+                .longitude(request.getLongitude())
+                .streetViewUrl(request.getStreetViewUrl())
                 .build();
         return mapToResponse(hotelRepository.save(hotel));
     }
@@ -72,6 +75,9 @@ public class HotelService {
         hotel.setCountry(request.getCountry());
         hotel.setStarRating(request.getStarRating());
         hotel.setImagesJson(toJson(request.getImages()));
+        hotel.setLatitude(request.getLatitude());
+        hotel.setLongitude(request.getLongitude());
+        hotel.setStreetViewUrl(request.getStreetViewUrl());
 
         return mapToResponse(hotelRepository.save(hotel));
     }
@@ -107,6 +113,10 @@ public class HotelService {
                 .starRating(hotel.getStarRating())
                 .images(fromJson(hotel.getImagesJson(), new TypeReference<List<String>>() {
                 }))
+                .latitude(hotel.getLatitude())
+                .longitude(hotel.getLongitude())
+                .streetViewUrl(hotel.getStreetViewUrl())
+                .imageUrl(extractFirstImage(hotel.getImagesJson()))
                 .build();
 
         // Load rooms
@@ -139,6 +149,16 @@ public class HotelService {
         }
         int booked = bookingItemRepository.countBookedQuantityInRange(roomId, ServiceType.HOTEL, checkIn, checkOut);
         return Math.max(0, totalRooms - booked);
+    }
+
+    private String extractFirstImage(String json) {
+        if (json == null || json.isEmpty()) return null;
+        try {
+            List<String> images = objectMapper.readValue(json, new TypeReference<List<String>>() {});
+            return (images != null && !images.isEmpty()) ? images.get(0) : null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private <T> T fromJson(String json, TypeReference<T> typeReference) {

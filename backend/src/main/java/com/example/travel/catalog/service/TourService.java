@@ -114,12 +114,24 @@ public class TourService {
                     .latitude(tour.getLatitude())
                     .longitude(tour.getLongitude())
                     .streetViewUrl(tour.getStreetViewUrl())
+                    .imageUrl(extractFirstImage(tour.getImagesJson()))
                     .build();
             log.info("Successfully mapped tour {}", tour.getId());
             return response;
         } catch (Exception e) {
             log.error("Error mapping tour {}", tour.getId(), e);
             throw new RuntimeException("Lỗi hệ thống khi xử lý dữ liệu tour: " + e.getMessage());
+        }
+    }
+
+    private String extractFirstImage(String json) {
+        if (json == null || json.isEmpty()) return null;
+        try {
+            List<String> images = objectMapper.readValue(json, objectMapper.getTypeFactory().constructCollectionType(List.class, String.class));
+            return (images != null && !images.isEmpty()) ? images.get(0) : null;
+        } catch (Exception e) {
+            log.warn("Failed to parse imagesJson: {}", json);
+            return null;
         }
     }
 }

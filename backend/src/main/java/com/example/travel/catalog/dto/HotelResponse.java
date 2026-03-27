@@ -21,4 +21,10 @@ public class HotelResponse {
     private int starRating;
     private List<String> images;
     private List<HotelRoomResponse> rooms;
+
+    // Additional fields for detail view & management
+    private Double latitude;
+    private Double longitude;
+    private String streetViewUrl;
+    private String imageUrl;
 }

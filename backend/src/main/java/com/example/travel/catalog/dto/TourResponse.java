@@ -29,4 +29,5 @@ public class TourResponse {
     private Double latitude;
     private Double longitude;
     private String streetViewUrl;
+    private String imageUrl;
 }

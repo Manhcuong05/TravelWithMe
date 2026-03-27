@@ -17,6 +17,9 @@ export interface Tour {
     flightId?: string;
     poiIds?: string[];
     aiSuggestions?: string;
+    latitude?: number;
+    longitude?: number;
+    streetViewUrl?: string;
 }
 
 export interface FlightClass {

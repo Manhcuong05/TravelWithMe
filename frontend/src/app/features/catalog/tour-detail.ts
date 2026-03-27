@@ -82,25 +82,28 @@ import { ReviewsComponent } from '../review/review';
             </div>
           </div>
 
-          <!-- 📍 Vị Trí & Khám Phá 360° -->
-          <div class="location-block glass-effect" *ngIf="tour()?.latitude && tour()?.longitude">
+          <!-- 📍 Vị Trí & Khám Phá Địa Phương -->
+          <div class="location-wrapper glass-effect animate-slide-up" *ngIf="hasCoordinates()">
             <div class="location-header">
-              <h2 class="luxury-font">📍 Vị Trí & Khám Phá</h2>
-              <a [href]="getGoogleMapsUrl()" target="_blank" rel="noopener" class="btn-maps">
-                <span>🗺️</span> Xem trên Google Maps
+              <div class="title-with-icon">
+                <i class="fas fa-map-marked-alt text-gold"></i>
+                <h2 class="luxury-font">Vị Trí & Khám Phá</h2>
+              </div>
+              <a [href]="getGoogleMapsUrl()" target="_blank" rel="noopener" class="btn-maps-gold">
+                <span>📍</span> Mở trong Google Maps
               </a>
             </div>
-            <p class="location-address">{{ tour()?.location }}</p>
-            <div class="map-container">
+            <p class="location-address-pro">{{ tour()?.location }}</p>
+            <div class="map-frame-pro">
               <iframe 
                 [src]="getMapEmbedUrl()"
-                class="map-iframe"
+                class="full-map-iframe"
                 allowfullscreen
-                loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade">
+                loading="lazy">
               </iframe>
-              <div class="map-overlay-label">
-                <span>360° Street View có thể xem trong Maps</span>
+              <div class="map-floating-label">
+                <i class="fas fa-street-view mr-2"></i>
+                <span>Quan sát thực địa điểm đến của chuyến hành trình</span>
               </div>
             </div>
           </div>
@@ -188,19 +191,21 @@ import { ReviewsComponent } from '../review/review';
     .ai-icon { font-size: 2.5rem; }
     .ai-content { border-left: 3px solid var(--gold-primary); padding-left: 20px; font-style: italic; color: var(--text-secondary); }
 
-    /* Location & 360 Map */
-    .location-block { padding: 40px; margin-bottom: 40px; }
-    .location-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 12px; }
-    .location-header h2 { font-size: 2rem; color: var(--gold-primary); margin: 0; }
-    .location-address { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px; }
-    .btn-maps { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #1a73e8, #0d5bca); color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; transition: all 0.3s ease; white-space: nowrap; }
-    .btn-maps:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26, 115, 232, 0.4); }
-    .map-container { position: relative; border-radius: 16px; overflow: hidden; height: 420px; border: 1px solid var(--glass-border); }
-    .map-iframe { width: 100%; height: 100%; border: none; display: block; }
-    .map-overlay-label { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; letter-spacing: 0.5px; backdrop-filter: blur(8px); white-space: nowrap; pointer-events: none; }
+    /* Location & Map Enhancements */
+    .location-wrapper { padding: 40px; margin-bottom: 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 20px; }
+    .location-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; }
+    .title-with-icon { display: flex; align-items: center; gap: 15px; }
+    .title-with-icon i { font-size: 1.8rem; color: var(--gold-primary); }
+    .title-with-icon h2 { margin: 0; font-size: 1.8rem; color: var(--gold-primary); }
+    .location-address-pro { color: var(--text-secondary); margin-bottom: 20px; font-size: 0.95rem; }
+    .btn-maps-gold { display: flex; align-items: center; gap: 10px; background: rgba(212, 175, 55, 0.1); color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 10px 20px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 700; transition: 0.3s; }
+    .btn-maps-gold:hover { background: var(--gold-primary); color: #000; box-shadow: 0 5px 20px rgba(212, 175, 55, 0.3); }
+    .map-frame-pro { position: relative; height: 450px; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
+    .full-map-iframe { width: 100%; height: 100%; border:0; }
+    .map-floating-label { position: absolute; top: 20px; right: 20px; background: rgba(5, 10, 20, 0.8); backdrop-filter: blur(10px); padding: 8px 16px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 0.75rem; pointer-events: none; }
 
     .sticky-sidebar { position: sticky; top: 120px; height: fit-content; }
-    .booking-summary { padding: 40px; }
+    .booking-summary { padding: 40px; border-radius: 20px; }
     .booking-summary h3 { font-size: 1.8rem; margin-bottom: 30px; color: var(--gold-primary); text-align: center; }
     
     .price-box { background: rgba(255,255,255,0.05); padding: 25px; border-radius: 12px; border: 1px solid var(--glass-border); text-align: center; margin-bottom: 30px; }
@@ -248,9 +253,14 @@ export class TourDetailComponent implements OnInit {
 
   getMapEmbedUrl(): SafeResourceUrl {
     const t = this.tour();
-    if (!t?.latitude || !t?.longitude) return this.sanitizer.bypassSecurityTrustResourceUrl('');
-    const url = `https://maps.google.com/maps?q=${t.latitude},${t.longitude}&z=15&output=embed&t=k`;
+    if (!this.hasCoordinates()) return this.sanitizer.bypassSecurityTrustResourceUrl('');
+    const url = `https://maps.google.com/maps?q=${t.latitude},${t.longitude}&z=15&output=embed`;
     return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  hasCoordinates(): boolean {
+    const t = this.tour();
+    return !!(t && t.latitude !== null && t.longitude !== null && t.latitude !== undefined);
   }
 
   getGoogleMapsUrl(): string {

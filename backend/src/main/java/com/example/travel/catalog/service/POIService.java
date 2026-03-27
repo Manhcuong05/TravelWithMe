@@ -107,6 +107,17 @@ public class POIService {
                 .averageSpend(poi.getAverageSpend())
                 .imagesJson(poi.getImagesJson())
                 .handbookJson(poi.getHandbookJson())
+                .imageUrl(extractFirstImage(poi.getImagesJson()))
                 .build();
+    }
+
+    private String extractFirstImage(String json) {
+        if (json == null || json.isEmpty()) return null;
+        try {
+            List<String> images = objectMapper.readValue(json, new com.fasterxml.jackson.core.type.TypeReference<List<String>>() {});
+            return (images != null && !images.isEmpty()) ? images.get(0) : null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { GenericMgmtComponent, Column } from '../shared/generic-mgmt';
 import { CatalogService, PointOfInterest } from '../../../core/services/catalog.service';
+import { SafePipe } from '../../../shared/pipes/safe.pipe';
 
 @Component({
   selector: 'app-poi-mgmt',
   standalone: true,
-  imports: [CommonModule, GenericMgmtComponent, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, GenericMgmtComponent, FormsModule, ReactiveFormsModule, SafePipe],
   template: `
     <app-generic-mgmt
       [title]="'Quản lý Địa danh'"
@@ -56,13 +57,32 @@ import { CatalogService, PointOfInterest } from '../../../core/services/catalog.
               </div>
 
               <div class="form-group-pro">
-                <label>Vĩ độ (Latitude)</label>
-                <input type="number" formControlName="latitude" step="0.000001">
+                <label>📍 Vĩ độ (Latitude)</label>
+                <input type="number" formControlName="latitude" step="any" placeholder="Ví dụ: 21.0285">
               </div>
 
               <div class="form-group-pro">
-                <label>Kinh độ (Longitude)</label>
-                <input type="number" formControlName="longitude" step="0.000001">
+                <label>📍 Kinh độ (Longitude)</label>
+                <input type="number" formControlName="longitude" step="any" placeholder="Ví dụ: 105.8542">
+              </div>
+
+              <div class="form-group-pro full-width coord-hint-pro">
+                <i class="fas fa-circle-info mr-2"></i>
+                <span>💡 Hướng dẫn: Mở Google Maps → Chuột phải vào vị trí → Sao chép số đầu tiên (Vĩ độ) và số thứ hai (Kinh độ).</span>
+              </div>
+
+              <div class="form-group-pro full-width map-preview-wrap" *ngIf="poiForm.get('latitude')?.value && poiForm.get('longitude')?.value">
+                <label>Bản đồ vị trí (Preview)</label>
+                <div class="map-container-pro">
+                  <iframe 
+                    width="100%" 
+                    height="200" 
+                    frameborder="0" 
+                    style="border:0; border-radius: 14px;" 
+                    [src]="getMapUrl() | safe" 
+                    allowfullscreen>
+                  </iframe>
+                </div>
               </div>
 
               <div class="form-group-pro">
@@ -88,15 +108,24 @@ import { CatalogService, PointOfInterest } from '../../../core/services/catalog.
 
               <div class="form-group-pro full-width">
                 <label>Hình ảnh đại diện (Banner)</label>
+                
+                <!-- Preview area -->
+                <div class="image-preview-container-pro" *ngIf="poiForm.get('imageUrl')?.value">
+                  <img [src]="poiForm.get('imageUrl')?.value" alt="POI Preview">
+                  <button type="button" class="btn-remove-img" (click)="poiForm.patchValue({imageUrl: ''})">
+                    <i class="fas fa-times-circle"></i>
+                  </button>
+                </div>
+
                 <div class="upload-zone-pro">
                   <div class="url-input">
                     <i class="fas fa-link"></i>
-                    <input type="text" formControlName="imageUrl" placeholder="HTTPS://...">
+                    <input type="text" formControlName="imageUrl" placeholder="Link ảnh hoặc tải lên...">
                   </div>
-                  <div class="file-trigger">
-                    <input type="file" (change)="onFileSelected($event)" accept="image/*" id="file-up">
-                    <label for="file-up" class="btn-upload-minimal">
-                      <i class="fas fa-cloud-arrow-up"></i>
+                  <div class="file-trigger-pro">
+                    <label class="btn-upload-minimal" [class.disabled]="isUploading()">
+                      <input type="file" (change)="onFileSelected($event)" accept="image/*" [disabled]="isUploading()" style="display: none">
+                      <i class="fas" [class.fa-cloud-arrow-up]="!isUploading()" [class.fa-spinner-third]="isUploading()" [class.fa-spin]="isUploading()"></i>
                       <span>{{ isUploading() ? 'Đang tải...' : 'Tải ảnh lên' }}</span>
                     </label>
                   </div>
@@ -202,9 +231,17 @@ import { CatalogService, PointOfInterest } from '../../../core/services/catalog.
     .url-input i { position: absolute; left: 15px; top: 18px; color: #475569; font-size: 0.8rem; }
     .url-input input { padding-left: 40px !important; }
     
-    .file-trigger { position: relative; }
-    .file-trigger input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
-    .btn-upload-minimal { display: flex; align-items: center; gap: 10px; height: 100%; padding: 0 20px; background: rgba(212,175,55,0.1); border: 1px dashed rgba(212,175,55,0.3); border-radius: 14px; color: #d4af37; font-weight: 700; font-size: 0.85rem; }
+    .file-trigger-pro { display: flex; align-items: stretch; }
+    .btn-upload-minimal { 
+       display: flex; align-items: center; justify-content: center; gap: 10px; 
+       padding: 0 20px; background: rgba(212,175,55,0.1); 
+       border: 1px dashed rgba(212,175,55,0.4); border-radius: 14px; 
+       color: #d4af37; font-weight: 700; font-size: 0.85rem; cursor: pointer !important;
+       transition: all 0.3s; white-space: nowrap; outline: none;
+       user-select: none;
+    }
+    .btn-upload-minimal:hover:not(.disabled) { background: rgba(212,175,55,0.2); border-color: #d4af37; transform: translateY(-2px); }
+    .btn-upload-minimal.disabled { opacity: 0.5; cursor: wait !important; }
 
     .ai-trigger-panel { 
        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%);
@@ -229,6 +266,27 @@ import { CatalogService, PointOfInterest } from '../../../core/services/catalog.
     .btn-save-pro { background: linear-gradient(135deg, #FFD700, #D4AF37); color: #000; padding: 12px 35px; border: none; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2); }
     .btn-save-pro:hover:not(:disabled) { transform: scale(1.03); box-shadow: 0 15px 30px rgba(212, 175, 55, 0.3); }
     .btn-save-pro:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .image-preview-container-pro { 
+       position: relative; width: 100%; height: 200px; border-radius: 20px; 
+       overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.1);
+    }
+    .image-preview-container-pro img { width: 100%; height: 100%; object-fit: cover; }
+    .btn-remove-img { 
+       position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); 
+       border: none; color: #ef4444; font-size: 1.5rem; cursor: pointer; border-radius: 50%;
+       width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+       backdrop-filter: blur(5px); transition: 0.3s;
+    }
+    .btn-remove-img:hover { background: #ef4444; color: white; transform: scale(1.1); }
+
+    .coord-hint-pro { 
+       background: rgba(201,168,76,0.07); border: 1px dashed rgba(201,168,76,0.3); 
+       border-radius: 12px; padding: 12px 18px !important; font-size: 0.8rem; color: #94a3b8;
+       line-height: 1.5;
+    }
+    .map-preview-wrap { margin-top: 10px; }
+    .map-container-pro { border: 2px solid rgba(255,255,255,0.05); border-radius: 16px; overflow: hidden; background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
 
     .mr-3 { margin-right: 12px; }
   `]
@@ -274,6 +332,13 @@ export class PoiMgmtComponent implements OnInit {
 
   ngOnInit() {
     this.loadPOIs();
+  }
+
+  getMapUrl(): string {
+    const lat = this.poiForm.get('latitude')?.value;
+    const lng = this.poiForm.get('longitude')?.value;
+    if (!lat || !lng) return '';
+    return `https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed`;
   }
 
   loadPOIs() {

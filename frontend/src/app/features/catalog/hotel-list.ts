@@ -17,39 +17,56 @@ import { HotelService, Hotel } from '../../core/services/hotel.service';
         </div>
 
         <div class="filter-wrapper glass-effect animate-slide-up-delayed">
+          <div class="search-title">
+            <span class="luxury-accent">✨</span> TÌM KIẾM NGHỈ DƯỠNG
+          </div>
           <div class="filters-grid">
             <!-- City Filter -->
             <div class="filter-group">
-              <label><span class="icon">📍</span> ĐỊA ĐIỂM</label>
-              <select [(ngModel)]="selectedCity" (change)="onFilterChange()">
-                <option value="">Tất cả thành phố</option>
-                <option *ngFor="let city of cities()" [value]="city">{{ city }}</option>
-              </select>
+              <label>ĐỊA ĐIỂM</label>
+              <div class="input-with-icon">
+                <span class="field-icon">📍</span>
+                <select [(ngModel)]="selectedCity" (change)="onFilterChange()">
+                  <option value="">Tất cả thành phố</option>
+                  <option *ngFor="let city of cities()" [value]="city">{{ city }}</option>
+                </select>
+              </div>
             </div>
 
             <!-- Stars Filter -->
             <div class="filter-group">
-              <label><span class="icon">⭐</span> XẾP HẠNG</label>
-              <select [(ngModel)]="starRating" (change)="onFilterChange()">
-                <option [value]="0">Tất cả hạng sao</option>
-                <option [value]="5">5 Sao (Luxury)</option>
-                <option [value]="4">4 Sao (Premium)</option>
-                <option [value]="3">3 Sao (Standard)</option>
-              </select>
+              <label>HẠNG SAO</label>
+              <div class="input-with-icon">
+                <span class="field-icon">⭐</span>
+                <select [(ngModel)]="starRating" (change)="onFilterChange()">
+                  <option [value]="0">Tất cả hạng sao</option>
+                  <option [value]="5">5 Sao (Luxury)</option>
+                  <option [value]="4">4 Sao (Premium)</option>
+                  <option [value]="3">3 Sao (Standard)</option>
+                </select>
+              </div>
             </div>
 
             <!-- Price Filter -->
             <div class="filter-group price-range">
-              <label><span class="icon">💰</span> KHOẢNG GIÁ (VNĐ)</label>
+              <label>KHOẢNG GIÁ (VNĐ)</label>
               <div class="range-inputs">
-                <input type="number" [(ngModel)]="minPrice" placeholder="Từ" (input)="onFilterChange()">
+                <div class="input-with-icon">
+                  <span class="field-icon">min</span>
+                  <input type="number" [(ngModel)]="minPrice" placeholder="Từ" (input)="onFilterChange()">
+                </div>
                 <span class="divider">-</span>
-                <input type="number" [(ngModel)]="maxPrice" placeholder="Đến" (input)="onFilterChange()">
+                <div class="input-with-icon">
+                   <span class="field-icon">max</span>
+                  <input type="number" [(ngModel)]="maxPrice" placeholder="Đến" (input)="onFilterChange()">
+                </div>
               </div>
             </div>
 
             <div class="filter-actions">
-               <button class="btn-reset" (click)="resetFilters()">Đặt lại</button>
+               <button class="btn-search-reset" (click)="resetFilters()">
+                 <span class="icon">🔄</span>
+               </button>
             </div>
           </div>
         </div>
@@ -69,12 +86,12 @@ import { HotelService, Hotel } from '../../core/services/hotel.service';
         <div class="hotel-grid" *ngIf="!loading() && filteredHotels().length > 0">
           <div *ngFor="let hotel of filteredHotels()" class="hotel-card glass-effect hover-up">
             <div class="card-img" [style.backgroundImage]="'url(' + (hotel.imageUrl || 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=600') + ')'">
-              <div class="rating-badge">★ {{ hotel.rating }}</div>
-              <div class="stars-badge">{{ hotel.starRating }}★</div>
+              <div class="luxury-badge">{{ hotel.starRating }}★</div>
             </div>
             <div class="card-body">
-              <div class="meta-info">
-                <span class="city-tag">{{ hotel.city }}</span>
+              <div class="meta-row">
+                <span class="city-tag"><span class="icon">📍</span> {{ hotel.city }}</span>
+                <span class="user-rating"><span class="icon">⭐</span> {{ hotel.rating }}</span>
               </div>
               <h3>{{ hotel.name }}</h3>
               <p class="description">{{ hotel.description | slice:0:100 }}...</p>
@@ -94,68 +111,70 @@ import { HotelService, Hotel } from '../../core/services/hotel.service';
   `,
   styles: [`
     .catalog-page { padding: 140px 0 100px; min-height: 100vh; background: radial-gradient(circle at top right, #1a1a2e, #050a14); }
-    .container { max-width: 1300px; margin: 0 auto; padding: 0 25px; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 40px; }
     
     .page-header { text-align: center; margin-bottom: 60px; }
-    .page-header h1 { font-size: 3.5rem; margin-bottom: 15px; background: linear-gradient(to right, #fff, #d4af37); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .page-header p { color: #94a3b8; font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
+    .page-header h1 { font-size: 4rem; margin-bottom: 15px; background: linear-gradient(to bottom, #fff 30%, #d4af37 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-family: 'Playfair Display', serif; }
+    .page-header p { color: #94a3b8; font-size: 1.2rem; max-width: 700px; margin: 0 auto; opacity: 0.8; }
 
-    .filter-wrapper { padding: 30px; border-radius: 24px; margin-bottom: 60px; border: 1px solid rgba(212, 175, 55, 0.2); }
-    .filters-grid { display: grid; grid-template-columns: 1fr 1fr 1.5fr auto; gap: 30px; align-items: flex-end; }
+    .filter-wrapper { padding: 40px; border-radius: 30px; margin-bottom: 80px; border: 1px solid rgba(212, 175, 55, 0.2); background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(20px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+    .search-title { font-size: 0.8rem; font-weight: 800; color: #d4af37; letter-spacing: 4px; margin-bottom: 25px; display: flex; align-items: center; gap: 12px; }
+    .filters-grid { display: grid; grid-template-columns: 1fr 1fr 1.5fr auto; gap: 24px; align-items: flex-end; }
     
-    .filter-group { display: flex; flex-direction: column; gap: 10px; }
-    .filter-group label { font-size: 0.75rem; font-weight: 800; color: #d4af37; letter-spacing: 1.5px; display: flex; align-items: center; gap: 8px; }
-    .filter-group .icon { font-style: normal; }
+    .filter-group { display: flex; flex-direction: column; gap: 12px; }
+    .filter-group label { font-size: 0.7rem; font-weight: 700; color: #64748b; letter-spacing: 2px; padding-left: 4px; }
     
-    select, input { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px 16px; color: white; outline: none; transition: all 0.3s; font-size: 0.9rem; }
-    select:focus, input:focus { border-color: #d4af37; background: rgba(255,255,255,0.08); box-shadow: 0 0 15px rgba(212, 175, 55, 0.1); }
-    select option { background: #1a1a2e; color: white; }
+    .input-with-icon { position: relative; display: flex; align-items: center; }
+    .field-icon { position: absolute; left: 16px; color: #d4af37; font-size: 0.9rem; pointer-events: none; opacity: 0.8; }
+    
+    select, input { width: 100%; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(212, 175, 55, 0.1); border-radius: 16px; padding: 14px 16px 14px 44px; color: white; outline: none; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); font-size: 0.95rem; }
+    select:focus, input:focus { border-color: #d4af37; background: rgba(255, 255, 255, 0.05); box-shadow: 0 0 20px rgba(212, 175, 55, 0.15); transform: translateY(-2px); }
+    select option { background: #0f172a; color: white; }
 
-    .range-inputs { display: flex; align-items: center; gap: 10px; }
-    .range-inputs input { width: 100%; }
-    .divider { color: #475569; }
+    .price-range .input-with-icon .field-icon { font-size: 0.65rem; text-transform: uppercase; font-weight: 800; opacity: 0.5; left: 12px; }
+    .price-range input { padding-left: 48px; }
 
-    .btn-reset { background: none; border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; padding: 12px 20px; border-radius: 12px; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; height: 48px; }
-    .btn-reset:hover { border-color: #d4af37; color: white; }
+    .range-inputs { display: flex; align-items: center; gap: 12px; }
+    .divider { color: rgba(212, 175, 55, 0.3); font-weight: 300; }
+
+    .btn-search-reset { background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.2); color: #d4af37; width: 52px; height: 52px; border-radius: 16px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+    .btn-search-reset:hover { background: #d4af37; color: #000; transform: rotate(180deg) scale(1.1); }
 
     /* Hotel Grid */
-    .hotel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 40px; }
-    .hotel-card { border-radius: 24px; overflow: hidden; height: 100%; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.05); }
+    .hotel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 50px; }
+    .hotel-card { border-radius: 32px; overflow: hidden; height: 100%; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.05); transition: all 0.5s ease; position: relative; }
+    .hotel-card:hover { border-color: rgba(212, 175, 55, 0.3); transform: translateY(-15px); box-shadow: 0 30px 60px -15px rgba(0,0,0,0.6); }
     
-    .card-img { height: 260px; background-size: cover; background-position: center; position: relative; transition: transform 0.5s ease; }
-    .hotel-card:hover .card-img { transform: scale(1.05); }
+    .card-img { height: 280px; background-size: cover; background-position: center; position: relative; overflow: hidden; }
+    .card-img::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(5, 10, 20, 0.8), transparent); }
     
-    .rating-badge { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.7); padding: 6px 14px; border-radius: 30px; font-size: 0.85rem; color: #ffd700; backdrop-filter: blur(8px); font-weight: 700; border: 1px solid rgba(255,255,255,0.1); }
-    .stars-badge { position: absolute; top: 20px; left: 20px; background: rgba(212, 175, 55, 0.9); padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; color: #000; font-weight: 800; }
+    .luxury-badge { position: absolute; top: 24px; left: 24px; z-index: 10; background: #d4af37; color: #000; padding: 6px 14px; border-radius: 12px; font-size: 0.8rem; font-weight: 800; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
 
-    .card-body { padding: 30px; flex: 1; display: flex; flex-direction: column; background: linear-gradient(to bottom, rgba(255,255,255,0.02), transparent); }
-    .city-tag { font-size: 0.7rem; text-transform: uppercase; color: #d4af37; font-weight: 800; letter-spacing: 2px; }
+    .card-body { padding: 35px; flex: 1; display: flex; flex-direction: column; background: rgba(255,255,255,0.01); }
+    .meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .city-tag { font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 600; letter-spacing: 1.5px; display: flex; align-items: center; gap: 6px; }
+    .city-tag .icon { color: #d4af37; }
+    .user-rating { background: rgba(212, 175, 55, 0.1); color: #d4af37; padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+
+    .card-body h3 { font-size: 1.8rem; margin: 15px 0; color: #fff; font-family: 'Playfair Display', serif; line-height: 1.2; }
+    .description { color: #64748b; font-size: 1rem; line-height: 1.7; margin-bottom: 35px; }
     
-    .card-body h3 { font-size: 1.6rem; margin: 12px 0; color: #fff; font-family: 'Playfair Display', serif; }
-    .description { color: #94a3b8; font-size: 0.95rem; line-height: 1.6; margin-bottom: 30px; }
-    
-    .card-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 25px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .card-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.05); }
     .price-info { display: flex; flex-direction: column; }
-    .price-label { font-size: 0.75rem; color: #475569; text-transform: uppercase; letter-spacing: 1px; }
-    .amount { font-size: 1.3rem; font-weight: 800; color: #fff; }
-    .amount small { font-size: 0.7rem; color: #94a3b8; font-weight: 400; }
+    .price-label { font-size: 0.7rem; color: #475569; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+    .amount { font-size: 1.5rem; font-weight: 800; color: #fff; }
+    .amount small { font-size: 0.75rem; color: #64748b; font-weight: 400; }
 
-    .btn-view { background: #d4af37; color: #000; text-decoration: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; font-size: 0.85rem; transition: all 0.3s; }
-    .btn-view:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2); }
+    .btn-view { background: #d4af37; color: #000; text-decoration: none; padding: 14px 28px; border-radius: 16px; font-weight: 800; font-size: 0.9rem; transition: all 0.4s; }
+    .btn-view:hover { background: #fff; transform: scale(1.05); box-shadow: 0 15px 30px rgba(212, 175, 55, 0.3); }
 
-    .empty-state { text-align: center; padding: 100px 40px; }
-    .empty-icon { font-size: 4rem; margin-bottom: 20px; opacity: 0.5; }
-    .empty-state h3 { font-size: 1.8rem; margin-bottom: 15px; color: #fff; }
-    .empty-state p { color: #64748b; margin-bottom: 30px; }
-    .btn-gold-outline { background: none; border: 1px solid #d4af37; color: #d4af37; padding: 12px 30px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.3s; }
-    .btn-gold-outline:hover { background: #d4af37; color: #000; }
-
-    .spinner { width: 50px; height: 50px; border: 4px solid rgba(212, 175, 55, 0.1); border-top-color: #d4af37; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+    .loading-state, .empty-state { text-align: center; padding: 100px 40px; }
+    .spinner { width: 60px; height: 60px; border: 4px solid rgba(212, 175, 55, 0.1); border-top-color: #d4af37; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
     @keyframes spin { to { transform: rotate(360deg); } }
     
-    .animate-slide-up { animation: slideUp 0.8s ease backwards; }
-    .animate-slide-up-delayed { animation: slideUp 0.8s 0.2s ease backwards; }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-slide-up { animation: slideUp 1s cubic-bezier(0.23, 1, 0.32, 1) backwards; }
+    .animate-slide-up-delayed { animation: slideUp 1s 0.3s cubic-bezier(0.23, 1, 0.32, 1) backwards; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
   `]
 })
 export class HotelListComponent implements OnInit {
