@@ -11,13 +11,20 @@ import { FavoriteService } from '../../core/services/favorite.service';
   imports: [CommonModule, RouterLink, FormsModule],
   template: `
     <section class="catalog-page animate-fade-in">
-      <div class="container">
-        <div class="page-header">
-          <h1 class="luxury-font animate-slide-up">Điểm Đến Thượng Lưu</h1>
-          <p class="animate-slide-up-delayed">Tìm kiếm nơi nghỉ dưỡng hoàn hảo tại những điểm đến danh tiếng nhất thế giới.</p>
-        </div>
+      
+      <!-- Hero Section -->
+      <div class="hero-section">
+         <div class="hero-bg" style="background-image: url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=1920')"></div>
+         <div class="hero-overlay"></div>
+         <div class="hero-content">
+            <h2 class="sub-heading animate-slide-up">B E S T  P R E M I U M  S T A Y S</h2>
+            <h1 class="luxury-font main-heading animate-slide-up" style="animation-delay: 0.1s">Điểm Đến Thượng Lưu</h1>
+            <p class="animate-slide-up" style="animation-delay: 0.2s">Tìm kiếm nơi nghỉ dưỡng hoàn hảo tại những điểm đến danh tiếng nhất thế giới</p>
+         </div>
+      </div>
 
-        <div class="filter-wrapper glass-effect animate-slide-up-delayed">
+      <div class="container relative-z">
+        <div class="filter-wrapper glass-effect animate-slide-up-delayed" style="animation-delay: 0.4s">
           <div class="search-title">
             <span class="luxury-accent">✨</span> TÌM KIẾM NGHỈ DƯỠNG
           </div>
@@ -85,7 +92,7 @@ import { FavoriteService } from '../../core/services/favorite.service';
         </div>
 
         <div class="hotel-grid" *ngIf="!loading() && filteredHotels().length > 0">
-          <div *ngFor="let hotel of filteredHotels()" class="hotel-card glass-effect hover-up">
+          <div *ngFor="let hotel of filteredHotels(); let i = index" class="hotel-card glass-effect animate-slide-up" [style.animation-delay]="(0.3 + i*0.1) + 's'">
             <div class="card-img" [style.backgroundImage]="'url(' + (hotel.imageUrl || 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=600') + ')'">
               <div class="luxury-badge">{{ hotel.starRating }}★</div>
               
@@ -118,14 +125,24 @@ import { FavoriteService } from '../../core/services/favorite.service';
     </section>
   `,
   styles: [`
-    .catalog-page { padding: 140px 0 100px; min-height: 100vh; background: radial-gradient(circle at top right, #1a1a2e, #050a14); }
-    .container { max-width: 1400px; margin: 0 auto; padding: 0 40px; }
+    .catalog-page { min-height: 100vh; background: #020617; padding-bottom: 100px; }
     
-    .page-header { text-align: center; margin-bottom: 60px; }
-    .page-header h1 { font-size: 4rem; margin-bottom: 15px; background: linear-gradient(to bottom, #fff 30%, #d4af37 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-family: 'Playfair Display', serif; }
-    .page-header p { color: #94a3b8; font-size: 1.2rem; max-width: 700px; margin: 0 auto; opacity: 0.8; }
+    /* Hero Section */
+    .hero-section { position: relative; height: 500px; display: flex; align-items: center; justify-content: center; text-align: center; margin-bottom: -70px; z-index: 1; overflow: hidden; }
+    .hero-bg { position: absolute; inset: 0; background-size: cover; background-position: center; background-attachment: fixed; }
+    .hero-bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(2,6,23,0.3) 0%, rgba(2,6,23,0.8) 70%, rgba(2,6,23,1) 100%); }
+    .hero-overlay { position: absolute; inset: 0; background: radial-gradient(circle at center, transparent 0%, rgba(2, 6, 23, 0.4) 100%); }
+    .hero-content { position: relative; z-index: 2; padding: 0 20px; max-width: 900px; margin-top: 40px; }
+    
+    .sub-heading { font-size: 0.8rem; letter-spacing: 8px; text-transform: uppercase; margin-bottom: 25px; font-weight: 800; color: #d4af37; }
+    .main-heading { font-size: 5rem; color: #fff; margin-bottom: 25px; text-shadow: 0 10px 40px rgba(0,0,0,0.6); font-family: 'Playfair Display', serif; }
+    .hero-content p { color: #cbd5e1; font-size: 1.25rem; line-height: 1.8; opacity: 0.9; max-width: 700px; margin: 0 auto; }
 
-    .filter-wrapper { padding: 40px; border-radius: 30px; margin-bottom: 80px; border: 1px solid rgba(212, 175, 55, 0.2); background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(20px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 40px; }
+    .relative-z { position: relative; z-index: 10; }
+    
+    /* Filter Wrapper */
+    .filter-wrapper { padding: 40px; border-radius: 30px; margin-bottom: 80px; border: 1px solid rgba(212, 175, 55, 0.2); background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(25px); box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6); }
     .search-title { font-size: 0.8rem; font-weight: 800; color: #d4af37; letter-spacing: 4px; margin-bottom: 25px; display: flex; align-items: center; gap: 12px; }
     .filters-grid { display: grid; grid-template-columns: 1fr 1fr 1.5fr auto; gap: 24px; align-items: flex-end; }
     
@@ -135,7 +152,7 @@ import { FavoriteService } from '../../core/services/favorite.service';
     .input-with-icon { position: relative; display: flex; align-items: center; }
     .field-icon { position: absolute; left: 16px; color: #d4af37; font-size: 0.9rem; pointer-events: none; opacity: 0.8; }
     
-    select, input { width: 100%; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(212, 175, 55, 0.1); border-radius: 16px; padding: 14px 16px 14px 44px; color: white; outline: none; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); font-size: 0.95rem; }
+    select, input { width: 100%; background: rgba(7, 12, 24, 0.6); border: 1px solid rgba(212, 175, 55, 0.1); border-radius: 16px; padding: 14px 16px 14px 44px; color: white; outline: none; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); font-size: 0.95rem; }
     select:focus, input:focus { border-color: #d4af37; background: rgba(255, 255, 255, 0.05); box-shadow: 0 0 20px rgba(212, 175, 55, 0.15); transform: translateY(-2px); }
     select option { background: #0f172a; color: white; }
 
@@ -149,14 +166,14 @@ import { FavoriteService } from '../../core/services/favorite.service';
     .btn-search-reset:hover { background: #d4af37; color: #000; transform: rotate(180deg) scale(1.1); }
 
     /* Hotel Grid */
-    .hotel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 50px; }
-    .hotel-card { border-radius: 32px; overflow: hidden; height: 100%; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.05); transition: all 0.5s ease; position: relative; }
-    .hotel-card:hover { border-color: rgba(212, 175, 55, 0.3); transform: translateY(-15px); box-shadow: 0 30px 60px -15px rgba(0,0,0,0.6); }
+    .hotel-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 40px; }
+    .hotel-card { border-radius: 32px; overflow: hidden; height: 100%; display: flex; flex-direction: column; border: 1px solid rgba(255,255,255,0.05); transition: all 0.5s ease; position: relative; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(10px); }
+    .hotel-card:hover { border-color: rgba(212, 175, 55, 0.3); transform: translateY(-15px); box-shadow: 0 30px 60px -15px rgba(0,0,0,0.6), 0 0 30px rgba(212, 175, 55, 0.1); }
     
-    .card-img { height: 280px; background-size: cover; background-position: center; position: relative; overflow: hidden; }
-    .card-img::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(5, 10, 20, 0.8), transparent); }
+    .card-img { height: 260px; background-size: cover; background-position: center; position: relative; overflow: hidden; }
+    .card-img::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(2, 6, 23, 1), transparent 70%); }
     
-    .luxury-badge { position: absolute; top: 24px; left: 24px; z-index: 10; background: #d4af37; color: #000; padding: 6px 14px; border-radius: 12px; font-size: 0.8rem; font-weight: 800; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+    .luxury-badge { position: absolute; top: 24px; left: 24px; z-index: 10; background: #d4af37; color: #000; padding: 6px 14px; border-radius: 12px; font-size: 0.8rem; font-weight: 900; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
 
     .btn-bookmark { 
       position: absolute; top: 24px; right: 24px; 
@@ -168,31 +185,39 @@ import { FavoriteService } from '../../core/services/favorite.service';
     .btn-bookmark:hover { transform: scale(1.1) rotate(5deg); background: rgba(212, 175, 55, 0.2); border-color: #d4af37; color: #d4af37; }
     .btn-bookmark.active { background: linear-gradient(135deg, #FFD700 0%, #D4AF37 50%, #B8860B 100%); color: #000; border-color: transparent; box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4); }
 
-    .card-body { padding: 35px; flex: 1; display: flex; flex-direction: column; background: rgba(255,255,255,0.01); }
+    .card-body { padding: 30px; flex: 1; display: flex; flex-direction: column; }
     .meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    .city-tag { font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 600; letter-spacing: 1.5px; display: flex; align-items: center; gap: 6px; }
+    .city-tag { font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; letter-spacing: 1.5px; display: flex; align-items: center; gap: 8px; }
     .city-tag .icon { color: #d4af37; }
-    .user-rating { background: rgba(212, 175, 55, 0.1); color: #d4af37; padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+    .user-rating { background: rgba(212, 175, 55, 0.1); color: #d4af37; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 800; display: flex; align-items: center; gap: 5px; }
 
-    .card-body h3 { font-size: 1.8rem; margin: 15px 0; color: #fff; font-family: 'Playfair Display', serif; line-height: 1.2; }
-    .description { color: #64748b; font-size: 1rem; line-height: 1.7; margin-bottom: 35px; }
+    .card-body h3 { font-size: 1.6rem; margin: 10px 0 15px; color: #fff; font-family: 'Playfair Display', serif; line-height: 1.3; }
+    .description { color: #64748b; font-size: 0.95rem; line-height: 1.7; margin-bottom: 30px; }
     
-    .card-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .card-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; padding-top: 25px; border-top: 1px solid rgba(255,255,255,0.05); }
     .price-info { display: flex; flex-direction: column; }
-    .price-label { font-size: 0.7rem; color: #475569; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+    .price-label { font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; font-weight: 700; }
     .amount { font-size: 1.5rem; font-weight: 800; color: #fff; }
-    .amount small { font-size: 0.75rem; color: #64748b; font-weight: 400; }
+    .amount small { font-size: 0.8rem; color: #64748b; font-weight: 500; }
 
-    .btn-view { background: #d4af37; color: #000; text-decoration: none; padding: 14px 28px; border-radius: 16px; font-weight: 800; font-size: 0.9rem; transition: all 0.4s; }
-    .btn-view:hover { background: #fff; transform: scale(1.05); box-shadow: 0 15px 30px rgba(212, 175, 55, 0.3); }
+    .btn-view { background: linear-gradient(135deg, #FFD700 0%, #D4AF37 100%); color: #000; text-decoration: none; padding: 14px 28px; border-radius: 16px; font-weight: 800; font-size: 0.9rem; transition: all 0.4s; }
+    .btn-view:hover { filter: brightness(1.2); transform: scale(1.05); box-shadow: 0 15px 30px rgba(212, 175, 55, 0.3); }
 
     .loading-state, .empty-state { text-align: center; padding: 100px 40px; }
     .spinner { width: 60px; height: 60px; border: 4px solid rgba(212, 175, 55, 0.1); border-top-color: #d4af37; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
     @keyframes spin { to { transform: rotate(360deg); } }
     
-    .animate-slide-up { animation: slideUp 1s cubic-bezier(0.23, 1, 0.32, 1) backwards; }
-    .animate-slide-up-delayed { animation: slideUp 1s 0.3s cubic-bezier(0.23, 1, 0.32, 1) backwards; }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-slide-up { animation: slideUp 1s cubic-bezier(0.23, 1, 0.32, 1) both; }
+    .animate-slide-up-delayed { animation: slideUp 1s cubic-bezier(0.23, 1, 0.32, 1) both; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+    
+    @media (max-width: 768px) {
+       .main-heading { font-size: 3.5rem; }
+       .hero-section { height: 450px; }
+       .filters-grid { grid-template-columns: 1fr; gap: 15px; }
+       .container { padding: 0 20px; }
+       .filter-wrapper { padding: 25px; }
+    }
   `]
 })
 export class HotelListComponent implements OnInit {

@@ -13,14 +13,14 @@ import { gsap } from 'gsap';
     <section class="itinerary-page overflow-hidden">
       <!-- Ambient Background -->
       <div class="ai-ambient-bg">
-        <img src="/home/ngcuong/.gemini/antigravity/brain/06fc9758-9846-4eac-a916-45c04aa23e32/luxury_ai_travel_bg_1774678282305.png" alt="AI Planner Background">
+        <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1920" alt="AI Planner Background">
         <div class="overlay-gradient"></div>
       </div>
 
       <div class="container relative z-10">
         <!-- Default Header (Init Mode) -->
         <div class="page-header text-center mb-60" *ngIf="!isViewingSaved()">
-          <span class="pro-label animate-slide-up">POWERED BY NEXT-GEN AI</span>
+          <span class="pro-label animate-slide-up">POWERED BY GenZ CMC</span>
           <h1 class="luxury-font animate-slide-up" style="animation-delay: 0.1s">Lập Kế Hoạch Du Lịch AI</h1>
           <p class="animate-slide-up" style="animation-delay: 0.2s">Thiết lập hành trình độc bản dựa trên sở thích cá nhân của bạn.</p>
         </div>
@@ -187,8 +187,8 @@ import { gsap } from 'gsap';
 
     /* Ambient Background Engine */
     .ai-ambient-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; overflow: hidden; }
-    .ai-ambient-bg img { width: 100%; height: 100%; object-fit: cover; opacity: 0.25; filter: blur(5px); transform: scale(1.1); }
-    .overlay-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, rgba(10,10,11,0.5) 0%, rgba(5,5,5,1) 80%); }
+    .ai-ambient-bg img { width: 100%; height: 100%; object-fit: cover; opacity: 0.5; filter: blur(2px); transform: scale(1.05); }
+    .overlay-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(5,5,5,0.7) 0%, rgba(5,5,5,0.95) 100%); }
 
     /* Typography & Elements */
     .pro-label { font-size: 0.7rem; font-weight: 800; letter-spacing: 4px; color: var(--gold-secondary); display: block; margin-bottom: 20px; }
@@ -320,6 +320,16 @@ import { gsap } from 'gsap';
     .btn-back-main { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 15px 30px; border-radius: 30px; cursor: pointer; transition: 0.3s; }
     .btn-back-main:hover { background: rgba(255,255,255,0.05); color: var(--gold-primary); padding: 15px 40px; }
 
+    /* Native CSS Animations for instant load */
+    .animate-slide-up { animation: slideUp 0.8s cubic-bezier(0.23, 1, 0.32, 1) both; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .animate-scale-up { animation: scaleUp 0.8s cubic-bezier(0.23, 1, 0.32, 1) both; animation-delay: 0.3s; }
+    @keyframes scaleUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    
+    .animate-fade-in { animation: fadeIn 0.8s ease-out both; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
     /* Mobile Responsive */
     @media (max-width: 768px) {
       .grid-form { grid-template-columns: 1fr; }
@@ -367,13 +377,7 @@ export class ItineraryComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private initAnimations() {
-    gsap.from('.animate-slide-up', {
-      duration: 1,
-      y: 50,
-      opacity: 0,
-      stagger: 0.2,
-      ease: 'power3.out'
-    });
+    // Moved to native CSS animations in styles block for instant trigger on route enter.
   }
 
   loadItinerary(id: string) {

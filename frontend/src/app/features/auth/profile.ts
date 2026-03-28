@@ -1,82 +1,79 @@
-import { Component, inject, OnInit, signal, ViewChild, ElementRef } from '@angular/core';
+import { Component, inject, OnInit, signal, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { AppValidators } from '../../core/utils/validators';
+import { gsap } from 'gsap';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   template: `
-    <section class="profile-page animate-fade-in">
-      <div class="container">
+    <section class="profile-page-promax">
+      <div class="container relative z-10">
         
-        <div class="profile-header-pro glass-pro">
-          <!-- Cover Photo Area -->
-          <div class="cover-photo">
-            <div class="cover-overlay"></div>
+        <!-- Cover & Avatar Section -->
+        <div class="profile-hero glass-premium">
+          <div class="cover-photo" style="background-image: url('https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&q=80&w=1920')">
+            <div class="overlay-lux"></div>
           </div>
-
-          <!-- Avatar Section (Facebook Style) -->
-          <div class="avatar-center-wrap">
+          
+          <div class="avatar-section">
             <div class="avatar-holder">
-              <img [src]="user()?.avatarUrl || 'https://ui-avatars.com/api/?name=' + user()?.fullName + '&background=D4AF37&color=fff'" 
-                   class="main-avatar">
-              
-              <button class="avatar-edit-btn" (click)="fileInput.click()" [disabled]="uploading()">
+              <img [src]="user()?.avatarUrl || 'https://ui-avatars.com/api/?name=' + user()?.fullName + '&background=D4AF37&color=fff'" alt="Avatar" class="avatar-img">
+              <button class="btn-edit-avatar" (click)="fileInput.click()" [disabled]="uploading()">
                 <i class="fas" [ngClass]="uploading() ? 'fa-spinner fa-spin' : 'fa-camera'"></i>
               </button>
-              
               <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" class="hidden">
             </div>
             
-            <div class="profile-identity">
+            <div class="identity-info">
               <h1 class="luxury-font">{{ user()?.fullName }}</h1>
-              <div class="badge-role">{{ user()?.role }}</div>
+              <span class="role-badge">{{ user()?.role }}</span>
             </div>
           </div>
         </div>
 
-        <div class="profile-content-wrap mt-10">
-          <div class="glass-pro form-card-pro">
-            <div class="card-header-pro">
-               <h2 class="luxury-font">Thông Tin Tài Khoản</h2>
-               <p>Cập nhật thông tin cá nhân của bạn để nhận được phục vụ tốt nhất.</p>
+        <!-- Form Content -->
+        <div class="profile-body mt-40">
+          <div class="glass-premium info-card">
+            <div class="card-title-group mb-40">
+              <span class="pro-label">CÀI ĐẶT CÁ NHÂN</span>
+              <h2 class="luxury-font text-3xl">Thông Tin Tài Khoản</h2>
+              <p class="text-gray mt-10">Cập nhật thông tin cá nhân của bạn để nhận được phục vụ tốt nhất.</p>
             </div>
 
-            <form [formGroup]="profileForm" (ngSubmit)="save()" class="pro-form">
-              <div class="form-row">
-                <div class="form-group-pro">
-                  <label>Họ và Tên</label>
-                  <input type="text" formControlName="fullName" placeholder="VD: Nguyễn Văn A" class="input-pro">
-                  <div class="error-msg" *ngIf="isInvalid('fullName')">
-                    <small *ngIf="profileForm.get('fullName')?.errors?.['required']">Họ tên không được trống</small>
-                    <small *ngIf="profileForm.get('fullName')?.errors?.['minlength']">Tên quá ngắn</small>
-                  </div>
+            <form [formGroup]="profileForm" (ngSubmit)="save()" class="luxury-form">
+              <div class="form-grid">
+                
+                <div class="floating-group form-element">
+                  <input type="text" formControlName="fullName" id="fullName" placeholder=" ">
+                  <label for="fullName">HỌ VÀ TÊN</label>
+                  <i class="fas fa-user input-icon"></i>
+                  <div class="error-msg" *ngIf="isInvalid('fullName')">Họ tên không hợp lệ</div>
                 </div>
+
+                <div class="floating-group readonly-group form-element">
+                  <input type="email" formControlName="email" id="email" placeholder=" " readonly>
+                  <label for="email">EMAIL LIÊN HỆ</label>
+                  <i class="fas fa-envelope input-icon"></i>
+                  <div class="hint-text text-mobile-mt">Email không thể thay đổi để bảo mật</div>
+                </div>
+
+                <div class="floating-group form-element">
+                  <input type="text" formControlName="phone" id="phone" placeholder=" ">
+                  <label for="phone">SỐ ĐIỆN THOẠI</label>
+                  <i class="fas fa-phone input-icon"></i>
+                  <div class="error-msg text-mobile-mt" *ngIf="isInvalid('phone')">Số điện thoại không hợp lệ</div>
+                </div>
+
               </div>
 
-              <div class="form-grid-2">
-                <div class="form-group-pro">
-                  <label>Email liên hệ</label>
-                  <input type="email" formControlName="email" class="input-pro" readonly>
-                  <div class="hint">Email không thể thay đổi để bảo mật</div>
-                </div>
-
-                <div class="form-group-pro">
-                  <label>Số điện thoại</label>
-                  <input type="text" formControlName="phone" placeholder="090..." class="input-pro">
-                  <div class="error-msg" *ngIf="isInvalid('phone')">
-                    <small *ngIf="profileForm.get('phone')?.errors?.['pattern']">Số điện thoại không hợp lệ</small>
-                  </div>
-                </div>
-              </div>
-
-              <div class="form-actions-pro">
-                <button type="submit" class="btn-gold-pro w-full" [disabled]="saving() || profileForm.invalid">
-                    <i class="fas fa-save mr-2"></i>
-                    {{ saving() ? 'Đang lưu hệ thống...' : 'Cập Nhật Hồ Sơ' }}
+              <div class="action-row mt-50 form-element">
+                <button type="submit" class="btn-luxury-lg w-full" [disabled]="saving() || profileForm.invalid">
+                  <span>{{ saving() ? 'ĐANG LƯU HỆ THỐNG...' : 'CẬP NHẬT HỒ SƠ' }}</span>
+                  <i class="fas fa-arrow-right ml-10"></i>
                 </button>
               </div>
             </form>
@@ -87,92 +84,101 @@ import { AppValidators } from '../../core/utils/validators';
     </section>
   `,
   styles: [`
-    :host { --gold-primary: #D4AF37; --gold-secondary: #FFD700; --bg-card: rgba(15, 23, 42, 0.7); }
-
-    .profile-page { padding: 120px 0 100px; min-height: 100vh; background: #020617; }
+    :host { --gold-primary: #D4AF37; --gold-gradient: linear-gradient(135deg, #FFD700 0%, #D4AF37 50%, #B8860B 100%); }
+    .profile-page-promax { min-height: 100vh; background: #020617; padding: 120px 0 100px; color: #fff; overflow-x: hidden; }
     .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
     
-    .glass-pro { 
-      background: var(--bg-card); backdrop-filter: blur(25px); 
-      border: 1px solid rgba(255,255,255,0.08); border-radius: 32px; 
-      overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    .glass-premium { 
+      background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(25px); 
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 40px; 
+      box-shadow: 0 25px 50px rgba(0,0,0,0.5); overflow: hidden;
     }
 
-    /* Profile Header - Facebook Style */
-    .profile-header-pro { margin-bottom: 40px; }
-    .cover-photo { 
-      height: 240px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); 
-      position: relative; overflow: hidden;
-    }
-    .cover-overlay { 
-      position: absolute; inset: 0; 
-      background: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=1500') center/cover;
-      opacity: 0.3; filter: grayscale(100%);
-    }
-
-    .avatar-center-wrap { text-align: center; margin-top: -85px; padding-bottom: 40px; position: relative; }
-    .avatar-holder { 
-      position: relative; width: 170px; height: 170px; margin: 0 auto 20px; 
-      border-radius: 50%; border: 6px solid #020617; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-      background: #1e293b;
-    }
-    .main-avatar { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .profile-hero { position: relative; }
+    .cover-photo { height: 280px; background-size: cover; background-position: center; position: relative; }
+    .overlay-lux { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 20%, #020617 100%); opacity: 0.8; }
     
-    .avatar-edit-btn { 
-      position: absolute; bottom: 8px; right: 8px; width: 40px; height: 40px; 
-      border-radius: 50%; background: #334155; color: #fff; border: none;
-      display: flex; align-items: center; justify-content: center; cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: 0.3s;
-    }
-    .avatar-edit-btn:hover { background: var(--gold-primary); color: #000; transform: scale(1.1); }
+    .avatar-section { display: flex; flex-direction: column; align-items: center; margin-top: -120px; padding-bottom: 50px; position: relative; z-index: 10; }
     
-    .profile-identity h1 { font-size: 2.2rem; color: #fff; margin: 0; }
-    .badge-role { 
-      display: inline-block; margin-top: 10px; padding: 5px 15px; border-radius: 30px;
-      background: rgba(212,175,55,0.1); color: var(--gold-primary); 
-      font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px;
-    }
-
-    /* Form Content */
-    .card-header-pro { padding: 40px 50px 0; }
-    .card-header-pro h2 { font-size: 1.5rem; color: #fff; margin: 0; }
-    .card-header-pro p { color: #64748b; font-size: 0.9rem; margin-top: 5px; }
-
-    .pro-form { padding: 40px 50px; }
-    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px; }
-    .form-group-pro { display: flex; flex-direction: column; gap: 10px; }
-    .form-group-pro label { font-size: 0.75rem; color: var(--gold-primary); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+    .avatar-holder { position: relative; width: 190px; height: 190px; border-radius: 50%; padding: 6px; background: var(--gold-gradient); box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
+    .avatar-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 6px solid #020617; }
     
-    .input-pro { 
-      background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); 
-      padding: 15px 18px; border-radius: 14px; color: #fff; font-size: 1rem;
-      transition: all 0.3s;
+    .btn-edit-avatar {
+      position: absolute; bottom: 8px; right: 8px; width: 50px; height: 50px;
+      border-radius: 50%; background: #1e293b; color: var(--gold-primary); border: 2px solid var(--gold-primary);
+      display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      font-size: 1.2rem; box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
     }
-    .input-pro:focus { border-color: var(--gold-primary); outline: none; box-shadow: 0 0 0 4px rgba(212,175,55,0.1); }
-    .input-pro[readonly] { opacity: 0.6; cursor: not-allowed; }
-
-    .hint { font-size: 0.7rem; color: #475569; font-style: italic; }
-    .error-msg { color: #f87171; font-size: 0.75rem; margin-top: 5px; }
-
-    .form-actions-pro { margin-top: 40px; }
-    .btn-gold-pro { 
-      background: var(--gold-gradient); color: #000; font-weight: 800; 
-      padding: 18px; border-radius: 16px; border: none; cursor: pointer;
-      transition: 0.3s; box-shadow: 0 10px 20px rgba(212,175,55,0.2);
+    .btn-edit-avatar:hover { background: var(--gold-primary); color: #000; transform: scale(1.15) rotate(10deg); }
+    
+    .identity-info { text-align: center; margin-top: 25px; }
+    .identity-info h1 { font-size: 2.8rem; margin-bottom: 12px; text-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+    .role-badge { 
+      background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3);
+      color: var(--gold-primary); padding: 8px 25px; border-radius: 30px;
+      font-size: 0.8rem; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
     }
-    .btn-gold-pro:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(212,175,55,0.4); }
-    .btn-gold-pro:disabled { opacity: 0.7; cursor: not-allowed; }
 
+    .info-card { padding: 50px 70px; }
+    .pro-label { font-size: 0.75rem; font-weight: 800; letter-spacing: 3px; color: var(--gold-primary); margin-bottom: 15px; display: block; }
+    .text-3xl { font-size: 2.4rem; margin: 0; color: #fff; }
+    .text-gray { color: #94a3b8; font-size: 1.05rem; }
+    .mt-10 { margin-top: 10px; }
+    .mb-40 { margin-bottom: 40px; }
+    .mt-40 { margin-top: 40px; }
+    .mt-50 { margin-top: 50px; }
+    
+    .form-grid { display: flex; flex-direction: column; gap: 30px; }
+    
+    .floating-group { position: relative; }
+    .floating-group input {
+      width: 100%; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1);
+      padding: 28px 20px 12px 60px; color: #fff; font-size: 1.15rem; border-radius: 18px;
+      transition: 0.4s; outline: none; box-sizing: border-box;
+    }
+    .floating-group label {
+      position: absolute; left: 60px; top: 22px; color: rgba(255,255,255,0.4);
+      font-size: 0.85rem; font-weight: 700; letter-spacing: 1px;
+      pointer-events: none; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .input-icon { position: absolute; left: 24px; top: 24px; color: var(--gold-primary); font-size: 1.2rem; opacity: 0.7; }
+    
+    .floating-group input:focus { border-color: var(--gold-primary); background: rgba(212, 175, 55, 0.05); box-shadow: 0 0 20px rgba(212, 175, 55, 0.1); }
+    .floating-group input:focus + label, .floating-group input:not(:placeholder-shown) + label {
+      top: 10px; font-size: 0.65rem; color: var(--gold-primary);
+    }
+    
+    .readonly-group input { opacity: 0.6; cursor: not-allowed; }
+    .hint-text { position: absolute; right: 24px; top: 24px; font-size: 0.8rem; color: #64748b; font-style: italic; }
+    .error-msg { position: absolute; right: 24px; top: 24px; color: #f87171; font-size: 0.8rem; font-weight: 600; }
+    
+    .btn-luxury-lg { 
+      background: var(--gold-gradient); color: #000; padding: 24px; 
+      border-radius: 20px; border: none; font-weight: 900; letter-spacing: 2px;
+      font-size: 1rem; cursor: pointer; transition: 0.4s;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 15px 35px rgba(212, 175, 55, 0.3);
+    }
+    .btn-luxury-lg:hover:not(:disabled) { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(212, 175, 55, 0.5); }
+    .btn-luxury-lg:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; filter: grayscale(1); }
+    
+    .w-full { width: 100%; }
+    .ml-10 { margin-left: 10px; }
     .hidden { display: none; }
 
     @media (max-width: 768px) {
-      .form-grid-2 { grid-template-columns: 1fr; }
-      .cover-photo { height: 180px; }
-      .pro-form, .card-header-pro { padding: 30px; }
+      .info-card { padding: 40px 25px; }
+      .avatar-holder { width: 140px; height: 140px; margin-top: 20px; }
+      .cover-photo { height: 200px; }
+      .hint-text, .error-msg { position: static; display: block; margin-top: 10px; margin-left: 15px; }
+      .text-mobile-mt { margin-top: 10px; }
+      .floating-group input { padding: 28px 20px 12px 50px; font-size: 1rem; }
+      .floating-group label { left: 50px; }
+      .input-icon { left: 20px; top: 26px; }
     }
   `]
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent implements OnInit, AfterViewInit {
   profileForm!: FormGroup;
   authService = inject(AuthService);
   fb = inject(FormBuilder);
@@ -188,6 +194,17 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  ngAfterViewInit() {
+    // GSAP Pro Max Animations
+    setTimeout(() => {
+      gsap.from('.cover-photo', { duration: 1.5, scale: 1.1, opacity: 0, ease: 'power3.out' });
+      gsap.from('.avatar-holder', { duration: 1.2, y: 60, opacity: 0, delay: 0.3, ease: 'back.out(1.5)' });
+      gsap.from('.identity-info', { duration: 1, y: 30, opacity: 0, delay: 0.5, ease: 'power3.out' });
+      gsap.from('.info-card', { duration: 1, y: 50, opacity: 0, delay: 0.6, ease: 'power4.out' });
+      gsap.from('.form-element', { duration: 0.8, x: -30, opacity: 0, stagger: 0.15, delay: 0.8, ease: 'power3.out' });
+    }, 100);
+  }
+
   isInvalid(controlName: string) {
     const control = this.profileForm.get(controlName);
     return control && control.invalid && (control.touched || control.dirty);
@@ -201,16 +218,12 @@ export class ProfileComponent implements OnInit {
     this.authService.uploadAvatar(file).subscribe({
       next: (res) => {
         if (res.success) {
-          // Auto update user profile with new avatar URL
           const updateData = {
             ...this.profileForm.getRawValue(),
             avatarUrl: res.data
           };
           this.authService.updateProfile(updateData).subscribe({
             next: (updateRes) => {
-              if (updateRes.success) {
-                // Success - the signal will update automatically via tap in service
-              }
               this.uploading.set(false);
             },
             error: () => this.uploading.set(false)
@@ -233,7 +246,6 @@ export class ProfileComponent implements OnInit {
     }
 
     this.saving.set(true);
-    // Include current avatarUrl when saving text info
     const updateData = {
         ...this.profileForm.value,
         avatarUrl: this.user()?.avatarUrl
