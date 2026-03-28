@@ -1,74 +1,120 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, AfterViewInit, OnDestroy, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ItineraryService, ItineraryResponse } from '../../core/services/itinerary.service';
+import { gsap } from 'gsap';
 
 @Component({
   selector: 'app-itinerary',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   template: `
-    <section class="itinerary-page animate-fade-in">
-      <div class="container">
-        <div class="page-header" *ngIf="!isViewingSaved()">
-          <h1 class="luxury-font">Lập Kế Hoạch Du Lịch AI</h1>
-          <p>Để trợ lý thông minh của chúng tôi kiến tạo hành trình tuyệt mỹ cho bạn.</p>
+    <section class="itinerary-page overflow-hidden">
+      <!-- Ambient Background -->
+      <div class="ai-ambient-bg">
+        <img src="/home/ngcuong/.gemini/antigravity/brain/06fc9758-9846-4eac-a916-45c04aa23e32/luxury_ai_travel_bg_1774678282305.png" alt="AI Planner Background">
+        <div class="overlay-gradient"></div>
+      </div>
+
+      <div class="container relative z-10">
+        <!-- Default Header (Init Mode) -->
+        <div class="page-header text-center mb-60" *ngIf="!isViewingSaved()">
+          <span class="pro-label animate-slide-up">POWERED BY NEXT-GEN AI</span>
+          <h1 class="luxury-font animate-slide-up" style="animation-delay: 0.1s">Lập Kế Hoạch Du Lịch AI</h1>
+          <p class="animate-slide-up" style="animation-delay: 0.2s">Thiết lập hành trình độc bản dựa trên sở thích cá nhân của bạn.</p>
         </div>
 
-        <div class="page-header" *ngIf="isViewingSaved()">
-          <h1 class="luxury-font">Hành Trình Của Bạn</h1>
-          <p>Khám phá lại những khoảnh khắc đáng nhớ đã được lưu lại.</p>
-          <a routerLink="/favorites" class="btn-back"><i class="fas fa-arrow-left"></i> Quay lại danh sách</a>
+        <!-- Viewing Saved Mode Header -->
+        <div class="page-header text-center mb-60" *ngIf="isViewingSaved()">
+          <h1 class="luxury-font animate-slide-up">Hành Trình Của Bạn</h1>
+          <p class="animate-slide-up" style="animation-delay: 0.1s">Hành trình trải nghiệm xa hoa đã được lưu vào hệ thống của TravelWithMe.</p>
+          <a routerLink="/favorites" class="btn-back mt-20 animate-slide-up" style="animation-delay: 0.2s">
+            <i class="fas fa-arrow-left"></i> Bộ sưu tập đã lưu
+          </a>
         </div>
 
-        <div class="planner-form glass-effect" *ngIf="!isViewingSaved()">
-          <div class="form-row">
-            <div class="form-group">
-              <label>Điểm đến</label>
-              <input type="text" [(ngModel)]="request.destination" placeholder="VD: Phú Quốc, Việt Nam">
+        <!-- Main Input Form (Hidden when result exists) -->
+        <div class="planner-card glass-premium animate-scale-up" *ngIf="!itinerary() && !loading()">
+          <div class="form-content">
+            <div class="grid-form">
+              <div class="floating-group">
+                <input type="text" [(ngModel)]="request.destination" placeholder=" " id="dest">
+                <label for="dest">BẠN MUỐN ĐI ĐÂU?</label>
+                <i class="fas fa-map-marker-alt input-icon"></i>
+              </div>
+              <div class="floating-group">
+                <input type="number" [(ngModel)]="request.days" min="1" max="14" placeholder=" " id="days">
+                <label for="days">SỐ NGÀY TRẢI NGHIỆM</label>
+                <i class="fas fa-calendar-day input-icon"></i>
+              </div>
             </div>
-            <div class="form-group">
-              <label>Số ngày</label>
-              <input type="number" [(ngModel)]="request.days" min="1" max="14">
+            
+            <div class="floating-group mt-30">
+              <textarea [(ngModel)]="request.preferences" placeholder=" " id="prefs"></textarea>
+              <label for="prefs">SỞ THÍCH & YÊU CẦU ĐẶC BIỆT (TÙY CHỌN)</label>
+              <i class="fas fa-sparkles input-icon"></i>
             </div>
-          </div>
-          <div class="form-group">
-            <label>Sở thích cá nhân (Tùy chọn)</label>
-            <textarea [(ngModel)]="request.preferences" placeholder="VD: Nghỉ dưỡng cao cấp, ẩm thực địa phương, không gian lãng mạn..."></textarea>
-          </div>
-          <button (click)="generate()" class="btn-gold w-full" [disabled]="loading()">
-            {{ loading() ? 'Đang kiến tạo hành trình...' : 'Tạo lịch trình' }}
-          </button>
-          
-          <div class="alert alert-error glass-effect mt-15 animate-fade-in" *ngIf="errorMessage()">
-            <i class="fas fa-exclamation-triangle mr-2"></i> {{ errorMessage() }}
+
+            <div class="action-footer mt-40">
+              <button (click)="generate()" class="btn-luxury-lg w-full" [disabled]="loading()">
+                <span>BẮT ĐẦU KIẾN TẠO HÀNH TRÌNH</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        <div *ngIf="loading()" class="loading-container">
-          <div class="luxury-spinner"></div>
-          <p class="luxury-font">Đang thiết lập trải nghiệm độc bản dành riêng cho bạn...</p>
-        </div>
-
-        <div *ngIf="itinerary()" class="itinerary-result animate-fade-in">
-          <div class="result-header glass-effect animate-slide-up">
-            <div class="luxury-seal">✨ AI Optimized</div>
-            <h2 class="luxury-font">{{ itinerary()?.title }}</h2>
-            <p class="dest-tag">{{ itinerary()?.destination }}</p>
-            <div class="actions">
-               <button *ngIf="!itinerary()?.saved" class="btn-gold-outline" (click)="saveSuccess()">Lưu vào tài khoản</button>
-               <button class="btn-gold-outline" (click)="print()">Xuất PDF</button>
+        <!-- AI Orchestration Loader -->
+        <div *ngIf="loading()" class="ai-orchestration-loader">
+          <div class="loader-content">
+            <div class="luxury-radar-container">
+              <div class="radar-circle"></div>
+              <div class="radar-circle" style="animation-delay: 0.5s"></div>
+              <div class="radar-circle" style="animation-delay: 1s"></div>
+              <div class="radar-scanner"></div>
+              <i class="fas fa-brain ai-icon"></i>
+            </div>
+            <div class="loading-status">
+              <h3 class="luxury-font">{{ loadingStatus() }}</h3>
+              <div class="progress-bar-container">
+                <div class="progress-bar" [style.width.%]="loadingProgress()"></div>
+              </div>
+              <p>Hệ thống đang tích hợp dữ liệu tour & khách sạn theo thời gian thực...</p>
             </div>
           </div>
+        </div>
 
-          <div class="timeline">
-            <div *ngFor="let day of itinerary()?.days" class="day-block">
-              <div class="day-badge luxury-font">Ngày {{ day.day }}</div>
-              <div class="activities">
-                <div *ngFor="let act of day.activities" class="activity-card glass-effect">
-                  <span class="time">{{ act.time }}</span>
-                  <div class="act-details">
+        <!-- Itinerary Result -->
+        <div *ngIf="itinerary()" class="itinerary-display animate-fade-in">
+          <div class="result-hero-card glass-premium mb-60">
+             <div class="hero-top">
+                <span class="pro-tag-luxury">ULTIMATE PLAN READY</span>
+                <h2 class="luxury-font">{{ itinerary()?.title }}</h2>
+                <div class="hero-meta">
+                  <span><i class="fas fa-location-dot"></i> {{ itinerary()?.destination }}</span>
+                  <span><i class="fas fa-clock"></i> {{ itinerary()?.days?.length }} Ngày</span>
+                </div>
+             </div>
+             <div class="hero-actions">
+                <button *ngIf="!itinerary()?.saved" class="btn-gold-glass" (click)="saveSuccess()">
+                  <i class="fas fa-bookmark mr-10"></i> Lưu vào Tài Khoản
+                </button>
+                <button class="btn-gold-glass" (click)="print()">
+                  <i class="fas fa-file-pdf mr-10"></i> Xuất PDF
+                </button>
+             </div>
+          </div>
+
+          <!-- Timeline -->
+          <div class="timeline-v2">
+            <div *ngFor="let day of itinerary()?.days; let i = index" class="day-v2-card animate-slide-up" [style.animation-delay]="(i * 0.1) + 's'">
+              <div class="day-sidebar">
+                <div class="day-number luxury-font">Day {{ day.day }}</div>
+              </div>
+              <div class="day-main">
+                <div *ngFor="let act of day.activities" class="act-v2-card glass-premium">
+                  <div class="act-time luxury-font">{{ act.time }}</div>
+                  <div class="act-info">
                     <h3>{{ act.activity }}</h3>
                     <p class="loc">📍 {{ act.location }}</p>
                     <p *ngIf="act.notes" class="notes">{{ act.notes }}</p>
@@ -78,125 +124,190 @@ import { ItineraryService, ItineraryResponse } from '../../core/services/itinera
             </div>
           </div>
           
-          <!-- AI Recommendations Section -->
-          <div class="recommendations-section mt-60 animate-fade-in">
-            <div class="section-title-pro">
-              <span class="pro-tag">SẢN PHẨM GỢI Ý</span>
-              <h2 class="luxury-font">Dành Riêng Cho Hành Trình Của Bạn</h2>
-              <p>Các lựa chọn tour và khách sạn thực tế phù hợp nhất với kế hoạch này.</p>
+          <!-- New Recommendations Pro Section -->
+          <div class="recommendations-container mt-100 mb-100">
+            <div class="section-badge-center">
+              <span class="premium-divider"></span>
+              <span class="badge-text">KHÁM PHÁ CÁC SẢN PHẨM PHÙ HỢP CÓ SẴN</span>
+              <span class="premium-divider"></span>
             </div>
             
-            <div class="recommendations-grid" *ngIf="itinerary()?.recommendations?.length; else noRecs">
-              <div *ngFor="let rec of itinerary()?.recommendations" class="rec-card glass-effect hover-up">
-                <div class="rec-type-badge">{{ rec.type }}</div>
-                <div class="rec-icon">
-                  <i class="fas" [class.fa-hotel]="rec.type === 'HOTEL'" [class.fa-map-marked-alt]="rec.type === 'TOUR'" [class.fa-monument]="rec.type === 'POI'"></i>
-                </div>
-                <div class="rec-content">
-                  <h3>{{ rec.name }}</h3>
-                  <button class="btn-view-rec" [routerLink]="getRecLink(rec)">
-                    Xem chi tiết <i class="fas fa-external-link-alt ml-2"></i>
-                  </button>
+            <div class="recommendations-header text-center mt-30 mb-50">
+               <h2 class="luxury-font text-5xl">Dành Riêng Cho Bạn</h2>
+            </div>
+
+            <div class="itinerary-recommendations-grid" *ngIf="itinerary()?.recommendations?.length; else noRecs">
+              <div *ngFor="let rec of itinerary()?.recommendations" class="rec-glass-card hover-lift">
+                <div class="rec-type">{{ rec.type }}</div>
+                <div class="rec-main">
+                  <div class="rec-media">
+                    <i class="fas" [class.fa-hotel]="rec.type === 'HOTEL'" [class.fa-map-marked-alt]="rec.type === 'TOUR'" [class.fa-location-dot]="rec.type === 'POI'"></i>
+                  </div>
+                  <div class="rec-body">
+                    <h3>{{ rec.name }}</h3>
+                    <p>Khám phá sản phẩm cao cấp phù hợp với lịch trình đã lập.</p>
+                    <a [routerLink]="getRecLink(rec)" class="btn-view-premium">Xem Chi Tiết</a>
+                  </div>
                 </div>
               </div>
             </div>
             
             <ng-template #noRecs>
-              <div class="no-recommendations glass-effect p-40">
-                <i class="fas fa-info-circle mb-15"></i>
-                <p>Hệ thống hiện tại chưa có Tour hoặc Khách sạn thực tế đáp ứng hoàn toàn hành trình AI gợi ý phía trên.</p>
-                <span class="sub-text">Chúng tôi đang nỗ lực cập nhật thêm nhiều lựa chọn mới cho khu vực này!</span>
+              <div class="no-results-premium glass-premium text-center p-60">
+                <i class="fas fa-search-minus mb-20 text-4xl opacity-50"></i>
+                <p class="text-xl">Hiện chưa có sản phẩm thực tế phù hợp chính xác cho địa điểm này.</p>
+                <span class="text-sm opacity-60">Vui lòng liên hệ hotline Luxury để được hỗ trợ Travel Concierge 24/7.</span>
               </div>
             </ng-template>
           </div>
+        </div>
+
+        <!-- Footer Control for Results -->
+        <div class="result-footer-nav" *ngIf="itinerary() && !isViewingSaved()">
+           <button (click)="resetForm()" class="btn-back-main">
+             <i class="fas fa-rotate-left"></i> Tạo lịch trình khác
+           </button>
         </div>
       </div>
     </section>
   `,
   styles: [`
-    .itinerary-page { padding: 150px 0 100px; min-height: 100vh; }
-    .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
-    .page-header { text-align: center; margin-bottom: 50px; }
-    .page-header h1 { font-size: 3.5rem; margin-bottom: 10px; }
-    .btn-back { display: inline-flex; align-items: center; gap: 8px; color: var(--gold-primary); text-decoration: none; font-size: 0.9rem; margin-top: 15px; transition: 0.3s; }
-    .btn-back:hover { color: #fff; transform: translateX(-5px); }
+    :host { scroll-behavior: smooth; }
+    .itinerary-page { padding: 180px 0 120px; min-height: 100vh; position: relative; background: #050505; color: #fff; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 25px; }
 
-    .planner-form { padding: 40px; margin-bottom: 60px; }
-    .form-row { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px; }
-    .form-group { margin-bottom: 20px; text-align: left; }
-    .form-group label { display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--gold-primary); margin-bottom: 8px; letter-spacing: 0.5px; }
-    .form-group input, .form-group textarea {
-      width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border);
-      padding: 12px 15px; border-radius: 8px; color: var(--text-primary); outline: none; transition: var(--transition-smooth);
-    }
-    .form-group textarea { height: 100px; resize: none; }
-    .form-group input:focus, .form-group textarea:focus { border-color: var(--gold-primary); background: rgba(255, 255, 255, 0.08); }
-    .w-full { width: 100%; }
+    /* Ambient Background Engine */
+    .ai-ambient-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; overflow: hidden; }
+    .ai-ambient-bg img { width: 100%; height: 100%; object-fit: cover; opacity: 0.25; filter: blur(5px); transform: scale(1.1); }
+    .overlay-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, rgba(10,10,11,0.5) 0%, rgba(5,5,5,1) 80%); }
 
-    .loading-container { text-align: center; padding: 50px 0; }
-    .luxury-spinner { width: 60px; height: 60px; border: 2px solid var(--glass-border); border-top: 2px solid var(--gold-primary); border-radius: 50%; animation: spin 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite; margin: 0 auto 30px; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .result-header { padding: 40px; text-align: center; margin-bottom: 50px; border-radius: 24px; position: relative; overflow: hidden; }
-    .luxury-seal { background: var(--gold-primary); color: var(--bg-primary); font-size: 0.65rem; font-weight: 800; padding: 4px 12px; border-radius: 4px; display: inline-block; margin-bottom: 15px; text-transform: uppercase; }
-    .result-header h2 { font-size: 2.5rem; margin-bottom: 15px; color: var(--gold-primary); }
-    .dest-tag { text-transform: uppercase; letter-spacing: 3px; color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 25px; }
-    .actions { display: flex; gap: 15px; justify-content: center; }
-    .btn-gold-outline { background: transparent; border: 1px solid var(--gold-primary); color: var(--gold-primary); padding: 8px 20px; border-radius: 6px; font-size: 0.8rem; transition: var(--transition-smooth); cursor: pointer; }
-    .btn-gold-outline:hover { background: var(--gold-primary); color: var(--bg-primary); }
-
-    .timeline { position: relative; padding-left: 30px; }
-    .timeline::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 1px; background: var(--glass-border); }
+    /* Typography & Elements */
+    .pro-label { font-size: 0.7rem; font-weight: 800; letter-spacing: 4px; color: var(--gold-secondary); display: block; margin-bottom: 20px; }
+    .mb-60 { margin-bottom: 60px; }
+    .mt-100 { margin-top: 100px; }
+    .mb-100 { margin-bottom: 100px; }
     
-    .day-block { margin-bottom: 60px; position: relative; }
-    .day-badge { 
-      position: absolute; left: -60px; top: 0; background: var(--gold-gradient); color: var(--bg-primary); 
-      padding: 5px 15px; border-radius: 4px; font-weight: 700; font-size: 0.9rem; transform: rotate(-90deg); transform-origin: top right;
-    }
+    /* Luxury Form Design */
+    .planner-card { padding: 50px; border-radius: 30px; border: 1px solid rgba(212, 175, 55, 0.2); position: relative; }
+    .grid-form { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; }
     
-    .activity-card { padding: 25px; margin-bottom: 15px; display: flex; gap: 30px; transition: var(--transition-smooth); border-radius: 12px; }
-    .activity-card:hover { border-color: var(--gold-primary); transform: translateX(10px); }
-    .time { font-weight: 600; color: var(--gold-secondary); min-width: 80px; }
-    .act-details h3 { font-size: 1.2rem; margin-bottom: 8px; font-family: 'Playfair Display', serif; }
-    .loc { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px; }
-    .notes { font-size: 0.85rem; color: var(--text-muted); font-style: italic; }
+    .floating-group { position: relative; margin-bottom: 25px; }
+    .floating-group input, .floating-group textarea {
+      width: 100%; background: rgba(255,255,255,0.03) !important; border: none; 
+      border-bottom: 1px solid rgba(255,255,255,0.1); padding: 35px 20px 15px 50px;
+      color: #fff; font-size: 1.1rem; outline: none; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 12px;
+    }
+    .floating-group textarea { height: 120px; }
+    .floating-group label {
+      position: absolute; left: 50px; top: 35px; color: rgba(255,255,255,0.4); 
+      font-size: 0.75rem; font-weight: 800; letter-spacing: 2px;
+      transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none;
+    }
+    .input-icon { position: absolute; left: 20px; top: 40px; color: var(--gold-primary); font-size: 1.2rem; opacity: 0.6; }
+    
+    .floating-group input:focus, .floating-group textarea:focus { background: rgba(212, 175, 55, 0.05) !important; border-bottom-color: var(--gold-primary); }
+    .floating-group input:focus + label, .floating-group input:not(:placeholder-shown) + label,
+    .floating-group textarea:focus + label, .floating-group textarea:not(:placeholder-shown) + label {
+      top: 12px; font-size: 0.65rem; color: var(--gold-primary);
+    }
 
-    /* Recommendations Styling */
-    .mt-60 { margin-top: 60px; }
-    .section-title-pro { text-align: center; margin-bottom: 40px; }
-    .pro-tag { display: inline-block; background: rgba(212, 175, 55, 0.1); color: var(--gold-primary); padding: 5px 15px; border-radius: 20px; font-size: 0.65rem; font-weight: 800; letter-spacing: 2px; margin-bottom: 15px; }
-    .section-title-pro h2 { font-size: 2.2rem; margin-bottom: 10px; }
-    .section-title-pro p { color: var(--text-secondary); font-size: 0.95rem; }
+    .btn-luxury-lg { 
+      background: var(--gold-gradient); color: var(--bg-primary); padding: 22px; 
+      border-radius: 15px; border: none; font-weight: 800; letter-spacing: 3px;
+      font-size: 0.9rem; cursor: pointer; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+    }
+    .btn-luxury-lg:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 15px 40px rgba(212, 175, 55, 0.5); }
 
-    .recommendations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
-    .rec-card { padding: 30px; position: relative; display: flex; align-items: center; gap: 20px; overflow: hidden; }
-    .rec-type-badge { position: absolute; top: 12px; right: 12px; font-size: 0.6rem; font-weight: 800; color: var(--gold-primary); opacity: 0.5; }
-    .rec-icon { width: 50px; height: 50px; border-radius: 50%; background: rgba(212, 175, 55, 0.1); display: flex; align-items: center; justify-content: center; color: var(--gold-primary); font-size: 1.2rem; }
-    .rec-content h3 { font-size: 1.1rem; margin-bottom: 10px; color: #fff; font-family: 'Playfair Display', serif; }
-    .btn-view-rec { background: transparent; border: none; color: var(--gold-primary); font-size: 0.8rem; font-weight: 700; cursor: pointer; padding: 0; display: flex; align-items: center; }
-    .btn-view-rec:hover { color: #fff; }
-    .ml-2 { margin-left: 8px; }
-    .hover-up:hover { transform: translateY(-10px); border-color: var(--gold-primary); }
+    /* AI Loader Experience */
+    .ai-orchestration-loader { padding: 100px 0; text-align: center; }
+    .luxury-radar-container { width: 140px; height: 140px; margin: 0 auto 40px; position: relative; display: flex; align-items: center; justify-content: center; }
+    .radar-circle { position: absolute; border: 1px solid var(--gold-primary); border-radius: 50%; width: 100%; height: 100%; opacity: 0; animation: radarPing 3s infinite linear; }
+    .radar-scanner { position: absolute; width: 100%; height: 100%; border-radius: 50%; border-right: 2px solid var(--gold-primary); animation: radarSpin 2s infinite linear; }
+    .ai-icon { font-size: 3rem; color: var(--gold-primary); filter: drop-shadow(0 0 15px var(--gold-primary)); }
+    @keyframes radarPing { 0% { opacity: 0.5; transform: scale(0.8); } 100% { opacity: 0; transform: scale(2); } }
+    @keyframes radarSpin { to { transform: rotate(360deg); } }
+    
+    .loading-status h3 { font-size: 1.8rem; letter-spacing: 2px; margin-bottom: 20px; color: #fff; }
+    .progress-bar-container { width: 300px; height: 4px; background: rgba(255,255,255,0.1); margin: 0 auto 20px; border-radius: 2px; overflow: hidden; }
+    .progress-bar { height: 100%; background: var(--gold-gradient); transition: width 0.5s ease; }
+    .loading-status p { font-size: 0.9rem; opacity: 0.6; }
 
-    .no-recommendations { text-align: center; color: var(--text-secondary); border: 1px dashed rgba(255,255,255,0.1); border-radius: 15px; }
-    .no-recommendations i { font-size: 2rem; color: var(--gold-primary); opacity: 0.5; }
-    .p-40 { padding: 40px; }
-    .mb-15 { margin-bottom: 15px; }
-    .mt-15 { margin-top: 15px; }
-    .mr-2 { margin-right: 8px; }
-    .sub-text { font-size: 0.8rem; opacity: 0.7; display: block; margin-top: 10px; }
-    .alert-error { background: rgba(255, 68, 68, 0.1); color: #ff4444; border: 1px solid rgba(255, 68, 68, 0.2); padding: 15px; border-radius: 8px; font-size: 0.9rem; }
+    /* Result Layout V2 */
+    .result-hero-card { padding: 50px; border-radius: 30px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.1); }
+    .pro-tag-luxury { background: var(--gold-primary); color: #000; padding: 5px 15px; font-weight: 900; font-size: 0.6rem; letter-spacing: 2px; border-radius: 5px; margin-bottom: 15px; display: inline-block; }
+    .result-hero-card h2 { font-size: 2.8rem; margin-bottom: 15px; }
+    .hero-meta { display: flex; gap: 25px; opacity: 0.7; font-size: 0.95rem; }
+    .hero-meta i { color: var(--gold-primary); margin-right: 8px; }
+    
+    .hero-actions { display: flex; gap: 15px; }
+    .btn-gold-glass { background: rgba(212, 175, 55, 0.1); border: 1px solid var(--gold-primary); color: var(--gold-primary); padding: 12px 25px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+    .btn-gold-glass:hover { background: var(--gold-primary); color: #000; transform: translateY(-3px); }
+
+    /* Timeline V2 */
+    .timeline-v2 { display: flex; flex-direction: column; gap: 40px; position: relative; }
+    .timeline-v2::before { content: ''; position: absolute; left: 100px; top: 0; bottom: 0; width: 1px; background: linear-gradient(to bottom, transparent, rgba(212,175,55,0.2), transparent); }
+    
+    .day-v2-card { display: grid; grid-template-columns: 100px 1fr; gap: 40px; }
+    .day-sidebar { display: flex; justify-content: flex-end; }
+    .day-number { font-size: 1.5rem; color: var(--gold-primary); text-transform: uppercase; letter-spacing: 2px; }
+    
+    .day-main { display: flex; flex-direction: column; gap: 15px; }
+    .act-v2-card { padding: 30px; border-radius: 20px; display: flex; gap: 40px; align-items: flex-start; transition: 0.4s; }
+    .act-v2-card:hover { border-color: var(--gold-primary); transform: translateX(15px); }
+    .act-time { font-size: 1.1rem; color: var(--gold-secondary); min-width: 80px; }
+    .act-info h3 { font-size: 1.4rem; margin-bottom: 10px; font-family: 'Playfair Display', serif; }
+    .act-info .loc { font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-bottom: 10px; }
+    .act-info .notes { font-size: 0.85rem; color: rgba(255,255,255,0.4); font-style: italic; line-height: 1.6; }
+
+    /* Recommendation Section Premium */
+    .section-badge-center { display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 100px; }
+    .premium-divider { height: 1px; width: 50px; background: rgba(212, 175, 55, 0.3); }
+    .badge-text { font-size: 0.7rem; font-weight: 800; letter-spacing: 4px; color: var(--gold-secondary); }
+    
+    .itinerary-recommendations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; }
+    .rec-glass-card { padding: 30px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.02); position: relative; transition: 0.4s; }
+    .rec-type { position: absolute; top: 15px; right: 20px; font-size: 0.6rem; font-weight: 900; color: var(--gold-primary); opacity: 0.4; }
+    .rec-media { width: 60px; height: 60px; border-radius: 15px; background: rgba(212, 175, 55, 0.1); display: flex; align-items: center; justify-content: center; color: var(--gold-primary); font-size: 1.6rem; margin-bottom: 25px; }
+    .rec-body h3 { font-size: 1.3rem; margin-bottom: 12px; font-family: 'Playfair Display', serif; }
+    .rec-body p { font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 25px; }
+    .btn-view-premium { display: inline-block; color: var(--gold-primary); border-bottom: 1px solid var(--gold-primary); text-decoration: none; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px; transition: 0.3s; }
+    .btn-view-premium:hover { letter-spacing: 2px; color: #fff; border-bottom-color: #fff; }
+
+    .hover-lift:hover { transform: translateY(-10px); border-color: rgba(212,175,55,0.3); background: rgba(212,175,55,0.02); }
+
+    .result-footer-nav { text-align: center; margin-top: 50px; }
+    .btn-back-main { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 15px 30px; border-radius: 30px; cursor: pointer; transition: 0.3s; }
+    .btn-back-main:hover { background: rgba(255,255,255,0.05); color: var(--gold-primary); padding: 15px 40px; }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .grid-form { grid-template-columns: 1fr; }
+      .day-v2-card { grid-template-columns: 1fr; gap: 15px; }
+      .day-sidebar { justify-content: flex-start; }
+      .timeline-v2::before { display: none; }
+      .act-v2-card { flex-direction: column; gap: 15px; }
+      .result-hero-card { flex-direction: column; gap: 30px; text-align: center; }
+      .container { padding: 0 15px; }
+    }
   `]
 })
-export class ItineraryComponent implements OnInit {
+export class ItineraryComponent implements OnInit, AfterViewInit, OnDestroy {
   private service = inject(ItineraryService);
   private route = inject(ActivatedRoute);
+  private el = inject(ElementRef);
 
   request = { destination: '', days: 3, preferences: '' };
   itinerary = signal<ItineraryResponse | null>(null);
   loading = signal<boolean>(false);
   errorMessage = signal<string | null>(null);
   isViewingSaved = signal<boolean>(false);
+  
+  // AI Orchestration Stats
+  loadingStatus = signal<string>('Đang khởi động AI Engine...');
+  loadingProgress = signal<number>(0);
+  private statusInterval: any;
 
   ngOnInit() {
     this.route.params.subscribe(params => {
@@ -205,6 +316,24 @@ export class ItineraryComponent implements OnInit {
         this.isViewingSaved.set(true);
         this.loadItinerary(id);
       }
+    });
+  }
+
+  ngAfterViewInit() {
+    this.initAnimations();
+  }
+
+  ngOnDestroy() {
+    if (this.statusInterval) clearInterval(this.statusInterval);
+  }
+
+  private initAnimations() {
+    gsap.from('.animate-slide-up', {
+      duration: 1,
+      y: 50,
+      opacity: 0,
+      stagger: 0.2,
+      ease: 'power3.out'
     });
   }
 
@@ -225,21 +354,68 @@ export class ItineraryComponent implements OnInit {
     this.loading.set(true);
     this.errorMessage.set(null);
     this.itinerary.set(null);
+    this.startLoadingSimulation();
+
     this.service.generate(this.request).subscribe({
       next: (res) => {
         if (res.success) {
           this.itinerary.set(res.data);
+          setTimeout(() => {
+            gsap.from('.day-v2-card', {
+              duration: 1,
+              y: 100,
+              opacity: 0,
+              stagger: 0.15,
+              ease: 'power4.out'
+            });
+            // Scroll to Top of result
+             window.scrollTo({ top: 300, behavior: 'smooth' });
+          }, 100);
         } else {
           this.errorMessage.set(res.message || 'Không thể tạo lịch trình.');
         }
-        this.loading.set(false);
+        this.stopLoadingSimulation();
       },
       error: (err) => {
         console.error(err);
         this.errorMessage.set('Rất tiếc, hệ thống AI đang bận hoặc gặp sự cố. Vui lòng thử lại sau giây lát.');
-        this.loading.set(false);
+        this.stopLoadingSimulation();
       }
     });
+  }
+
+  private startLoadingSimulation() {
+    const statuses = [
+      'Đang khởi động AI Engine...',
+      'Đang quét dữ liệu địa danh...',
+      'Đang tối ưu hóa tuyến đường di chuyển...',
+      'Đang lựa chọn khách sạn phù hợp nhất...',
+      'Đang kết nối tour trải nghiệm độc bản...',
+      'Đang hoàn thiện lịch trình dành riêng cho bạn...'
+    ];
+    let i = 0;
+    this.loadingProgress.set(5);
+    this.loadingStatus.set(statuses[0]);
+
+    this.statusInterval = setInterval(() => {
+      if (i < statuses.length - 1) {
+        i++;
+        this.loadingStatus.set(statuses[i]);
+        this.loadingProgress.update(v => Math.min(v + 15, 95));
+      }
+    }, 1500);
+  }
+
+  private stopLoadingSimulation() {
+    if (this.statusInterval) clearInterval(this.statusInterval);
+    this.loadingProgress.set(100);
+    this.loading.set(false);
+  }
+
+  resetForm() {
+    this.itinerary.set(null);
+    this.request = { destination: '', days: 3, preferences: '' };
+    setTimeout(() => this.initAnimations(), 50);
   }
 
   saveSuccess() {
@@ -256,8 +432,6 @@ export class ItineraryComponent implements OnInit {
           }
         }
       });
-    } else {
-      alert('Không thể lưu lịch trình này.');
     }
   }
 
@@ -268,7 +442,6 @@ export class ItineraryComponent implements OnInit {
   getRecLink(rec: any): string {
     if (rec.type === 'HOTEL') return `/hotels/${rec.id}`;
     if (rec.type === 'TOUR') return `/tours/${rec.id}`;
-    if (rec.type === 'POI') return `/pois`; // POI doesn't have a single-page detail usually, opens list
     return '/';
   }
 }
