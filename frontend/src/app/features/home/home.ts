@@ -1,6 +1,6 @@
-import { Component, AfterViewInit, OnDestroy, ElementRef } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, ElementRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from '@studio-freight/lenis';
@@ -10,228 +10,175 @@ import Lenis from '@studio-freight/lenis';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
+    <!-- HERO SECTION -->
     <section class="hero-section">
-      <div class="hero-bg"></div>
+      <div class="hero-bg" style="background-image: url('/images/home_hero.png')"></div>
       <div class="hero-overlay"></div>
-      <div class="hero-content">
-        <h1 class="luxury-font">Khám Phá Những Hành Trình<br>Phi Thường Cùng Chúng Tôi</h1>
-        <p class="subtitle">Trải nghiệm sự sang trọng được định nghĩa lại. Những hành trình được thiết kế riêng vượt xa mọi mong đợi.</p>
-        <!-- Removed Search Bar for visual space -->
+      <div class="hero-content container">
+        <span class="pro-tag-hero animate-on-load">VƯƠN TỚI SỰ PHI THƯỜNG</span>
+        <h1 class="luxury-font main-title animate-on-load">Hành Trình Đẳng Cấp<br><span class="gold-gradient-text">Định Nghĩa Lại</span></h1>
+        <p class="subtitle-hero animate-on-load">Khám phá thế giới qua lăng kính công nghệ AI và dịch vụ độc bản, được kiến tạo bởi đam mê của những sinh viên CMC.</p>
+        <div class="hero-actions animate-on-load">
+           <button routerLink="/tours" class="btn-primary-pro">KHÁM PHÁ NGAY</button>
+           <button routerLink="/itinerary" class="btn-glass-pro">TRẢI NGHIỆM AI</button>
+        </div>
+      </div>
+      <div class="scroll-indicator">
+         <div class="mouse"></div>
+         <span>CUỘN ĐỂ KHÁM PHÁ</span>
       </div>
     </section>
 
-    <section class="featured-sections container">
-      <div class="section-header">
-        <h2 class="luxury-font">Bộ Sưu Tập Tuyển Chọn</h2>
-        <p>Những điểm lưu trú và trải nghiệm được chọn lọc kỹ lưỡng cho những lữ khách tinh tế.</p>
+    <!-- AI FEATURES SECTION -->
+    <section class="ai-experience container-fluid">
+      <div class="container staggered-grid">
+        <div class="grid-visual animate-left">
+           <div class="glass-visual-card">
+              <i class="fas fa-magic ai-icon"></i>
+              <h3>Lập Kế Hoạch AI</h3>
+              <p>Thấu hiểu sở thích của bạn để thiết kế hành trình độc bản chỉ trong vài giây.</p>
+           </div>
+        </div>
+        <div class="grid-text animate-right">
+           <span class="pro-tag">Công Nghệ Tương Lai</span>
+           <h2 class="luxury-font section-title">Du Lịch Thông Minh <br>Bắt Đầu Từ <span class="gold-text">Trí Tuệ Nhân Tạo</span></h2>
+           <p>Chúng tôi ứng dụng các thuật toán AI tiên tiến nhất để phân tích hàng triệu dữ liệu, từ thời tiết đến sở thích cá nhân, nhằm kiến tạo một chuyến đi hoàn hảo cho riêng bạn.</p>
+           <ul class="check-list">
+              <li><i class="fas fa-check-circle gold-text"></i> Gợi ý điểm đến cá nhân hóa 100%.</li>
+              <li><i class="fas fa-check-circle gold-text"></i> Tối ưu hóa thời gian và ngân sách.</li>
+              <li><i class="fas fa-check-circle gold-text"></i> Hỗ trợ trợ lý ảo 24/7 trong suốt hành trình.</li>
+           </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- COLLECTIONS SECTION -->
+    <section class="collections container">
+      <div class="section-header text-center">
+        <span class="pro-tag">BỘ SƯU TẬP</span>
+        <h2 class="luxury-font">Điểm Đến Tuyển Chọn</h2>
       </div>
       
-      <div class="grid grid-3-cols">
-        <!-- Khách Sạn Boutique -->
-        <div class="card glass-effect">
-          <div class="card-img" style="background-image: url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=600')"></div>
-          <div class="card-body">
-            <h3 class="luxury-font">Khách Sạn Boutique</h3>
-            <p>Những không gian độc đáo, dịch vụ xuất sắc.</p>
-            <a routerLink="/hotels" class="link-gold">Xem Khách Sạn →</a>
-          </div>
+      <div class="collection-grid">
+        <div class="collection-item large glass-card animate-card" (click)="navigate('/hotels')">
+           <div class="coll-img" style="background-image: url('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=600')"></div>
+           <div class="coll-info">
+              <h3>Khách Sạn Boutique</h3>
+              <p>Những không gian độc bản, dịch vụ xuất sắc.</p>
+           </div>
         </div>
-        
-        <!-- Biệt Thự Biệt Lập -->
-        <div class="card glass-effect">
-          <div class="card-img" style="background-image: url('https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&q=80&w=600')"></div>
-          <div class="card-body">
-            <h3 class="luxury-font">Biệt Thự Biệt Lập</h3>
-            <p>Sự riêng tư tuyệt đối, trải nghiệm đẳng cấp.</p>
-            <a routerLink="/villas" class="link-gold">Khám Phá Villa →</a>
-          </div>
+        <div class="collection-item glass-card animate-card" (click)="navigate('/villas')">
+           <div class="coll-img" style="background-image: url('https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&q=80&w=600')"></div>
+           <div class="coll-info">
+              <h3>Biệt Thự Biệt Lập</h3>
+              <p>Sự riêng tư tuyệt đối cho gia đình.</p>
+           </div>
         </div>
-
-        <!-- Trải Nghiệm Ẩm Thực -->
-        <div class="card glass-effect">
-          <div class="card-img" style="background-image: url('https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&q=80&w=600')"></div>
-          <div class="card-body">
-            <h3 class="luxury-font">Hành Trình Ẩm Thực Tinh Hoa</h3>
-            <p>Vị ngon bản địa, dịch vụ chuẩn mực.</p>
-            <a routerLink="/dining" class="link-gold">Xem Tiệc Tối →</a>
-          </div>
+        <div class="collection-item glass-card animate-card" (click)="navigate('/dining')">
+           <div class="coll-img" style="background-image: url('https://images.unsplash.com/photo-1544148103-0773bf10d330?auto=format&fit=crop&q=80&w=600')"></div>
+           <div class="coll-info">
+              <h3>Ẩm Thực Tinh Hoa</h3>
+              <p>Trải nghiệm vị giác chuẩn mực.</p>
+           </div>
         </div>
       </div>
+    </section>
+
+    <!-- STUDENT STORY SECTION (CMC) -->
+    <section class="student-story container-fluid">
+       <div class="story-bg-overlay"></div>
+       <div class="container story-content">
+          <div class="story-text-center text-center">
+             <span class="pro-tag white">CÂU CHUYỆN SÁNG LẬP</span>
+             <h2 class="luxury-font">Kiến tạo bởi đam mê của<br>nhóm 5 sinh viên <span class="gold-text">Đại học CMC</span></h2>
+             <p>Khởi nguồn từ một dự án tại trường học, chúng tôi - 5 sinh viên CMC - đã khát khao biến việc du lịch trở nên dễ dàng và đẳng cấp hơn nhờ sức mạnh của AI. "TravelWithMe" không chỉ là một ứng dụng, đó là tầm nhìn của chúng tôi về một thế giới du lịch thông minh và bền vững.</p>
+             <button routerLink="/about/brand-story" class="btn-outline-white">XEM CÂU CHUYỆN CỦA CHÚNG TÔI</button>
+          </div>
+       </div>
     </section>
   `,
   styles: [`
-    :host {
-      display: block;
-      font-family: "Helvetica Neue", Arial, sans-serif;
-      font-weight: 300;
-    }
-    .luxury-font {
-      font-family: "Playfair Display", "Times New Roman", serif;
-      letter-spacing: 0.05em; /* Tăng letter-spacing */
-    }
-    .hero-section {
-      position: relative;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      overflow: hidden;
-    }
-    .hero-bg {
-      position: absolute;
-      top: -10%; left: 0; right: 0; bottom: -10%;
-      background: url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&q=80&w=1920') center/cover no-repeat;
-      z-index: -2;
-      height: 120%;
-    }
-    .hero-overlay {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: radial-gradient(circle, rgba(5,10,20,0.4) 0%, rgba(5,10,20,0.85) 100%);
-      z-index: -1;
-    }
-    .hero-content {
-      z-index: 1;
-      padding: 0 20px;
-    }
-    .hero-content h1 {
-      font-size: 5rem;
-      margin-bottom: 24px;
-      line-height: 1.15;
-      color: #ffffff;
-      text-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    }
-    .subtitle {
-      font-size: 1.25rem;
-      color: rgba(255,255,255,0.85);
-      max-width: 650px;
-      margin: 0 auto;
-      font-weight: 300;
-      letter-spacing: 0.5px;
-    }
-    .container {
-      max-width: 1280px;
-      margin: 120px auto;
-      padding: 0 24px;
-    }
-    .section-header {
-      text-align: center;
-      margin-bottom: 80px;
-    }
-    .section-header h2 { 
-      font-size: 2.8rem; 
-      margin-bottom: 16px; 
-      color: #fff;
-    }
-    .section-header p {
-      color: rgba(255,255,255,0.7);
-      font-size: 1.1rem;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-    /* Grid 3-4 columns */
-    .grid-3-cols {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 40px;
-    }
+    :host { --gold-primary: #D4AF37; --bg-dark: #050a14; --glass-bg: rgba(255, 255, 255, 0.03); }
+    
+    /* Layout & Base */
+    section { position: relative; overflow: hidden; }
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+    .container-fluid { width: 100%; padding: 120px 0; }
+    .text-center { text-align: center; }
+    .gold-text { color: var(--gold-primary); }
+    .gold-gradient-text { background: linear-gradient(135deg, #d4af37 0%, #f9e29c 50%, #d4af37 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .pro-tag { display: inline-block; background: rgba(212, 175, 55, 0.1); border: 1px solid rgba(212, 175, 55, 0.3); color: var(--gold-primary); padding: 6px 16px; border-radius: 30px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 25px; }
+    .white { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: #fff; }
+
+    /* HERO */
+    .hero-section { height: 100vh; display: flex; align-items: center; background: #000; }
+    .hero-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; transition: 0.3s; will-change: transform; }
+    .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, rgba(5,10,20,0.3) 0%, rgba(5,10,20,0.8) 100%); }
+    .hero-content { position: relative; z-index: 5; text-align: center; }
+    .main-title { font-size: clamp(3rem, 8vw, 6rem); color: #fff; line-height: 1.1; margin-bottom: 30px; font-weight: 700; letter-spacing: -1px; }
+    .subtitle-hero { font-size: clamp(1.1rem, 2vw, 1.4rem); color: rgba(255,255,255,0.85); max-width: 800px; margin: 0 auto 50px; line-height: 1.6; font-weight: 300; }
+    
+    .hero-actions { display: flex; gap: 20px; justify-content: center; }
+    .btn-primary-pro { background: var(--gold-primary); color: #000; border: none; padding: 18px 45px; border-radius: 40px; font-weight: 800; font-size: 0.9rem; letter-spacing: 2px; cursor: pointer; transition: 0.4s; }
+    .btn-primary-pro:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(212, 175, 55, 0.4); }
+    .btn-glass-pro { background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 18px 45px; border-radius: 40px; font-weight: 700; font-size: 0.9rem; letter-spacing: 2px; cursor: pointer; transition: 0.4s; }
+    .btn-glass-pro:hover { background: rgba(255,255,255,0.15); border-color: #fff; }
+
+    .scroll-indicator { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); text-align: center; color: rgba(255,255,255,0.5); font-size: 0.7rem; letter-spacing: 3px; }
+    .mouse { width: 24px; height: 40px; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; margin: 0 auto 10px; position: relative; }
+    .mouse::after { content: ''; position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 4px; height: 8px; background: var(--gold-primary); border-radius: 2px; animation: scrollMouse 2s infinite; }
+    @keyframes scrollMouse { 0% { opacity: 1; top: 8px; } 100% { opacity: 0; top: 25px; } }
+
+    /* AI STAGGERED GRID */
+    .ai-experience { background: #050a14; }
+    .staggered-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+    .glass-visual-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 80px 50px; border-radius: 40px; text-align: center; backdrop-filter: blur(20px); }
+    .ai-icon { font-size: 4rem; color: var(--gold-primary); margin-bottom: 30px; text-shadow: 0 0 30px rgba(212, 175, 55, 0.4); }
+    .section-title { font-size: clamp(2.5rem, 4vw, 3.5rem); color: #fff; line-height: 1.2; margin-bottom: 30px; }
+    .check-list { list-style: none; padding: 0; margin-top: 35px; }
+    .check-list li { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; color: rgba(255,255,255,0.7); font-size: 1.1rem; }
+
+    /* COLLECTIONS */
+    .collections { margin-bottom: 150px; }
+    .collection-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 80px; }
+    .collection-item { position: relative; height: 500px; border-radius: 32px; overflow: hidden; cursor: pointer; }
+    .coll-img { position: absolute; width: 100%; height: 100%; background-size: cover; background-position: center; transition: 0.8s; }
+    .collection-item:hover .coll-img { transform: scale(1.1); }
+    .coll-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 40px; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); display: flex; flex-direction: column; justify-content: flex-end; }
+    .coll-info h3 { font-size: 1.8rem; margin-bottom: 10px; color: #fff; }
+    .coll-info p { color: rgba(255,255,255,0.7); font-weight: 300; }
+
+    /* STORY SECTION */
+    .student-story { height: 70vh; min-height: 600px; display: flex; align-items: center; position: relative; background: #000; }
+    .story-bg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1600'); background-size: cover; background-position: center; filter: grayscale(100%) brightness(0.3); }
+    .story-content { position: relative; z-index: 5; }
+    .story-text-center h2 { font-size: clamp(2.5rem, 5vw, 4rem); color: #fff; margin-bottom: 30px; line-height: 1.2; }
+    .story-text-center p { max-width: 850px; margin: 0 auto 50px; color: rgba(255,255,255,0.7); font-size: 1.25rem; line-height: 1.8; font-weight: 300; }
+    .btn-outline-white { background: transparent; border: 1px solid #fff; color: #fff; padding: 18px 40px; border-radius: 40px; font-weight: 700; cursor: pointer; transition: 0.4s; letter-spacing: 2px; }
+    .btn-outline-white:hover { background: #fff; color: #000; }
+
     @media (max-width: 1024px) {
-      .grid-3-cols { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 768px) {
-      .grid-3-cols { grid-template-columns: 1fr; }
-    }
-    /* Card Styles with GSAP reveal ready & Glassmorphism */
-    .card {
-      position: relative;
-      border-radius: 24px;   /* Bo góc lớn */
-      overflow: hidden;
-      background: rgba(255, 255, 255, 0.04);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      perspective: 1000px;
-      cursor: pointer;
-    }
-    .card-img {
-      height: 420px;
-      background-size: cover;
-      background-position: center;
-      transition: transform 0.7s cubic-bezier(0.25, 1, 0.5, 1);
-    }
-    /* Hover state micro-interactions */
-    .card:hover .card-img {
-      transform: scale(1.05); /* Zoom in nhẹ */
-    }
-    .card-body {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      padding: 40px 30px 30px;
-      background: linear-gradient(to top, rgba(10,10,15,0.95) 0%, rgba(10,10,15,0.6) 60%, transparent 100%);
-      transform: translateY(20px);
-      transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-    }
-    .card:hover .card-body {
-      transform: translateY(0);
-    }
-    .card-body h3 { 
-      margin-bottom: 12px; 
-      font-size: 1.6rem; 
-      color: #fff;
-    }
-    .card-body p { 
-      color: rgba(255,255,255,0.7); 
-      margin-bottom: 20px;
-      font-size: 0.95rem;
-      line-height: 1.5;
-    }
-    .link-gold {
-      color: #d4af37; /* Màu gold sang trọng */
-      text-decoration: none;
-      font-weight: 400;
-      letter-spacing: 2px;
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      opacity: 0;
-      transform: translateY(15px);
-      transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1) 0.1s; /* delay nhẹ */
-      display: inline-block;
-      position: relative;
-    }
-    .card:hover .link-gold {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .link-gold::after {
-      content: '';
-      position: absolute;
-      width: 0;
-      height: 1px;
-      bottom: -4px;
-      left: 0;
-      background-color: #d4af37;
-      transition: width 0.3s ease;
-    }
-    .card:hover .link-gold:hover::after {
-      width: 100%;
+      .staggered-grid { grid-template-columns: 1fr; gap: 50px; text-align: center; }
+      .check-list li { justify-content: center; }
+      .collection-grid { grid-template-columns: 1fr; }
     }
   `]
 })
 export class HomeComponent implements AfterViewInit, OnDestroy {
   private lenis: any;
   private ctx: any;
+  private router = inject(Router);
 
   constructor(private el: ElementRef) { }
 
+  navigate(path: string) {
+    this.router.navigate([path]);
+  }
+
   ngAfterViewInit() {
-    // 1. Smooth Inertia Scroll (Lenis)
+    // 1. Smooth Scroll (Lenis)
     this.lenis = new Lenis({
-      duration: 1.0,
+      duration: 1.2,
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
     });
@@ -245,18 +192,69 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
     // GSAP Setup
     gsap.registerPlugin(ScrollTrigger);
 
-    // Create a GSAP Context allows easy cleanup
     this.ctx = gsap.context(() => {
-
-      // 2. On-load Animation "Hero Fade-in"
+      // Hero Animations
       const tl = gsap.timeline();
-      tl.from('.hero-bg', { scale: 1.05, duration: 2, ease: 'power2.out' })
-        .from('.hero-content h1', { y: 40, opacity: 0, duration: 0.8, ease: 'power3.out' }, '-=1.5')
-        .from('.hero-content .subtitle', { y: 20, opacity: 0, duration: 0.8, ease: 'power3.out' }, '-=1.2');
+      tl.from('.hero-bg', { scale: 1.2, duration: 2.5, ease: 'power2.out' })
+        .from('.animate-on-load', { 
+          y: 60, 
+          opacity: 0, 
+          duration: 1, 
+          stagger: 0.2, 
+          ease: 'power4.out' 
+        }, '-=1.5');
 
-      // 3. Parallax Layering for Hero Background
+      // AI Section Animations
+      gsap.from('.animate-left', {
+        x: -100,
+        opacity: 0,
+        duration: 1.2,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '.ai-experience',
+          start: 'top 80%',
+        }
+      });
+
+      gsap.from('.animate-right', {
+        x: 100,
+        opacity: 0,
+        duration: 1.2,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '.ai-experience',
+          start: 'top 80%',
+        }
+      });
+
+      // Collections Grid
+      gsap.from('.animate-card', {
+        y: 80,
+        opacity: 0,
+        duration: 1,
+        stagger: 0.2,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.collections',
+          start: 'top 75%',
+        }
+      });
+
+      // Story Section Parallax
+      gsap.from('.story-content', {
+        y: 100,
+        opacity: 0,
+        duration: 1.5,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.student-story',
+          start: 'top 80%',
+        }
+      });
+
+      // Hero Parallax
       gsap.to('.hero-bg', {
-        yPercent: 30, // move BG down 30% of its height
+        yPercent: 20,
         ease: 'none',
         scrollTrigger: {
           trigger: '.hero-section',
@@ -265,42 +263,11 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
           scrub: true
         }
       });
-
-      // Entrance animation for header
-      gsap.from('.section-header', {
-        y: 20,
-        opacity: 0,
-        duration: 0.8,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: '.featured-sections',
-          start: 'top bottom+=400', // Triggers way before entering screen
-          toggleActions: "play none none reverse"
-        }
-      });
-
-      // 4. Scroll-triggered Animations "Earlier Emerging Motion"
-      gsap.from('.card', {
-        y: 40,
-        opacity: 0,
-        duration: 0.7,
-        stagger: 0.1,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: '.featured-sections',
-          start: 'top bottom+=300', // Triggers earlier so it's ready when visible
-          toggleActions: "play none none reverse"
-        }
-      });
     }, this.el.nativeElement);
   }
 
   ngOnDestroy() {
-    if (this.lenis) {
-      this.lenis.destroy();
-    }
-    if (this.ctx) {
-      this.ctx.revert();
-    }
+    if (this.lenis) this.lenis.destroy();
+    if (this.ctx) this.ctx.revert();
   }
 }
