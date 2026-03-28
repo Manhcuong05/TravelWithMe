@@ -31,12 +31,34 @@ import Lenis from '@studio-freight/lenis';
 
     <!-- AI FEATURES SECTION -->
     <section class="ai-experience container-fluid">
+      <div class="ai-bg-glow"></div>
       <div class="container staggered-grid">
         <div class="grid-visual animate-left">
            <div class="glass-visual-card">
-              <i class="fas fa-magic ai-icon"></i>
+              <div class="ai-orb-container">
+                <div class="ai-orb-ring ring-1"></div>
+                <div class="ai-orb-ring ring-2"></div>
+                <div class="ai-orb-ring ring-3"></div>
+                <i class="fas fa-brain ai-icon"></i>
+              </div>
               <h3>Lập Kế Hoạch AI</h3>
               <p>Thấu hiểu sở thích của bạn để thiết kế hành trình độc bản chỉ trong vài giây.</p>
+              <div class="ai-stats-row">
+                <div class="ai-stat">
+                  <span class="stat-num gold-gradient-text">98%</span>
+                  <span class="stat-label">Hài lòng</span>
+                </div>
+                <div class="ai-stat-divider"></div>
+                <div class="ai-stat">
+                  <span class="stat-num gold-gradient-text">10K+</span>
+                  <span class="stat-label">Hành trình</span>
+                </div>
+                <div class="ai-stat-divider"></div>
+                <div class="ai-stat">
+                  <span class="stat-num gold-gradient-text">24/7</span>
+                  <span class="stat-label">Hỗ trợ</span>
+                </div>
+              </div>
            </div>
         </div>
         <div class="grid-text animate-right">
@@ -48,6 +70,7 @@ import Lenis from '@studio-freight/lenis';
               <li><i class="fas fa-check-circle gold-text"></i> Tối ưu hóa thời gian và ngân sách.</li>
               <li><i class="fas fa-check-circle gold-text"></i> Hỗ trợ trợ lý ảo 24/7 trong suốt hành trình.</li>
            </ul>
+           <button routerLink="/itinerary" class="btn-primary-pro mt-8" style="margin-top: 40px; display: inline-block;">THỬ NGAY MIỄN PHÍ</button>
         </div>
       </div>
     </section>
@@ -130,10 +153,31 @@ import Lenis from '@studio-freight/lenis';
     @keyframes scrollMouse { 0% { opacity: 1; top: 8px; } 100% { opacity: 0; top: 25px; } }
 
     /* AI STAGGERED GRID */
-    .ai-experience { background: #050a14; }
+    .ai-experience { background: #050a14; position: relative; }
+    .ai-bg-glow { position: absolute; top: 50%; left: 25%; transform: translate(-50%, -50%); width: 600px; height: 600px; background: radial-gradient(circle, rgba(212,175,55,0.06) 0%, transparent 70%); pointer-events: none; }
+    .container-fluid { width: 100%; padding: 80px 0; }
     .staggered-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
-    .glass-visual-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 80px 50px; border-radius: 40px; text-align: center; backdrop-filter: blur(20px); }
-    .ai-icon { font-size: 4rem; color: var(--gold-primary); margin-bottom: 30px; text-shadow: 0 0 30px rgba(212, 175, 55, 0.4); }
+    
+    /* AI Visual Card - Enriched */
+    .glass-visual-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(212,175,55,0.15); padding: 50px 40px; border-radius: 40px; text-align: center; backdrop-filter: blur(20px); position: relative; overflow: hidden; }
+    .glass-visual-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(212,175,55,0.4), transparent); }
+    
+    /* AI Orb Animation */
+    .ai-orb-container { position: relative; width: 130px; height: 130px; margin: 0 auto 30px; display: flex; align-items: center; justify-content: center; }
+    .ai-orb-ring { position: absolute; border-radius: 50%; border: 1px solid rgba(212,175,55,0.3); animation: orbitRing 4s infinite linear; }
+    .ring-1 { width: 100%; height: 100%; animation-duration: 4s; }
+    .ring-2 { width: 75%; height: 75%; animation-duration: 3s; animation-direction: reverse; border-color: rgba(212,175,55,0.2); }
+    .ring-3 { width: 50%; height: 50%; animation-duration: 2s; border-color: rgba(212,175,55,0.1); }
+    @keyframes orbitRing { to { transform: rotate(360deg); } }
+    .ai-icon { font-size: 3.5rem; color: var(--gold-primary); text-shadow: 0 0 30px rgba(212, 175, 55, 0.6); position: relative; z-index: 2; }
+    
+    /* Stats Row */
+    .ai-stats-row { display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 35px; padding-top: 25px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .ai-stat { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .stat-num { font-size: 1.6rem; font-weight: 800; font-family: 'Playfair Display', serif; }
+    .stat-label { font-size: 0.75rem; color: rgba(255,255,255,0.4); letter-spacing: 1px; text-transform: uppercase; }
+    .ai-stat-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.08); }
+    
     .section-title { font-size: clamp(2.5rem, 4vw, 3.5rem); color: #fff; line-height: 1.2; margin-bottom: 30px; }
     .check-list { list-style: none; padding: 0; margin-top: 35px; }
     .check-list li { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; color: rgba(255,255,255,0.7); font-size: 1.1rem; }
@@ -206,49 +250,49 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
       // AI Section Animations
       gsap.from('.animate-left', {
-        x: -100,
+        x: -50,
         opacity: 0,
-        duration: 1.2,
+        duration: 0.8,
         ease: 'power3.out',
         scrollTrigger: {
           trigger: '.ai-experience',
-          start: 'top 80%',
+          start: 'top 95%',
         }
       });
 
       gsap.from('.animate-right', {
-        x: 100,
+        x: 50,
         opacity: 0,
-        duration: 1.2,
+        duration: 0.8,
         ease: 'power3.out',
         scrollTrigger: {
           trigger: '.ai-experience',
-          start: 'top 80%',
+          start: 'top 95%',
         }
       });
 
       // Collections Grid
       gsap.from('.animate-card', {
-        y: 80,
+        y: 40,
         opacity: 0,
-        duration: 1,
-        stagger: 0.2,
+        duration: 0.6,
+        stagger: 0.1,
         ease: 'power2.out',
         scrollTrigger: {
           trigger: '.collections',
-          start: 'top 75%',
+          start: 'top 95%',
         }
       });
 
       // Story Section Parallax
       gsap.from('.story-content', {
-        y: 100,
+        y: 50,
         opacity: 0,
-        duration: 1.5,
+        duration: 0.8,
         ease: 'power2.out',
         scrollTrigger: {
           trigger: '.student-story',
-          start: 'top 80%',
+          start: 'top 95%',
         }
       });
 

@@ -338,11 +338,15 @@ import { BookingService } from '../../core/services/booking.service';
     
     .hero-title {
       text-align: center;
-      color: white;
+      background: linear-gradient(135deg, #f9e29c 0%, #d4af37 50%, #f9e29c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
       margin-bottom: 40px;
-      font-size: 2.8rem;
+      font-size: 3rem;
       letter-spacing: -1px;
-      text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      text-shadow: none;
+      filter: drop-shadow(0 4px 10px rgba(212,175,55,0.3));
     }
 
     /* Search Widget Professional Redesign */

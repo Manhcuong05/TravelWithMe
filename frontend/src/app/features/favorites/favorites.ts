@@ -281,10 +281,10 @@ export class FavoritesComponent implements OnInit {
   favoritesData = signal<any>({ tours: [], hotels: [], pois: [], itineraries: [] });
 
   tabs = [
-    { id: 'itineraries', label: 'AI Explorer', icon: 'fas fa-wand-magic-sparkles' },
-    { id: 'tours', label: 'Exclusive Tours', icon: 'fas fa-map-marked-alt' },
-    { id: 'hotels', label: 'Premium Stays', icon: 'fas fa-hotel' },
-    { id: 'pois', label: 'Hidden Gems', icon: 'fas fa-compass' }
+    { id: 'itineraries', label: 'Gợi ý AI', icon: 'fas fa-wand-magic-sparkles' },
+    { id: 'tours', label: 'Tour Du Lịch', icon: 'fas fa-map-marked-alt' },
+    { id: 'hotels', label: 'Khách Sạn', icon: 'fas fa-hotel' },
+    { id: 'pois', label: 'Địa Điểm', icon: 'fas fa-compass' }
   ];
 
   constructor() {

@@ -24,11 +24,11 @@ import { gsap } from 'gsap';
           <p class="subtitle animate-slide-up" style="animation-delay: 0.3s">Hệ thống quản lý các danh mục đặt chỗ thượng hạng của bạn.</p>
         </div>
 
-        <!-- Filter Tabs Component -->
-        <div class="category-tabs-wrapper animate-slide-up" style="animation-delay: 0.4s" *ngIf="!loading()">
-          <div class="category-tabs glass-premium">
+        <!-- Category Filter Tabs Pro Max -->
+        <div class="tabs-container-pro animate-slide-up" style="animation-delay: 0.4s" *ngIf="!loading()">
+          <div class="tabs-glass">
              <button *ngFor="let tab of tabs" 
-                     class="tab-btn" 
+                     class="tab-pill" 
                      [class.active]="activeTab() === tab.id"
                      (click)="setActiveTab(tab.id)">
                 <i [class]="tab.icon"></i>
@@ -124,34 +124,38 @@ import { gsap } from 'gsap';
     .decorative-line { width: 100px; height: 2px; background: var(--gold-gradient); margin: 0 auto 30px; box-shadow: 0 0 15px rgba(212, 175, 55, 0.5); }
     .subtitle { color: #94a3b8; font-size: 1.15rem; max-width: 600px; margin: 0 auto; line-height: 1.8; letter-spacing: 0.5px; }
 
-    /* Category Filter Tabs - HORIZONTAL SCROLL / WRAP */
-    .category-tabs-wrapper { margin: 0 auto 50px; width: 100%; display: flex; justify-content: center; }
-    .category-tabs { 
-      display: inline-flex; flex-direction: row; align-items: center; padding: 10px; border-radius: 50px; 
-      gap: 15px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.06); 
-      overflow-x: auto; max-width: 100%; scrollbar-width: none;
+    /* Tabs Pro Max (Horizontal Scrollable) */
+    .tabs-container-pro { display: flex; justify-content: center; margin-bottom: 60px; width: 100%; overflow: hidden; }
+    .tabs-glass { 
+      padding: 10px; background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); 
+      border-radius: 24px; border: 1px solid rgba(255,255,255,0.08); display: flex; gap: 8px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+      width: max-content;
+      max-width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; /* Hide scrollbar Firefox */
     }
-    .category-tabs::-webkit-scrollbar { display: none; } /* Hide scrollbar */
+    .tabs-glass::-webkit-scrollbar { display: none; } /* Hide scrollbar Safari and Chrome */
+
+    .tab-pill { 
+      flex-shrink: 0; /* Prevent squishing */
+      border: none; background: transparent; color: #64748b; padding: 14px 30px; 
+      border-radius: 18px; cursor: pointer; display: flex; align-items: center; gap: 12px;
+      font-weight: 700; font-size: 0.85rem; letter-spacing: 1px; transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+      position: relative; white-space: nowrap;
+    }
+    .tab-pill i { font-size: 1.1rem; transition: 0.3s; }
+    .tab-pill:hover { color: #fff; background: rgba(255,255,255,0.05); }
     
-    .tab-btn { 
-      display: flex; align-items: center; justify-content: center; gap: 10px; 
-      padding: 14px 25px; border-radius: 40px; background: transparent; border: none; 
-      color: #94a3b8; font-weight: 800; cursor: pointer; transition: 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); 
-      position: relative; font-size: 0.9rem; letter-spacing: 1px; white-space: nowrap;
-    }
-    .tab-btn i { font-size: 1.1rem; }
-    .tab-btn:hover { color: #fff; background: rgba(255,255,255,0.05); }
-
-    .tab-btn.active { 
-      background: var(--gold-gradient); color: #000; 
-      box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3); transform: scale(1.02);
-    }
-
+    .tab-pill.active { background: var(--gold-gradient); color: #000; box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3); }
+    .tab-pill.active i { color: #000; }
+    
     .count-badge { 
-      background: rgba(255,255,255,0.1); color: inherit; padding: 3px 10px; 
-      border-radius: 20px; font-size: 0.75rem; font-weight: 900; 
+      background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 8px; 
+      font-size: 0.7rem; font-weight: 800;
     }
-    .tab-btn.active .count-badge { background: rgba(0,0,0,0.2); }
+    .active .count-badge { background: rgba(0,0,0,0.1); }
 
     /* Grid & Cards - Smaller size */
     .booking-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; }
@@ -254,8 +258,9 @@ import { gsap } from 'gsap';
       .main-title { font-size: 2.5rem; }
       .booking-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
       
-      .category-tabs { border-radius: 20px; padding: 10px; gap: 8px; }
-      .tab-btn { padding: 12px 18px; font-size: 0.85rem; border-radius: 20px; }
+      .tabs-container-pro { justify-content: flex-start; padding: 0 5px; }
+      .tabs-glass { padding: 8px; border-radius: 20px; gap: 6px; }
+      .tab-pill { padding: 12px 20px; font-size: 0.8rem; border-radius: 14px; }
     }
   `]
 })
@@ -271,8 +276,7 @@ export class BookingListComponent implements OnInit {
     { id: 'ALL', name: 'Tất Cả', icon: 'fas fa-layer-group' },
     { id: 'TOUR', name: 'Tour Du Lịch', icon: 'fas fa-map-marked-alt' },
     { id: 'HOTEL', name: 'Khách Sạn', icon: 'fas fa-hotel' },
-    { id: 'FLIGHT', name: 'Vé Máy Bay', icon: 'fas fa-plane' },
-    { id: 'ITINERARY', name: 'Hành Trình AI', icon: 'fas fa-magic' }
+    { id: 'FLIGHT', name: 'Vé Máy Bay', icon: 'fas fa-plane' }
   ];
 
   filteredBookings = computed(() => {

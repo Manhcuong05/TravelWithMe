@@ -65,21 +65,23 @@ import { gsap } from 'gsap';
         </div>
 
         <!-- AI Orchestration Loader -->
-        <div *ngIf="loading()" class="ai-orchestration-loader">
+        <div *ngIf="loading()" class="ai-orchestration-loader" style="position: relative; z-index: 50; opacity: 1 !important; filter: brightness(1.5);">
           <div class="loader-content">
             <div class="luxury-radar-container">
               <div class="radar-circle"></div>
               <div class="radar-circle" style="animation-delay: 0.5s"></div>
               <div class="radar-circle" style="animation-delay: 1s"></div>
               <div class="radar-scanner"></div>
-              <i class="fas fa-brain ai-icon"></i>
+              <i class="fas fa-brain ai-icon" style="filter: drop-shadow(0 0 20px #d4af37);"></i>
             </div>
-            <div class="loading-status">
-              <h3 class="luxury-font">{{ loadingStatus() }}</h3>
-              <div class="progress-bar-container">
-                <div class="progress-bar" [style.width.%]="loadingProgress()"></div>
+            <div class="loading-status" style="margin-top: 30px;">
+              <h3 class="luxury-font" style="color: #ffffff !important; text-shadow: 0 0 20px rgba(255,255,255,0.9), 0 0 10px #ffffff; font-size: 2rem; font-weight: 700; opacity: 1 !important; margin-bottom: 25px; letter-spacing: 2px;">{{ loadingStatus() }}</h3>
+              
+              <div style="width: 350px; height: 6px; background: rgba(255,255,255,0.2); margin: 0 auto 20px; border-radius: 4px; overflow: hidden; box-shadow: 0 0 10px rgba(212,175,55,0.2);">
+                <div [style.width.%]="loadingProgress()" style="height: 100%; background: linear-gradient(90deg, #d4af37, #f9e29c, #d4af37); transition: width 0.3s ease; box-shadow: 0 0 20px #d4af37, 0 0 10px #f9e29c;"></div>
               </div>
-              <p>Hệ thống đang tích hợp dữ liệu tour & khách sạn theo thời gian thực...</p>
+              
+              <p style="color: #ffffff !important; font-size: 1.1rem; text-shadow: 0 0 10px rgba(255,255,255,0.5); opacity: 0.95;">Hệ thống đang tích hợp phân tích hàng triệu điểm dữ liệu...</p>
             </div>
           </div>
         </div>
@@ -238,10 +240,10 @@ import { gsap } from 'gsap';
     @keyframes radarPing { 0% { opacity: 0.5; transform: scale(0.8); } 100% { opacity: 0; transform: scale(2); } }
     @keyframes radarSpin { to { transform: rotate(360deg); } }
     
-    .loading-status h3 { font-size: 1.8rem; letter-spacing: 2px; margin-bottom: 20px; color: #fff; }
-    .progress-bar-container { width: 300px; height: 4px; background: rgba(255,255,255,0.1); margin: 0 auto 20px; border-radius: 2px; overflow: hidden; }
-    .progress-bar { height: 100%; background: var(--gold-gradient); transition: width 0.5s ease; }
-    .loading-status p { font-size: 0.9rem; opacity: 0.6; }
+    .loading-status h3 { font-size: 1.8rem; letter-spacing: 2px; margin-bottom: 20px; color: #ffffff !important; text-shadow: 0 0 15px rgba(255,255,255,0.5); }
+    .progress-bar-container { width: 300px; height: 6px; background: rgba(255,255,255,0.2); margin: 0 auto 20px; border-radius: 3px; overflow: hidden; box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
+    .progress-bar { height: 100%; background: var(--gold-gradient); transition: width 0.5s ease; box-shadow: 0 0 15px rgba(212, 175, 55, 0.8); }
+    .loading-status p { font-size: 1rem; color: #ffffff !important; opacity: 0.9; font-weight: 300; letter-spacing: 1px; }
 
     /* Result Layout V2 */
     .result-hero-card { padding: 50px; border-radius: 30px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.1); }
