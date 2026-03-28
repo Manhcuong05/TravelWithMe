@@ -12,7 +12,10 @@ public class DataSeeder {
     @Bean
     CommandLineRunner initDatabase(TourRepository repository) {
         return args -> {
-            repository.deleteAll();
+            if (repository.count() > 0) {
+                System.out.println("DEBUG: Database already contains tours. Skipping seeding.");
+                return;
+            }
             
             // 1. Phú Quốc
             repository.save(Tour.builder()

@@ -1,6 +1,7 @@
 import { Component, inject, signal, ElementRef, ViewChild, AfterViewChecked, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ChatService, ChatMessage } from '../../core/services/chat.service';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -180,6 +181,7 @@ import { AuthService } from '../../core/services/auth.service';
 export class ContactChatComponent implements OnInit, AfterViewChecked {
   public chatService = inject(ChatService);
   public auth = inject(AuthService);
+  private router = inject(Router);
   
   @ViewChild('scrollContainer') private scrollContainer?: ElementRef;
 
@@ -240,7 +242,8 @@ export class ContactChatComponent implements OnInit, AfterViewChecked {
   }
 
   goToLogin() {
-    // Implement navigation to login
+    this.isOpen.set(false);
+    this.router.navigate(['/auth/login']);
   }
 
   ngAfterViewChecked() {

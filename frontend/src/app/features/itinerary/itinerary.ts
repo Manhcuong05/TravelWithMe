@@ -153,10 +153,19 @@ import { gsap } from 'gsap';
             </div>
             
             <ng-template #noRecs>
-              <div class="no-results-premium glass-premium text-center p-60">
-                <i class="fas fa-search-minus mb-20 text-4xl opacity-50"></i>
-                <p class="text-xl">Hiện chưa có sản phẩm thực tế phù hợp chính xác cho địa điểm này.</p>
-                <span class="text-sm opacity-60">Vui lòng liên hệ hotline Luxury để được hỗ trợ Travel Concierge 24/7.</span>
+              <div class="concierge-premium-card glass-premium animate-scale-up">
+                <div class="concierge-visual">
+                  <div class="glow-orb"></div>
+                  <i class="fas fa-concierge-bell concierge-icon"></i>
+                </div>
+                <div class="concierge-content">
+                  <h3 class="luxury-font">Dịch Vụ Quản Gia Độc Bản</h3>
+                  <p>Hành trình này yêu cầu sự tinh tuyển vượt trên các lựa chọn hiện có.</p>
+                  <div class="concierge-action">
+                    <span class="hotline-text">LUXURY HOTLINE 24/7: <strong>1900 888 999</strong></span>
+                    <button class="btn-concierge-connect">Kết nối Chuyên gia</button>
+                  </div>
+                </div>
               </div>
             </ng-template>
           </div>
@@ -274,6 +283,36 @@ import { gsap } from 'gsap';
     .rec-body p { font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 25px; }
     .btn-view-premium { display: inline-block; color: var(--gold-primary); border-bottom: 1px solid var(--gold-primary); text-decoration: none; font-weight: 800; font-size: 0.75rem; letter-spacing: 1px; transition: 0.3s; }
     .btn-view-premium:hover { letter-spacing: 2px; color: #fff; border-bottom-color: #fff; }
+
+    /* Concierge Premium Experience Styling */
+    .concierge-premium-card {
+      display: flex; align-items: center; gap: 50px; padding: 60px; border-radius: 40px; margin-top: 30px;
+      border: 1px solid rgba(212, 175, 55, 0.3); background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(255,255,255,0.02) 100%);
+      position: relative; overflow: hidden;
+    }
+    .concierge-visual { position: relative; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; }
+    .glow-orb { position: absolute; width: 100%; height: 100%; background: radial-gradient(circle, rgba(212, 175, 55, 0.4) 0%, transparent 70%); animation: pulseGlow 4s infinite ease-in-out; }
+    .concierge-icon { font-size: 4rem; color: var(--gold-primary); position: relative; z-index: 2; filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.5)); }
+    
+    .concierge-content h3 { font-size: 2.2rem; margin-bottom: 15px; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .concierge-content p { font-size: 1.1rem; color: rgba(255,255,255,0.7); margin-bottom: 30px; }
+    
+    .concierge-action { display: flex; align-items: center; gap: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .hotline-text { font-size: 0.9rem; letter-spacing: 1px; color: rgba(255,255,255,0.5); }
+    .hotline-text strong { color: #fff; font-size: 1.1rem; margin-left: 10px; border-bottom: 1px dashed var(--gold-primary); }
+    
+    .btn-concierge-connect { 
+      background: var(--gold-gradient); color: var(--bg-primary); padding: 12px 30px; border-radius: 30px; 
+      border: none; font-weight: 800; cursor: pointer; transition: 0.4s; font-size: 0.85rem; letter-spacing: 1px;
+    }
+    .btn-concierge-connect:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); }
+
+    @keyframes pulseGlow { 0%, 100% { transform: scale(1); opacity: 0.4; } 50% { transform: scale(1.3); opacity: 0.7; } }
+
+    @media (max-width: 768px) {
+      .concierge-premium-card { flex-direction: column; text-align: center; padding: 40px 20px; gap: 30px; }
+      .concierge-action { flex-direction: column; gap: 20px; }
+    }
 
     .hover-lift:hover { transform: translateY(-10px); border-color: rgba(212,175,55,0.3); background: rgba(212,175,55,0.02); }
 
