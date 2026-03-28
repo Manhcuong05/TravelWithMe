@@ -175,6 +175,12 @@ public class AuthService {
                                 .build();
         }
 
+        public User getCurrentUser() {
+                String email = com.example.travel.core.util.SecurityUtil.getCurrentUserEmail();
+                return userRepository.findByEmail(email)
+                                .orElseThrow(() -> new BusinessException("USER_NOT_FOUND", "Không tìm thấy người dùng hiện tại"));
+        }
+
         private AuthResponse buildAuthResponse(User user, String token) {
                 return AuthResponse.builder()
                                 .accessToken(token)

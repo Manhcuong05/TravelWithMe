@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, OnDestroy, signal, computed, effect, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CatalogService, POI } from '../../core/services/catalog.service';
+import { FavoriteService } from '../../core/services/favorite.service';
 import { SafePipe } from '../../shared/pipes/safe.pipe';
 import { gsap } from 'gsap';
 
@@ -158,7 +159,11 @@ import { gsap } from 'gsap';
             <div class="card-footer-pro">
               <button class="card-link" (click)="openDetail(poi)">KHÁM PHÁ CHI TIẾT <i class="fas fa-long-arrow-alt-right"></i></button>
               <div class="card-actions-minimal">
-                <i class="far fa-heart heart-btn"></i>
+                <button class="btn-bookmark-mini" 
+                        (click)="toggleFavorite($event, poi.id)"
+                        [class.active]="isFavorite(poi.id)">
+                  <i class="fas fa-bookmark"></i>
+                </button>
                 <i class="fas fa-share-alt share-btn"></i>
               </div>
             </div>
@@ -509,8 +514,17 @@ import { gsap } from 'gsap';
     }
 
     .card-footer-pro { display: flex; justify-content: space-between; align-items: center; }
-    .card-actions-minimal { display: flex; gap: 20px; color: #64748b; font-size: 1rem; }
-    .heart-btn:hover { color: #ef4444; }
+    .card-actions-minimal { display: flex; gap: 20px; align-items: center; }
+    
+    .btn-bookmark-mini {
+      background: none; border: none; 
+      color: #64748b; font-size: 1.1rem; cursor: pointer;
+      transition: all 0.3s; padding: 0; display: flex; align-items: center;
+    }
+    .btn-bookmark-mini:hover { color: var(--gold-primary); transform: scale(1.2); }
+    .btn-bookmark-mini.active { color: var(--gold-primary); }
+
+    .share-btn { color: #64748b; cursor: pointer; transition: 0.3s; }
     .share-btn:hover { color: var(--gold-primary); }
 
     .mt-40 { margin-top: 40px; }
@@ -528,9 +542,11 @@ import { gsap } from 'gsap';
 })
 export class PoiListComponent implements OnInit, OnDestroy {
   private service = inject(CatalogService);
+  private favoriteService = inject(FavoriteService);
   private el = inject(ElementRef);
 
   pois = signal<POI[]>([]);
+  favorites = signal<Set<string>>(new Set());
   loading = signal(true);
   selectedRegion = signal<string>('ALL');
   selectedPoi = signal<POI | null>(null);
@@ -591,6 +607,32 @@ export class PoiListComponent implements OnInit, OnDestroy {
           this.startTimer();
         }
         this.loading.set(false);
+      }
+    });
+    this.loadFavorites();
+  }
+
+  loadFavorites() {
+    this.favoriteService.getAllFavorites().subscribe(res => {
+      if (res.success && res.data.pois) {
+        const ids = res.data.pois.map((p: any) => p.id);
+        this.favorites.set(new Set(ids));
+      }
+    });
+  }
+
+  isFavorite(id: string) {
+    return this.favorites().has(id);
+  }
+
+  toggleFavorite(event: Event, poiId: string) {
+    event.stopPropagation();
+    this.favoriteService.toggleFavorite({ itemType: 'POI', itemId: poiId }).subscribe(res => {
+      if (res.success) {
+        const newFavs = new Set(this.favorites());
+        if (newFavs.has(poiId)) newFavs.delete(poiId);
+        else newFavs.add(poiId);
+        this.favorites.set(newFavs);
       }
     });
   }

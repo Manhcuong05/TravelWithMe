@@ -43,6 +43,10 @@ public class HotelService {
                 .collect(Collectors.toList());
     }
 
+    public HotelResponse getHotelById(String id) {
+        return getHotelById(id, null, null);
+    }
+
     public HotelResponse getHotelById(String id, LocalDate checkIn, LocalDate checkOut) {
         Hotel hotel = hotelRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("HOTEL_NOT_FOUND", "Không tìm thấy khách sạn"));

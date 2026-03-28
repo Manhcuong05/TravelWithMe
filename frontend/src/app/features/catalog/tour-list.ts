@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CatalogService, Tour } from '../../core/services/catalog.service';
+import { FavoriteService } from '../../core/services/favorite.service';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
@@ -36,7 +37,14 @@ import { FormsModule } from '@angular/forms';
           <div *ngFor="let tour of filteredTours()" class="tour-card animate-fade-in">
             <div class="card-media">
                <img [src]="tour.imageUrl || 'https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&q=80&w=600'" [alt]="tour.title">
-               <button class="btn-wishlist"><i class="far fa-bookmark"></i></button>
+               
+               <!-- Bookmark Button -->
+               <button class="btn-bookmark" 
+                       (click)="toggleFavorite($event, tour.id)"
+                       [class.active]="isFavorite(tour.id)">
+                 <i class="fas fa-bookmark"></i>
+               </button>
+
                <div class="card-badge" *ngIf="tour.tourType">{{ tour.tourType }}</div>
             </div>
             
@@ -146,8 +154,16 @@ import { FormsModule } from '@angular/forms';
     .card-media img { width: 100%; height: 100%; object-fit: cover; transition: 1s cubic-bezier(0.4, 0, 0.2, 1); }
     .tour-card:hover .card-media img { transform: scale(1.1); }
     
-    .btn-wishlist { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.15); border: none; color: #fff; width: 38px; height: 38px; border-radius: 10px; cursor: pointer; backdrop-filter: blur(10px); transition: 0.3s; z-index: 10; }
-    .btn-wishlist:hover { background: #fff; color: #000; }
+    .btn-bookmark { 
+      position: absolute; top: 20px; right: 20px; 
+      background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); 
+      color: rgba(255,255,255,0.8); width: 42px; height: 42px; border-radius: 12px; 
+      cursor: pointer; backdrop-filter: blur(12px); transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1); z-index: 10;
+      display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+    }
+    .btn-bookmark:hover { transform: scale(1.1) rotate(5deg); background: rgba(212, 175, 55, 0.2); border-color: var(--gold-primary); color: var(--gold-primary); }
+    .btn-bookmark.active { background: var(--gold-gradient); color: #000; border-color: transparent; box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4); }
+    
     .card-badge { position: absolute; top: 20px; left: 20px; background: var(--gold-gradient); color: #000; padding: 6px 16px; border-radius: 10px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; z-index: 10; }
 
     .card-info { padding: 35px; flex: 1; display: flex; flex-direction: column; }
@@ -179,8 +195,10 @@ import { FormsModule } from '@angular/forms';
 })
 export class TourListComponent implements OnInit {
   private service = inject(CatalogService);
+  private favoriteService = inject(FavoriteService);
 
   tours = signal<Tour[]>([]);
+  favorites = signal<Set<string>>(new Set());
   loading = signal(true);
   searchQuery = '';
 
@@ -208,6 +226,32 @@ export class TourListComponent implements OnInit {
 
   ngOnInit() {
     this.loadTours();
+    this.loadFavorites();
+  }
+
+  loadFavorites() {
+    this.favoriteService.getAllFavorites().subscribe(res => {
+      if (res.success && res.data.tours) {
+        const ids = res.data.tours.map((t: any) => t.id);
+        this.favorites.set(new Set(ids));
+      }
+    });
+  }
+
+  isFavorite(id: string) {
+    return this.favorites().has(id);
+  }
+
+  toggleFavorite(event: Event, tourId: string) {
+    event.stopPropagation();
+    this.favoriteService.toggleFavorite({ itemType: 'TOUR', itemId: tourId }).subscribe(res => {
+      if (res.success) {
+        const newFavs = new Set(this.favorites());
+        if (newFavs.has(tourId)) newFavs.delete(tourId);
+        else newFavs.add(tourId);
+        this.favorites.set(newFavs);
+      }
+    });
   }
 
   loadTours() {

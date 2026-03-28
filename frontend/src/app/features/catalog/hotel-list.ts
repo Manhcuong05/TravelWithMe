@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HotelService, Hotel } from '../../core/services/hotel.service';
+import { FavoriteService } from '../../core/services/favorite.service';
 
 @Component({
   selector: 'app-hotel-list',
@@ -87,6 +88,13 @@ import { HotelService, Hotel } from '../../core/services/hotel.service';
           <div *ngFor="let hotel of filteredHotels()" class="hotel-card glass-effect hover-up">
             <div class="card-img" [style.backgroundImage]="'url(' + (hotel.imageUrl || 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=600') + ')'">
               <div class="luxury-badge">{{ hotel.starRating }}★</div>
+              
+              <!-- Bookmark Button -->
+              <button class="btn-bookmark" 
+                      (click)="toggleFavorite($event, hotel.id)"
+                      [class.active]="isFavorite(hotel.id)">
+                <i class="fas fa-bookmark"></i>
+              </button>
             </div>
             <div class="card-body">
               <div class="meta-row">
@@ -150,6 +158,16 @@ import { HotelService, Hotel } from '../../core/services/hotel.service';
     
     .luxury-badge { position: absolute; top: 24px; left: 24px; z-index: 10; background: #d4af37; color: #000; padding: 6px 14px; border-radius: 12px; font-size: 0.8rem; font-weight: 800; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
 
+    .btn-bookmark { 
+      position: absolute; top: 24px; right: 24px; 
+      background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); 
+      color: rgba(255,255,255,0.8); width: 42px; height: 42px; border-radius: 12px; 
+      cursor: pointer; backdrop-filter: blur(12px); transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1); z-index: 10;
+      display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+    }
+    .btn-bookmark:hover { transform: scale(1.1) rotate(5deg); background: rgba(212, 175, 55, 0.2); border-color: #d4af37; color: #d4af37; }
+    .btn-bookmark.active { background: linear-gradient(135deg, #FFD700 0%, #D4AF37 50%, #B8860B 100%); color: #000; border-color: transparent; box-shadow: 0 8px 20px rgba(212, 175, 55, 0.4); }
+
     .card-body { padding: 35px; flex: 1; display: flex; flex-direction: column; background: rgba(255,255,255,0.01); }
     .meta-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
     .city-tag { font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 600; letter-spacing: 1.5px; display: flex; align-items: center; gap: 6px; }
@@ -179,8 +197,10 @@ import { HotelService, Hotel } from '../../core/services/hotel.service';
 })
 export class HotelListComponent implements OnInit {
   private hotelService = inject(HotelService);
+  private favoriteService = inject(FavoriteService);
 
   hotels = signal<Hotel[]>([]);
+  favorites = signal<Set<string>>(new Set());
   loading = signal<boolean>(true);
 
   // Filter signals
@@ -215,6 +235,32 @@ export class HotelListComponent implements OnInit {
 
   ngOnInit() {
     this.loadHotels();
+    this.loadFavorites();
+  }
+
+  loadFavorites() {
+    this.favoriteService.getAllFavorites().subscribe(res => {
+      if (res.success && res.data.hotels) {
+        const ids = res.data.hotels.map((h: any) => h.id);
+        this.favorites.set(new Set(ids));
+      }
+    });
+  }
+
+  isFavorite(id: string) {
+    return this.favorites().has(id);
+  }
+
+  toggleFavorite(event: Event, hotelId: string) {
+    event.stopPropagation();
+    this.favoriteService.toggleFavorite({ itemType: 'HOTEL', itemId: hotelId }).subscribe(res => {
+      if (res.success) {
+        const newFavs = new Set(this.favorites());
+        if (newFavs.has(hotelId)) newFavs.delete(hotelId);
+        else newFavs.add(hotelId);
+        this.favorites.set(newFavs);
+      }
+    });
   }
 
   loadHotels() {

@@ -91,6 +91,12 @@ public class POIService {
                 .collect(Collectors.toList());
     }
 
+    public POIResponse getPOIById(String id) {
+        return poiRepository.findById(id)
+                .map(this::mapToResponse)
+                .orElseThrow(() -> new BusinessException("POI_NOT_FOUND", "Không tìm thấy địa điểm tham quan với ID: " + id));
+    }
+
     private POIResponse mapToResponse(POI poi) {
         return POIResponse.builder()
                 .id(poi.getId())
