@@ -1,233 +1,292 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, effect, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { CatalogService, Tour } from '../../core/services/catalog.service';
 import { BookingService } from '../../core/services/booking.service';
+import { FavoriteService } from '../../core/services/favorite.service';
 import { ReviewsComponent } from '../review/review';
+import { gsap } from 'gsap';
 
 @Component({
   selector: 'app-tour-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReviewsComponent],
+  imports: [CommonModule, FormsModule, ReviewsComponent, RouterLink],
   template: `
-    <section class="detail-page animate-fade-in" *ngIf="tour()">
-      <div class="hero-header" [style.backgroundImage]="'url(' + (tour()?.imageUrl || 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&q=80&w=1920') + ')'">
-        <div class="overlay"></div>
-        <div class="container hero-content">
-          <div class="rating luxury-font">ĐIỂM ĐẾN THƯỢNG LƯU · {{ tour()?.location }}</div>
-          <h1 class="luxury-font">{{ tour()?.title }}</h1>
-          <p class="address">📍 {{ tour()?.location }} · {{ tour()?.duration }}</p>
+    <section class="detail-page" *ngIf="tour()">
+      <!-- Luxury Hero Section -->
+      <div class="hero-section">
+        <div class="hero-bg animate-scale-in" [style.backgroundImage]="'url(' + (tour()?.imageUrl || 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&q=80&w=1920') + ')'"></div>
+        <div class="hero-overlay"></div>
+        
+        <div class="container hero-container">
+          <div class="hero-content">
+            <div class="breadcrumb-luxury">
+              <a routerLink="/tours">Exclusive Tours</a>
+              <span class="sep">/</span>
+              <span class="active">{{ tour()?.location }}</span>
+            </div>
+            
+            <h1 class="luxury-font main-title reveal-text">{{ tour()?.title }}</h1>
+            
+            <div class="hero-meta reveal-up">
+              <div class="meta-item">
+                <i class="fas fa-star text-gold"></i>
+                <span>4.9 (120+ Đánh giá)</span>
+              </div>
+              <div class="meta-item">
+                <i class="fas fa-clock"></i>
+                <span>{{ tour()?.durationDays }} Ngày {{ tour()?.durationDays! - 1 }} Đêm</span>
+              </div>
+              <div class="meta-item">
+                <i class="fas fa-shield-alt"></i>
+                <span>Bảo hiểm hành trình trọn gói</span>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- Floating Bookmark Button -->
+        <button class="btn-bookmark-floating" 
+                [class.active]="isFavorite()" 
+                (click)="toggleFavorite()"
+                [title]="isFavorite() ? 'Xóa khỏi yêu thích' : 'Lưu vào yêu thích'">
+          <i [class]="isFavorite() ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
+        </button>
       </div>
 
-      <div class="container main-grid">
-        <div class="content-side">
-          <div class="description-block glass-effect">
-            <h2 class="luxury-font">Giới Thiệu Chuyến Đi</h2>
-            <p>{{ tour()?.description }}</p>
+      <div class="container main-layout">
+        <div class="content-primary">
+          
+          <!-- Experience Highlights -->
+          <div class="section-card glass-luxury reveal-up">
+            <h2 class="luxury-font section-title">Trải Nghiệm Độc Bản</h2>
+            <div class="highlights-grid">
+              <div class="highlight-item" *ngFor="let h of tour()?.highlights">
+                <div class="h-icon"><i class="fas fa-check-circle"></i></div>
+                <p>{{ h }}</p>
+              </div>
+            </div>
           </div>
 
-          <div class="highlights-block glass-effect">
-            <h2 class="luxury-font">Điểm Nhấn Nổi Bật</h2>
-            <ul class="highlights-list">
-              <li *ngFor="let highlight of tour()?.highlights">
-                <span class="icon">✨</span> {{ highlight }}
-              </li>
-            </ul>
+          <!-- Description -->
+          <div class="section-card glass-luxury reveal-up">
+            <h2 class="luxury-font section-title">Giới Thiệu Hành Trình</h2>
+            <div class="desc-content">
+              <p>{{ tour()?.description }}</p>
+            </div>
           </div>
 
-          <!-- Combo Details -->
-          <div class="combo-section" *ngIf="tour()?.hotelId || tour()?.flightId || tour()?.poiIds?.length">
-            <h2 class="luxury-font section-title">Combo Trọn Gói Thượng Lưu</h2>
-            <div class="combo-grid">
-              <div class="combo-card glass-effect animate-slide-up" *ngIf="tour()?.hotelId">
-                <div class="card-icon">🏨</div>
-                <div class="card-info">
-                  <h3>Khách Sạn Sang Trọng</h3>
-                  <p>Lưu trú tại resort/khách sạn 5 sao cao cấp.</p>
-                  <span class="badge">Đã bao gồm</span>
-                </div>
-              </div>
-
-              <div class="combo-card glass-effect animate-slide-up" *ngIf="tour()?.flightId">
-                <div class="card-icon">✈️</div>
-                <div class="card-info">
-                  <h3>Vé Máy Bay Hạng Thương Gia</h3>
-                  <p>Trải nghiệm bay đẳng cấp với dịch vụ ưu tiên.</p>
-                  <span class="badge">Đã bao gồm</span>
-                </div>
-              </div>
-
-              <div class="combo-card glass-effect animate-slide-up" *ngIf="tour()?.poiIds?.length">
-                <div class="card-icon">🗺️</div>
-                <div class="card-info">
-                  <h3>Điểm Tham Quan Đặc Sắc</h3>
-                  <p>{{ tour()?.poiIds?.length }} địa điểm du lịch tiêu biểu.</p>
-                  <span class="badge">Vé vào cổng hoàn tất</span>
+          <!-- Timeline Itinerary Pro Max -->
+          <div class="section-card glass-luxury reveal-up">
+            <h2 class="luxury-font section-title">Lịch Trình Chi Tiết</h2>
+            <div class="timeline-container">
+              <div class="timeline-line"></div>
+              
+              <!-- Mock days since real tours might just have a text description -->
+              <div class="timeline-item" *ngFor="let day of [1,2,3]; let i = index">
+                <div class="timeline-dot">Day {{ day }}</div>
+                <div class="timeline-content">
+                  <h3 class="luxury-font day-title">Khám Phá {{ tour()?.location }} - Giai đoạn {{ day }}</h3>
+                  <p>Trải nghiệm trọn vẹn từng khoảnh khắc tại những địa điểm biểu tượng nhất. Dịch vụ cao cấp được phục vụ chu đáo tận nơi.</p>
+                  <div class="day-tags">
+                    <span class="d-tag"><i class="fas fa-utensils"></i> Bữa sáng/trưa/tối</span>
+                    <span class="d-tag"><i class="fas fa-car"></i> Xe đưa đón 5 sao</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- AI Suggestions -->
-          <div class="ai-block glass-effect" *ngIf="tour()?.aiSuggestions">
-            <div class="ai-header">
-              <span class="ai-icon">🤖</span>
-              <h2 class="luxury-font">Gợi Ý Từ Trợ Lý AI</h2>
-            </div>
-            <div class="ai-content">
-                <p>{{ tour()?.aiSuggestions }}</p>
-            </div>
+          <!-- Map Section -->
+          <div class="section-card glass-luxury reveal-up" *ngIf="hasCoordinates()">
+             <div class="section-header-flex">
+                <h2 class="luxury-font section-title">Vị Trí Hành Trình</h2>
+                <a [href]="getGoogleMapsUrl()" target="_blank" class="btn-text-gold">
+                  Xem trên Google Maps <i class="fas fa-external-link-alt"></i>
+                </a>
+             </div>
+             <div class="map-container-pro">
+                <iframe [src]="getMapEmbedUrl()" class="iframe-map" allowfullscreen loading="lazy"></iframe>
+             </div>
           </div>
 
-          <!-- 📍 Vị Trí & Khám Phá Địa Phương -->
-          <div class="location-wrapper glass-effect animate-slide-up" *ngIf="hasCoordinates()">
-            <div class="location-header">
-              <div class="title-with-icon">
-                <i class="fas fa-map-marked-alt text-gold"></i>
-                <h2 class="luxury-font">Vị Trí & Khám Phá</h2>
-              </div>
-              <a [href]="getGoogleMapsUrl()" target="_blank" rel="noopener" class="btn-maps-gold">
-                <span>📍</span> Mở trong Google Maps
-              </a>
-            </div>
-            <p class="location-address-pro">{{ tour()?.location }}</p>
-            <div class="map-frame-pro">
-              <iframe 
-                [src]="getMapEmbedUrl()"
-                class="full-map-iframe"
-                allowfullscreen
-                loading="lazy">
-              </iframe>
-              <div class="map-floating-label">
-                <i class="fas fa-street-view mr-2"></i>
-                <span>Quan sát thực địa điểm đến của chuyến hành trình</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Reviews Section -->
-          <div class="reviews-wrapper" *ngIf="tour()?.id">
+          <!-- Reviews -->
+          <div class="reviews-section reveal-up">
             <app-reviews [serviceId]="tour()!.id" serviceType="TOUR"></app-reviews>
           </div>
         </div>
 
-        <div class="sticky-sidebar">
-          <div class="booking-summary glass-effect">
-            <h3 class="luxury-font">Thông Tin Tour</h3>
-            
-            <div class="price-box">
-                <div class="price-label">Giá trọn gói từ</div>
-                <div class="price-value">{{ tour()?.price | number }} VNĐ</div>
-                <div class="price-sub">mỗi khách · Combo Full</div>
+        <!-- Sticky Sidebar Booking -->
+        <aside class="sidebar-sticky">
+          <div class="booking-card-pro glass-luxury reveal-right">
+            <div class="card-header">
+              <span class="starting-label">Giá trọn gói từ</span>
+              <div class="card-price">
+                <span class="currency">VNĐ</span>
+                <span class="amount">{{ tour()?.price | number }}</span>
+              </div>
+              <p class="price-desc">Đã bao gồm VAT & Phí dịch vụ cao cấp</p>
             </div>
 
-            <div class="summary-details">
-              <div class="summary-item">
-                <span>Thời gian</span>
-                <span>{{ tour()?.durationDays }} ngày</span>
+            <div class="booking-form">
+              <div class="form-group">
+                <label class=" luxury-font">📅 NGÀY KHỞI HÀNH</label>
+                <div class="input-wrapper">
+                  <input type="date" [(ngModel)]="departureDate" [min]="today" (change)="onDepartureDateChange()" class="luxury-input">
+                </div>
               </div>
-              <div class="summary-item">
-                <span>Vị trí</span>
-                <span>{{ tour()?.location }}</span>
+
+              <div class="return-info-glass" *ngIf="returnDate">
+                <div class="info-row">
+                  <i class="fas fa-plane-arrival"></i>
+                  <span>Ngày về dự kiến: <strong>{{ returnDate | date:'dd/MM/yyyy' }}</strong></span>
+                </div>
               </div>
+
+              <div class="inclusions-mini">
+                <div class="inc-item"><i class="fas fa-hotel"></i> Khách sạn 5 sao</div>
+                <div class="inc-item"><i class="fas fa-plane"></i> Vé máy bay khứ hồi</div>
+                <div class="inc-item"><i class="fas fa-shuttle-van"></i> Xe đưa đón riêng</div>
+              </div>
+
+              <button class="btn-book-luxury" [disabled]="!departureDate" (click)="onBook()">
+                <span>{{ departureDate ? 'XÁC NHẬN ĐẶT TOUR' : 'CHỌN NGÀY ĐI' }}</span>
+                <i class="fas fa-arrow-right"></i>
+              </button>
             </div>
 
-            <!-- Date Picker Section -->
-            <div class="date-picker-section">
-              <label class="date-label">📅 Ngày Khởi Hành</label>
-              <input 
-                type="date" 
-                class="date-input"
-                [(ngModel)]="departureDate"
-                [min]="today"
-                (change)="onDepartureDateChange()">
-              
-              <div class="return-date-preview" *ngIf="returnDate">
-                <span class="return-label">🏠 Ngày về dự kiến</span>
-                <span class="return-value">{{ returnDate | date:'dd/MM/yyyy' }}</span>
-              </div>
+            <div class="card-footer">
+              <i class="fas fa-headset"></i>
+              <span>Hỗ trợ 24/7 bởi chuyên gia du lịch</span>
             </div>
-
-            <button (click)="onBook()" class="btn-gold w-full mt-4" [disabled]="!departureDate">
-              {{ departureDate ? 'Đặt Ngay Combo Này' : 'Chọn Ngày Xuất Phát' }}
-            </button>
-            <p class="disclaimer">Giá trọn gói đã bao gồm toàn bộ dịch vụ trong combo cao cấp.</p>
           </div>
-        </div>
+
+          <!-- Contact Mini Card -->
+          <div class="contact-mini-glass glass-luxury reveal-right" style="margin-top: 20px;">
+             <p>Cần tư vấn thêm cho hành trình này?</p>
+             <a href="tel:19001234" class="phone-link luxury-font">1900 1234</a>
+          </div>
+        </aside>
       </div>
     </section>
   `,
   styles: [`
-    .detail-page { padding-bottom: 100px; }
-    .hero-header { height: 60vh; background-size: cover; background-position: center; position: relative; display: flex; align-items: flex-end; padding-bottom: 80px; }
-    .overlay { position: absolute; inset: 0; background: linear-gradient(transparent, var(--bg-primary)); }
-    .hero-content { position: relative; z-index: 1; }
-    .hero-content h1 { font-size: 4rem; color: var(--text-primary); margin-bottom: 10px; }
-    .rating { color: var(--gold-primary); letter-spacing: 2px; text-transform: uppercase; font-size: 0.9rem; margin-bottom: 15px; }
-    .address { color: var(--text-secondary); font-size: 1.1rem; }
+    :host { --gold-primary: #D4AF37; --gold-gradient: linear-gradient(135deg, #FFD700 0%, #D4AF37 50%, #B8860B 100%); }
 
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-    .main-grid { display: grid; grid-template-columns: 1fr 380px; gap: 40px; margin-top: -40px; position: relative; z-index: 10; }
+    .detail-page { background: #020617; color: #fff; min-height: 100vh; padding-bottom: 100px; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 0 40px; }
+
+    /* Hero Section */
+    .hero-section { height: 85vh; position: relative; overflow: hidden; display: flex; align-items: center; }
+    .hero-bg { position: absolute; inset: 0; background-size: cover; background-position: center; transition: 1.5s ease-out; }
+    .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, #020617 5%, rgba(2, 6, 23, 0.4) 60%, rgba(2, 6, 23, 0.8) 100%); }
     
-    .description-block, .highlights-block, .ai-block { padding: 40px; margin-bottom: 40px; line-height: 1.8; }
-    .description-block h2, .highlights-block h2, .section-title { font-size: 2rem; margin-bottom: 20px; color: var(--gold-primary); }
-    
-    .highlights-list { list-style: none; padding: 0; }
-    .highlights-list li { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; font-size: 1.1rem; color: var(--text-secondary); }
-    .highlights-list .icon { color: var(--gold-primary); }
+    .hero-container { position: relative; z-index: 10; width: 100%; top: 50px; }
+    .breadcrumb-luxury { display: flex; align-items: center; gap: 12px; margin-bottom: 30px; font-size: 0.8rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #64748b; }
+    .breadcrumb-luxury a { color: var(--gold-primary); text-decoration: none; transition: 0.3s; }
+    .breadcrumb-luxury a:hover { color: #fff; }
+    .breadcrumb-luxury .active { color: #fff; }
 
-    .combo-section { margin-bottom: 40px; }
-    .combo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-    .combo-card { padding: 25px; display: flex; gap: 20px; align-items: flex-start; }
-    .card-icon { font-size: 2rem; }
-    .card-info h3 { font-size: 1.1rem; margin-bottom: 5px; color: var(--text-primary); }
-    .card-info p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 10px; }
-    .badge { font-size: 0.7rem; text-transform: uppercase; background: var(--gold-primary); color: black; padding: 4px 10px; border-radius: 4px; font-weight: 700; }
+    .main-title { font-size: 5rem; line-height: 1.1; margin-bottom: 35px; max-width: 900px; text-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .hero-meta { display: flex; gap: 40px; }
+    .meta-item { display: flex; align-items: center; gap: 12px; font-size: 0.9rem; color: #94a3b8; font-weight: 600; }
+    .meta-item i { color: var(--gold-primary); font-size: 1.1rem; }
 
-    .ai-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
-    .ai-icon { font-size: 2.5rem; }
-    .ai-content { border-left: 3px solid var(--gold-primary); padding-left: 20px; font-style: italic; color: var(--text-secondary); }
+    /* Floating Bookmark */
+    .btn-bookmark-floating { 
+      position: absolute; top: 40px; right: 40px; width: 70px; height: 70px; 
+      border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+      cursor: pointer; transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1); backdrop-filter: blur(15px); z-index: 100;
+    }
+    .btn-bookmark-floating:hover { transform: scale(1.1) rotate(5deg); background: var(--gold-primary); border-color: var(--gold-primary); color: #000; box-shadow: 0 0 40px rgba(212, 175, 55, 0.4); }
+    .btn-bookmark-floating.active { background: var(--gold-gradient); color: #000; border-color: transparent; }
 
-    /* Location & Map Enhancements */
-    .location-wrapper { padding: 40px; margin-bottom: 40px; border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 20px; }
-    .location-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; }
-    .title-with-icon { display: flex; align-items: center; gap: 15px; }
-    .title-with-icon i { font-size: 1.8rem; color: var(--gold-primary); }
-    .title-with-icon h2 { margin: 0; font-size: 1.8rem; color: var(--gold-primary); }
-    .location-address-pro { color: var(--text-secondary); margin-bottom: 20px; font-size: 0.95rem; }
-    .btn-maps-gold { display: flex; align-items: center; gap: 10px; background: rgba(212, 175, 55, 0.1); color: var(--gold-primary); border: 1px solid var(--gold-primary); padding: 10px 20px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 700; transition: 0.3s; }
-    .btn-maps-gold:hover { background: var(--gold-primary); color: #000; box-shadow: 0 5px 20px rgba(212, 175, 55, 0.3); }
-    .map-frame-pro { position: relative; height: 450px; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
-    .full-map-iframe { width: 100%; height: 100%; border:0; }
-    .map-floating-label { position: absolute; top: 20px; right: 20px; background: rgba(5, 10, 20, 0.8); backdrop-filter: blur(10px); padding: 8px 16px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 0.75rem; pointer-events: none; }
+    /* Layout */
+    .main-layout { display: grid; grid-template-columns: 1fr 420px; gap: 60px; margin-top: -120px; position: relative; z-index: 20; }
+    .content-primary { display: flex; flex-direction: column; gap: 40px; }
 
-    .sticky-sidebar { position: sticky; top: 120px; height: fit-content; }
-    .booking-summary { padding: 40px; border-radius: 20px; }
-    .booking-summary h3 { font-size: 1.8rem; margin-bottom: 30px; color: var(--gold-primary); text-align: center; }
-    
-    .price-box { background: rgba(255,255,255,0.05); padding: 25px; border-radius: 12px; border: 1px solid var(--glass-border); text-align: center; margin-bottom: 30px; }
-    .price-label { font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; }
-    .price-value { font-size: 2rem; font-weight: 800; color: var(--gold-primary); }
-    .price-sub { font-size: 0.85rem; color: var(--text-muted); }
+    .glass-luxury { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.08); border-radius: 40px; }
+    .section-card { padding: 50px; }
+    .section-title { font-size: 2.2rem; color: #fff; margin-bottom: 35px; border-left: 5px solid var(--gold-primary); padding-left: 25px; }
 
-    .summary-item { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--glass-border); font-size: 0.95rem; }
+    .highlights-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+    .highlight-item { display: flex; gap: 15px; align-items: flex-start; }
+    .h-icon { color: var(--gold-primary); font-size: 1.2rem; margin-top: 3px; }
+    .highlight-item p { font-size: 1.05rem; color: #cbd5e1; line-height: 1.5; }
 
-    /* Date Picker */
-    .date-picker-section { margin: 24px 0; }
-    .date-label { display: block; font-size: 0.75rem; text-transform: uppercase; color: var(--gold-primary); letter-spacing: 1px; margin-bottom: 10px; }
-    .date-input { width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); color: var(--text-primary); padding: 12px 14px; border-radius: 8px; font-size: 0.95rem; cursor: pointer; transition: border-color 0.3s; box-sizing: border-box; }
-    .date-input:focus { outline: none; border-color: var(--gold-primary); }
-    .date-input::-webkit-calendar-picker-indicator { filter: invert(1) brightness(0.7); cursor: pointer; }
-    .return-date-preview { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding: 10px 14px; background: rgba(201, 168, 76, 0.08); border-radius: 8px; border: 1px solid rgba(201, 168, 76, 0.3); }
-    .return-label { font-size: 0.8rem; color: var(--text-secondary); }
-    .return-value { font-size: 0.9rem; font-weight: 600; color: var(--gold-primary); }
+    .desc-content p { font-size: 1.15rem; line-height: 1.8; color: #94a3b8; font-weight: 300; }
 
-    .w-full { width: 100%; }
-    .mt-4 { margin-top: 20px; }
-    .disclaimer { font-size: 0.75rem; color: var(--text-muted); text-align: center; margin-top: 20px; line-height: 1.4; }
+    /* Timeline */
+    .timeline-container { position: relative; padding-left: 20px; }
+    .timeline-line { position: absolute; left:-2px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--gold-primary), transparent); }
+    .timeline-item { position: relative; margin-bottom: 50px; padding-left: 45px; }
+    .timeline-dot { 
+      position: absolute; left: -25px; top: 0; width: 50px; height: 50px; 
+      border-radius: 50%; background: #020617; border: 2px solid var(--gold-primary);
+      display: flex; align-items: center; justify-content: center; font-size: 0.7rem; 
+      font-weight: 800; color: var(--gold-primary); text-transform: uppercase;
+    }
+    .day-title { font-size: 1.6rem; color: #fff; margin-bottom: 15px; }
+    .day-tags { display: flex; gap: 15px; margin-top: 20px; }
+    .d-tag { background: rgba(255,255,255,0.05); padding: 6px 14px; border-radius: 8px; font-size: 0.75rem; color: #64748b; display: flex; align-items: center; gap: 8px; font-weight: 600; }
+    .d-tag i { color: var(--gold-primary); }
+
+    /* Sidebar */
+    .sidebar-sticky { position: sticky; top: 120px; height: fit-content; display: flex; flex-direction: column; gap: 30px; }
+    .booking-card-pro { padding: 45px; }
+    .card-header { text-align: center; margin-bottom: 35px; }
+    .starting-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: #64748b; font-weight: 800; }
+    .card-price { display: flex; align-items: baseline; justify-content: center; gap: 10px; margin: 10px 0; }
+    .currency { font-size: 1.2rem; color: var(--gold-primary); font-weight: 700; }
+    .amount { font-size: 3.5rem; font-weight: 800; color: #fff; font-family: 'Playfair Display', serif; }
+    .price-desc { font-size: 0.8rem; color: #475569; }
+
+    .form-group { margin-bottom: 30px; }
+    .form-group label { display: block; font-size: 0.7rem; letter-spacing: 2px; color: var(--gold-primary); margin-bottom: 15px; font-weight: 800; }
+    .luxury-input { width: 100%; border: none; background: rgba(255,255,255,0.05); padding: 18px; border-radius: 12px; color: #fff; font-size: 1rem; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: 0.3s; box-sizing: border-box; }
+    .luxury-input:focus { outline: none; border-color: var(--gold-primary); background: rgba(212, 175, 55, 0.05); }
+
+    .return-info-glass { background: rgba(212, 175, 55, 0.1); padding: 15px; border-radius: 12px; border: 1px solid rgba(212, 175, 55, 0.3); margin-bottom: 25px; }
+    .info-row { display: flex; align-items: center; gap: 12px; color: #cbd5e1; font-size: 0.9rem; }
+    .info-row i { color: var(--gold-primary); }
+
+    .inclusions-mini { display: flex; flex-direction: column; gap: 12px; margin-bottom: 35px; }
+    .inc-item { display: flex; align-items: center; gap: 15px; font-size: 0.85rem; color: #94a3b8; font-weight: 600; }
+    .inc-item i { width: 20px; color: var(--gold-primary); text-align: center; }
+
+    .btn-book-luxury { 
+      width: 100%; padding: 22px; border: none; border-radius: 18px; 
+      background: var(--gold-gradient); color: #000; font-weight: 900; 
+      letter-spacing: 2px; font-size: 1rem; cursor: pointer; transition: 0.4s;
+      display: flex; align-items: center; justify-content: center; gap: 15px;
+      box-shadow: 0 15px 35px rgba(212, 175, 55, 0.3);
+    }
+    .btn-book-luxury:hover { transform: translateY(-5px); box-shadow: 0 20px 50px rgba(212, 175, 55, 0.5); }
+    .btn-book-luxury:disabled { opacity: 0.3; cursor: not-allowed; box-shadow: none; transform: none; }
+
+    .contact-mini-glass { padding: 25px; text-align: center; }
+    .phone-link { color: var(--gold-primary); font-size: 1.8rem; text-decoration: none; display: block; margin-top: 10px; }
+
+    /* Map */
+    .map-container-pro { height: 450px; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
+    .iframe-map { width: 100%; height: 100%; border:0; filter: grayscale(1) invert(0.9) contrast(1.2); }
+
+    /* Animations */
+    .animate-scale-in { animation: scaleIn 2s ease-out forwards; }
+    @keyframes scaleIn { from { transform: scale(1.1); } to { transform: scale(1); } }
+
+    .reveal-up { opacity: 0; transform: translateY(50px); }
+    .reveal-right { opacity: 0; transform: translateX(50px); }
+    .reveal-text { opacity: 0; transform: translateY(20px); filter: blur(5px); }
+
+    @media (max-width: 1200px) {
+      .main-layout { grid-template-columns: 1fr; }
+      .main-title { font-size: 3.5rem; }
+      .sidebar-sticky { position: static; max-width: 500px; margin: 0 auto; }
+    }
   `]
 })
 export class TourDetailComponent implements OnInit {
@@ -235,20 +294,67 @@ export class TourDetailComponent implements OnInit {
   private router = inject(Router);
   private catalogService = inject(CatalogService);
   private bookingService = inject(BookingService);
+  private favoriteService = inject(FavoriteService);
   private sanitizer = inject(DomSanitizer);
+  private el = inject(ElementRef);
 
   tour = signal<any | null>(null);
+  isFavorite = signal(false);
   departureDate: string = '';
   returnDate: Date | null = null;
   today = new Date().toISOString().split('T')[0];
 
+  constructor() {
+    effect(() => {
+      const t = this.tour();
+      if (t) {
+        this.checkFavorite();
+        this.initAnimations();
+      }
+    });
+  }
+
   ngOnInit() {
+    this.loadTour();
+  }
+
+  loadTour() {
     const id = this.route.snapshot.params['id'];
     this.catalogService.getTour(id).subscribe({
       next: (res) => {
-        if (res.success) this.tour.set(res.data);
+        if (res.success) {
+          this.tour.set(res.data);
+        }
       }
     });
+  }
+
+  checkFavorite() {
+    const t = this.tour();
+    if (!t) return;
+    this.favoriteService.getFavoriteStatus('TOUR', t.id).subscribe((res: any) => {
+      this.isFavorite.set(res.success && res.data);
+    });
+  }
+
+  toggleFavorite() {
+    const t = this.tour();
+    if (!t) return;
+    this.favoriteService.toggleFavorite({ itemType: 'TOUR', itemId: t.id }).subscribe(res => {
+      if (res.success) {
+        this.isFavorite.set(!this.isFavorite());
+        // Small GSAP pop effect
+        gsap.to('.btn-bookmark-floating', { scale: 1.3, duration: 0.2, yoyo: true, repeat: 1 });
+      }
+    });
+  }
+
+  private initAnimations() {
+    setTimeout(() => {
+      gsap.to('.reveal-text', { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1, stagger: 0.1, ease: 'power4.out' });
+      gsap.to('.reveal-up', { opacity: 1, y: 0, duration: 1, stagger: 0.2, ease: 'power3.out', delay: 0.5 });
+      gsap.to('.reveal-right', { opacity: 1, x: 0, duration: 1, ease: 'power3.out', delay: 1 });
+    }, 100);
   }
 
   getMapEmbedUrl(): SafeResourceUrl {
@@ -294,7 +400,7 @@ export class TourDetailComponent implements OnInit {
           type: 'TOUR',
           serviceId: currentTour.id,
           quantity: 1,
-          checkInDate: this.departureDate,   // ngày đi - backend sẽ tự tính ngày về
+          checkInDate: this.departureDate,
         }
       ]
     }).subscribe({
