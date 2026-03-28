@@ -72,8 +72,8 @@ import { FavoriteService } from '../../core/services/favorite.service';
             </div>
 
             <div class="filter-actions">
-               <button class="btn-search-reset" (click)="resetFilters()">
-                 <span class="icon">🔄</span>
+               <button class="btn-search-reset" (click)="resetFilters()" title="Làm mới bộ lọc">
+                 <i class="fas fa-rotate-left"></i>
                </button>
             </div>
           </div>
@@ -134,9 +134,9 @@ import { FavoriteService } from '../../core/services/favorite.service';
     .hero-overlay { position: absolute; inset: 0; background: radial-gradient(circle at center, transparent 0%, rgba(2, 6, 23, 0.4) 100%); }
     .hero-content { position: relative; z-index: 2; padding: 0 20px; max-width: 900px; margin-top: 40px; }
     
-    .sub-heading { font-size: 0.8rem; letter-spacing: 8px; text-transform: uppercase; margin-bottom: 25px; font-weight: 800; color: #d4af37; }
-    .main-heading { font-size: 5rem; color: #fff; margin-bottom: 25px; text-shadow: 0 10px 40px rgba(0,0,0,0.6); font-family: 'Playfair Display', serif; }
-    .hero-content p { color: #cbd5e1; font-size: 1.25rem; line-height: 1.8; opacity: 0.9; max-width: 700px; margin: 0 auto; }
+    .sub-heading { font-size: 0.8rem; letter-spacing: 8px; text-transform: uppercase; margin-bottom: 25px; font-weight: 800; color: #d4af37; text-shadow: 0 2px 15px rgba(0,0,0,0.8); }
+    .main-heading { font-size: 5rem; margin-bottom: 25px; background: linear-gradient(to bottom, #fff 30%, #d4af37 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-family: 'Playfair Display', serif; filter: drop-shadow(0 15px 30px rgba(0,0,0,0.6)); }
+    .hero-content p { color: #cbd5e1; font-size: 1.25rem; line-height: 1.8; opacity: 0.9; max-width: 700px; margin: 0 auto; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
 
     .container { max-width: 1400px; margin: 0 auto; padding: 0 40px; }
     .relative-z { position: relative; z-index: 10; }
