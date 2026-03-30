@@ -4,7 +4,7 @@
   <br />
   <br />
 
-  # ✈️ TravelWithMe (Pro Max Edition)
+  # ✈️ TravelWithMe 
   
   **Nền tảng Quản lý & Lên kế hoạch Du lịch Thông minh chuẩn Luxury**
   
@@ -131,8 +131,8 @@ graph TD;
 
 | Chức vụ | Tên đăng nhập | Mật khẩu | Quyền hạn |
 | :--- | :--- | :--- | :--- |
-| **Super Admin** | `admin@travel.com` | `123456` | Toàn quyền thao tác trên toàn bộ module và Settings. |
-| **Cộng Tác Viên (CTV)** | `ctv@travel.com` | `123456` | Quản lý đánh giá, nội dung content, upload hình ảnh nhưng không thể xóa User. |
+| **Super Admin** | `admin@travel.com` | `admin123` | Toàn quyền thao tác trên toàn bộ module và Settings. |
+| **Cộng Tác Viên (CTV)** | `ctv@travel.com` | `ctv123` | Quản lý đánh giá, nội dung content, upload hình ảnh nhưng không thể xóa User. |
 | **Người Dùng (Traveler)**| Đăng ký mới | `Người dùng tự tạo` | Book vé, lên kế hoạch AI, thanh toán hóa đơn. |
 
 ---
