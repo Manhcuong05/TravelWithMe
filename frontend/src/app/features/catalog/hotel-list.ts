@@ -94,7 +94,6 @@ import { FavoriteService } from '../../core/services/favorite.service';
         <div class="hotel-grid" *ngIf="!loading() && filteredHotels().length > 0">
           <div *ngFor="let hotel of filteredHotels(); let i = index" class="hotel-card glass-effect animate-slide-up" [style.animation-delay]="(0.3 + i*0.1) + 's'">
             <div class="card-img" [style.backgroundImage]="'url(' + (hotel.imageUrl || 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=600') + ')'">
-              <div class="luxury-badge">{{ hotel.starRating }}★</div>
               
               <!-- Bookmark Button -->
               <button class="btn-bookmark" 

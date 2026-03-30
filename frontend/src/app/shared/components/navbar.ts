@@ -61,8 +61,8 @@ import { AuthService } from '../../core/services/auth.service';
 
         <div class="actions-pro">
           <ng-container *ngIf="authService.currentUser()?.role === 'ADMIN' || authService.currentUser()?.role === 'CTV'">
-            <a routerLink="/management" class="btn-mgmt-pro">
-              Admin <i class="fas fa-bolt-lightning bolt-pro"></i>
+            <a routerLink="/management" class="btn-mgmt-pro" title="Hệ thống điều hành TravelWithMe">
+              Admin <i class="fas fa-gauge-high bolt-pro"></i>
             </a>
           </ng-container>
 

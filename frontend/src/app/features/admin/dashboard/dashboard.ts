@@ -4,6 +4,8 @@ import { CatalogService } from '../../../core/services/catalog.service';
 import { AdminService } from '../../../core/services/admin.service';
 import { BookingService } from '../../../core/services/booking.service';
 import { HotelService } from '../../../core/services/hotel.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
 @Component({
@@ -79,28 +81,6 @@ import { forkJoin } from 'rxjs';
         </div>
       </div>
 
-      <!-- System Health & Activity -->
-      <div class="dashboard-row mt-10">
-        <div class="activity-panel glass-pro">
-          <div class="panel-header">
-            <h3><i class="fas fa-bolt-lightning mr-2 text-amber-500"></i> Thao tác nhanh</h3>
-          </div>
-          <div class="action-grid mt-6">
-            <button class="btn-action-pro">
-               <i class="fas fa-file-invoice-dollar"></i>
-               <span>Xuất báo cáo tài chính</span>
-            </button>
-            <button class="btn-action-pro btn-outline-pro">
-               <i class="fas fa-shield-halved"></i>
-               <span>Kiểm tra Log hệ thống</span>
-            </button>
-            <button class="btn-action-pro btn-gold-pro">
-               <i class="fas fa-plus-circle"></i>
-               <span>Thêm dịch vụ mới</span>
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   `,
     styles: [`
@@ -137,22 +117,6 @@ import { forkJoin } from 'rxjs';
     .status-up { font-size: 0.7rem; color: #22c55e; font-weight: 700; display: flex; align-items: center; gap: 4px; }
     .status-neutral { font-size: 0.7rem; color: #94a3b8; font-weight: 700; display: flex; align-items: center; gap: 4px; }
 
-    /* Action Panel Pro */
-    .glass-pro { background: rgba(15, 23, 42, 0.2); backdrop-filter: blur(20px); border-radius: 30px; border: 1px solid rgba(255,255,255,0.03); padding: 40px; }
-    .panel-header h3 { font-size: 1.2rem; font-weight: 700; color: #fff; }
-    
-    .action-grid { display: flex; flex-wrap: wrap; gap: 20px; }
-    .btn-action-pro { 
-      padding: 16px 28px; border-radius: 16px; border: none; background: rgba(255,255,255,0.03);
-      color: #cbd5e1; font-weight: 700; display: flex; align-items: center; gap: 12px;
-      cursor: pointer; transition: 0.3s; font-size: 0.9rem;
-    }
-    .btn-action-pro:hover { background: rgba(255,255,255,0.08); color: #fff; transform: scale(1.02); }
-    
-    .btn-outline-pro { border: 1px solid rgba(255,255,255,0.1); }
-    .btn-gold-pro { background: linear-gradient(135deg, #FFD700, #D4AF37); color: #000; }
-    .btn-gold-pro:hover { box-shadow: 0 0 20px rgba(212, 175, 55, 0.3); }
-
     .mt-10 { margin-top: 40px; }
     .mr-2 { margin-right: 8px; }
   `]
@@ -162,6 +126,8 @@ export class DashboardComponent implements OnInit {
     private hotelService = inject(HotelService);
     private adminService = inject(AdminService);
     private bookingService = inject(BookingService);
+    public authService = inject(AuthService);
+    private router = inject(Router);
 
     stats = signal({
         users: 0,

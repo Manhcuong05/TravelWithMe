@@ -48,7 +48,7 @@ import { RouterLink } from '@angular/router';
           <p class="font-light">Đăng ký để nhận những thông tin du lịch độc quyền và ưu đãi sớm nhất từ CLB TravelWithMe.</p>
           <div class="input-group-pro">
             <input type="email" class="minimal-input font-light" placeholder="Email của bạn">
-            <button class="btn-gold-pro">ĐĂNG KÝ</button>
+            <button class="btn-gold-pro" routerLink="/auth/register">ĐĂNG KÝ</button>
           </div>
         </div>
       </div>

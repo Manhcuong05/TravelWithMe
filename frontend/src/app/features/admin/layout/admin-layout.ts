@@ -4,10 +4,10 @@ import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/rou
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
-    selector: 'app-admin-layout',
-    standalone: true,
-    imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
-    template: `
+  selector: 'app-admin-layout',
+  standalone: true,
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  template: `
     <div class="admin-wrapper prose-max-ui">
       <!-- Floating Sidebar -->
       <aside class="sidebar-pro">
@@ -128,7 +128,7 @@ import { AuthService } from '../../../core/services/auth.service';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     :host { --sidebar-pro-width: 320px; --top-bar-pro-height: 85px; --gold-elite: #D4AF37; --accent-indigo: #818cf8; }
     
     .admin-wrapper { display: flex; height: 100vh; background: #020617; color: #f1f5f9; overflow: hidden; font-family: 'Inter', sans-serif; }
@@ -222,12 +222,12 @@ import { AuthService } from '../../../core/services/auth.service';
   `]
 })
 export class AdminLayoutComponent {
-    private authService = inject(AuthService);
-    private router = inject(Router);
-    user = this.authService.currentUser;
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  user = this.authService.currentUser;
 
-    logout() {
-        this.authService.logout();
-        this.router.navigate(['/']);
-    }
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/']);
+  }
 }

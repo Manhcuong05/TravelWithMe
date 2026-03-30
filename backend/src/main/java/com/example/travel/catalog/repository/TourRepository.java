@@ -10,4 +10,6 @@ import java.util.List;
 public interface TourRepository extends JpaRepository<Tour, String> {
     List<Tour> findByLocation(String location);
     List<Tour> findByLocationContainingIgnoreCase(String location);
+    List<Tour> findByDescriptionContainingIgnoreCase(String description);
+    List<Tour> findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String title, String description);
 }

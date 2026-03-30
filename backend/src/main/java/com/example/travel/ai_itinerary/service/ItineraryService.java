@@ -44,26 +44,30 @@ public class ItineraryService {
                                 });
 
                 log.info("Generating itinerary for destination: {}, days: {}", destination, days);
+                String fullSearchQuery = destination + " " + (preferences != null ? preferences : "");
 
-                // Fetch context from database with fuzzy search
+                // Fetch context from database with broader search
                 List<Tour> relatedTours = tourRepository.findByLocationContainingIgnoreCase(destination);
+                if (preferences != null && !preferences.isBlank()) {
+                        List<Tour> prefTours = tourRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(preferences, preferences);
+                        relatedTours.addAll(prefTours);
+                }
+                relatedTours = relatedTours.stream().distinct().limit(10).collect(Collectors.toList());
+
                 List<Hotel> relatedHotels = hotelRepository.findByCityContainingIgnoreCase(destination);
                 List<POI> relatedPois = poiRepository.findByCityContainingIgnoreCase(destination);
 
                 StringBuilder contextBuilder = new StringBuilder();
-                contextBuilder.append("\nDỮ LIỆU THỰC TẾ TỪ HỆ THỐNG (Hãy ưu tiên sử dụng các địa danh này):\n");
+                contextBuilder.append("\nDỮ LIỆU THỰC TẾ TRONG HỆ THỐNG CỦA CHÚNG TÔI (Hãy ưu tiên sử dụng các ID này):\n");
 
                 contextBuilder.append("- ĐỊA DANH (POI): ");
-                relatedPois.forEach(p -> contextBuilder.append(p.getName()).append(" (ID: ").append(p.getId())
-                                .append("), "));
+                relatedPois.forEach(p -> contextBuilder.append(p.getName()).append(" (ID: ").append(p.getId()).append("), "));
 
                 contextBuilder.append("\n- KHÁCH SẠN: ");
-                relatedHotels.forEach(h -> contextBuilder.append(h.getName()).append(" (ID: ").append(h.getId())
-                                .append("), "));
+                relatedHotels.forEach(h -> contextBuilder.append(h.getName()).append(" (ID: ").append(h.getId()).append("), "));
 
-                contextBuilder.append("\n- TOUR CÓ SẴN: ");
-                relatedTours.forEach(t -> contextBuilder.append(t.getTitle()).append(" (ID: ").append(t.getId())
-                                .append("), "));
+                contextBuilder.append("\n- TOURS TRẢI NGHIỆM: ");
+                relatedTours.forEach(t -> contextBuilder.append(t.getTitle()).append(" - ").append(t.getLocation()).append(" (ID: ").append(t.getId()).append("), "));
 
                 if (relatedPois.isEmpty() && relatedHotels.isEmpty() && relatedTours.isEmpty()) {
                         contextBuilder.append(

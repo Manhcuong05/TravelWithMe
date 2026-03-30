@@ -15,8 +15,7 @@ import Lenis from '@studio-freight/lenis';
       <div class="hero-bg" style="background-image: url('/images/home_hero.png')"></div>
       <div class="hero-overlay"></div>
       <div class="hero-content container">
-        <span class="pro-tag-hero animate-on-load">VƯƠN TỚI SỰ PHI THƯỜNG</span>
-        <h1 class="luxury-font main-title animate-on-load">Hành Trình Đẳng Cấp<br><span class="gold-gradient-text">Định Nghĩa Lại</span></h1>
+        <h1 class="luxury-font main-title animate-on-load">Hành Trình Độc Bản<br><span class="gold-gradient-text">Dành Riêng Cho Bạn</span></h1>
         <p class="subtitle-hero animate-on-load">Khám phá thế giới qua lăng kính công nghệ AI và dịch vụ độc bản, được kiến tạo bởi đam mê của những sinh viên CMC.</p>
         <div class="hero-actions animate-on-load">
            <button routerLink="/tours" class="btn-primary-pro">KHÁM PHÁ NGAY</button>
@@ -139,6 +138,7 @@ import Lenis from '@studio-freight/lenis';
     .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, rgba(5,10,20,0.3) 0%, rgba(5,10,20,0.8) 100%); }
     .hero-content { position: relative; z-index: 5; text-align: center; }
     .main-title { font-size: clamp(3rem, 8vw, 6rem); color: #fff; line-height: 1.1; margin-bottom: 30px; font-weight: 700; letter-spacing: -1px; }
+    .main-title .gold-gradient-text { font-size: 0.70em; display: block; margin-top: 5px; }
     .subtitle-hero { font-size: clamp(1.1rem, 2vw, 1.4rem); color: rgba(255,255,255,0.85); max-width: 800px; margin: 0 auto 50px; line-height: 1.6; font-weight: 300; }
     
     .hero-actions { display: flex; gap: 20px; justify-content: center; }
@@ -240,12 +240,12 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
       // Hero Animations
       const tl = gsap.timeline();
       tl.from('.hero-bg', { scale: 1.2, duration: 2.5, ease: 'power2.out' })
-        .from('.animate-on-load', { 
-          y: 60, 
-          opacity: 0, 
-          duration: 1, 
-          stagger: 0.2, 
-          ease: 'power4.out' 
+        .from('.animate-on-load', {
+          y: 60,
+          opacity: 0,
+          duration: 1,
+          stagger: 0.2,
+          ease: 'power4.out'
         }, '-=1.5');
 
       // AI Section Animations
