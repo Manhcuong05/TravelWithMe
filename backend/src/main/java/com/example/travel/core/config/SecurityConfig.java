@@ -41,6 +41,7 @@ public class SecurityConfig {
                                                                 "/api/hotels/**", "/api/pois/**",
                                                                 "/api/tours/**", "/api/reviews/**", "/api/rooms/**")
                                                 .permitAll()
+                                                .requestMatchers("/api/admin/settings").permitAll()
                                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                                                 .requestMatchers(org.springframework.http.HttpMethod.POST,
                                                                 "/api/hotels/**", "/api/tours/**",

@@ -1,5 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { take } from 'rxjs';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-expert-team',
@@ -17,97 +20,34 @@ import { CommonModule } from '@angular/common';
       </div>
 
       <div class="container team-grid">
-        <!-- Thành viên 1: Nhóm trưởng -->
-        <div class="expert-card-pro glass-card animate-slide-up" style="--delay: 0.1s">
+        <div *ngFor="let member of teamMembers(); let i = index" 
+             class="expert-card-pro glass-card animate-slide-up" 
+             [style.--delay]="(i * 0.1 + 0.1) + 's'">
+          
           <div class="expert-image-wrapper-pro">
-             <div class="image-placeholder-pro">
-                <i class="fas fa-user-tie"></i>
-                <span class="placeholder-text luxury-font">LEADER</span>
+             <!-- Profile Image or Placeholder -->
+             <img *ngIf="member.image" [src]="member.image" class="expert-profile-img" [alt]="member.name">
+             
+             <div *ngIf="!member.image" class="image-placeholder-pro">
+                <i [class]="member.icon"></i>
+                <span class="placeholder-text luxury-font">{{ member.tag }}</span>
              </div>
-          </div>
-          <div class="expert-info-pro">
-            <h3 class="luxury-font gold-text">Nguyễn Mạnh Cường</h3>
-            <span class="expert-role">Nhóm Trưởng / Fullstack Developer</span>
-            <p class="expert-bio">Người dẫn dắt tầm nhìn và chịu trách nhiệm chính về kiến trúc hệ thống của dự án.</p>
-            <div class="social-links-pro">
-              <a href="#"><i class="fab fa-github"></i></a>
-              <a href="#"><i class="fab fa-linkedin"></i></a>
-            </div>
-          </div>
-        </div>
 
-        <!-- Thành viên 2: Frontend -->
-        <div class="expert-card-pro glass-card animate-slide-up" style="--delay: 0.2s">
-          <div class="expert-image-wrapper-pro">
-             <div class="image-placeholder-pro">
-                <i class="fas fa-code"></i>
-                <span class="placeholder-text luxury-font">FRONTEND</span>
+             <!-- Floating Upload Button - Only for Admin/CTV -->
+             <div *ngIf="canEdit()" class="upload-overlay">
+                <label [for]="'upload-' + i" class="btn-upload-avatar">
+                   <i class="fas fa-camera"></i>
+                   <span>Đổi ảnh</span>
+                </label>
+                <input type="file" [id]="'upload-' + i" hidden accept="image/*" (change)="onFileSelected($event, i)">
              </div>
           </div>
-          <div class="expert-info-pro">
-            <h3 class="luxury-font gold-text">Thành viên 02</h3>
-            <span class="expert-role">Phát triển Giao diện</span>
-            <p class="expert-bio">Chuyên gia về UI components, đảm bảo mỗi pixel đều mang lại cảm giác sang trọng.</p>
-            <div class="social-links-pro">
-              <a href="#"><i class="fab fa-github"></i></a>
-              <a href="#"><i class="fab fa-behance"></i></a>
-            </div>
-          </div>
-        </div>
 
-        <!-- Thành viên 3: Backend -->
-        <div class="expert-card-pro glass-card animate-slide-up" style="--delay: 0.3s">
-          <div class="expert-image-wrapper-pro">
-             <div class="image-placeholder-pro">
-                <i class="fas fa-database"></i>
-                <span class="placeholder-text luxury-font">BACKEND</span>
-             </div>
-          </div>
           <div class="expert-info-pro">
-            <h3 class="luxury-font gold-text">Thành viên 03</h3>
-            <span class="expert-role">Xây dựng Hệ thống</span>
-            <p class="expert-bio">Tối ưu hóa dữ liệu và đảm bảo tính ổn định của toàn bộ nền tảng TravelWithMe.</p>
+            <h3 class="luxury-font gold-text">{{ member.name }}</h3>
+            <p class="expert-bio">{{ member.bio }}</p>
             <div class="social-links-pro">
-              <a href="#"><i class="fab fa-github"></i></a>
-              <a href="#"><i class="fab fa-docker"></i></a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Thành viên 4: UI/UX -->
-        <div class="expert-card-pro glass-card animate-slide-up" style="--delay: 0.4s">
-          <div class="expert-image-wrapper-pro">
-             <div class="image-placeholder-pro">
-                <i class="fas fa-paint-brush"></i>
-                <span class="placeholder-text luxury-font">UI/UX</span>
-             </div>
-          </div>
-          <div class="expert-info-pro">
-            <h3 class="luxury-font gold-text">Thành viên 04</h3>
-            <span class="expert-role">Thiết kế Trải nghiệm</span>
-            <p class="expert-bio">Kiến tạo những đường nét tinh tế và quy trình tương tác mượt mà cho người dùng.</p>
-            <div class="social-links-pro">
-               <a href="#"><i class="fab fa-dribbble"></i></a>
-               <a href="#"><i class="fab fa-figma"></i></a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Thành viên 5: AI -->
-        <div class="expert-card-pro glass-card animate-slide-up" style="--delay: 0.5s">
-          <div class="expert-image-wrapper-pro">
-             <div class="image-placeholder-pro">
-                <i class="fas fa-brain"></i>
-                <span class="placeholder-text luxury-font">AI/DATA</span>
-             </div>
-          </div>
-          <div class="expert-info-pro">
-            <h3 class="luxury-font gold-text">Thành viên 05</h3>
-            <span class="expert-role">Nghiên cứu AI & Algorithm</span>
-            <p class="expert-bio">Người thổi hồn AI vào các tính năng gợi ý hành trình thông minh độc quyền.</p>
-            <div class="social-links-pro">
-              <a href="#"><i class="fab fa-github"></i></a>
-              <a href="#"><i class="fab fa-python"></i></a>
+              <a *ngFor="let link of member.socials" [href]="link.url"><i [class]="link.icon"></i></a>
             </div>
           </div>
         </div>
@@ -167,7 +107,11 @@ import { CommonModule } from '@angular/common';
       height: 320px; position: relative; background: rgba(0,0,0,0.2); 
       display: flex; align-items: center; justify-content: center;
       border-bottom: 1px solid var(--glass-border);
+      overflow: hidden;
     }
+    .expert-profile-img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+    .expert-card-pro:hover .expert-profile-img { transform: scale(1.1) rotate(1deg); }
+    
     .image-placeholder-pro { 
       text-align: center; display: flex; flex-direction: column; align-items: center; gap: 15px; 
       transition: 0.3s; color: rgba(212, 175, 55, 0.15); 
@@ -186,6 +130,23 @@ import { CommonModule } from '@angular/common';
     .social-links-pro { display: flex; gap: 18px; margin-top: auto; }
     .social-links-pro a { color: rgba(255,255,255,0.3); font-size: 1.3rem; transition: 0.3s; }
     .social-links-pro a:hover { color: var(--gold-primary); transform: translateY(-3px); }
+
+    /* Upload UI LUXURY */
+    .upload-overlay {
+       position: absolute; inset: 0; background: rgba(0,0,0,0.4); 
+       display: flex; align-items: center; justify-content: center;
+       opacity: 0; transition: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+       backdrop-filter: blur(5px);
+    }
+    .expert-card-pro:hover .upload-overlay { opacity: 1; }
+    
+    .btn-upload-avatar {
+       background: rgba(212, 175, 55, 0.2); border: 1px solid var(--gold-primary);
+       color: #fff; padding: 12px 24px; border-radius: 50px; cursor: pointer;
+       display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 0.85rem;
+       transition: 0.3s;
+    }
+    .btn-upload-avatar:hover { background: var(--gold-primary); color: #000; transform: scale(1.05); }
 
     .promo-box-pro { padding: 80px 40px; border-style: dashed; }
     .section-title { font-size: 2.22rem; margin-bottom: 20px; color: var(--gold-primary); }
@@ -213,4 +174,98 @@ import { CommonModule } from '@angular/common';
     }
   `]
 })
-export class ExpertTeamComponent {}
+export class ExpertTeamComponent implements OnInit {
+  private http = inject(HttpClient);
+  private authService = inject(AuthService);
+
+  canEdit = computed(() => {
+    const user = this.authService.currentUser();
+    return user && (user.role === 'ADMIN' || user.role === 'CTV');
+  });
+
+  teamMembers = signal([
+    {
+      id: 'TEAM_MEMBER_0_AVATAR',
+      name: 'Nguyễn Mạnh Cường',
+      tag: 'LEADER',
+      icon: 'fas fa-user-tie',
+      bio: 'Với tâm thế luôn học hỏi và dẫn dắt bằng khát vọng, tôi nỗ lực kết nối mọi nguồn lực để cùng các đồng nghiệp tạo nên một nền tảng du lịch hiện đại, đẳng cấp và giàu tính nhân văn.',
+      image: null as string | null,
+      socials: [{ icon: 'fab fa-github', url: '#' }, { icon: 'fab fa-linkedin', url: '#' }]
+    },
+    {
+      id: 'TEAM_MEMBER_1_AVATAR',
+      name: 'Vũ Minh Hiển',
+      tag: 'FRONTEND',
+      icon: 'fas fa-code',
+      bio: 'Với niềm đam mê thiết kế giao diện từ những ngày đầu, tôi luôn nỗ lực biến những ý tưởng phức tạp thành những trải nghiệm đơn giản, tinh tế và sang trọng nhất cho người dùng.',
+      image: null as string | null,
+      socials: [{ icon: 'fab fa-github', url: '#' }, { icon: 'fab fa-behance', url: '#' }]
+    },
+    {
+      id: 'TEAM_MEMBER_2_AVATAR',
+      name: 'Nguyễn Hoàng Duy',
+      tag: 'BACKEND',
+      icon: 'fas fa-database',
+      bio: 'Tôi tin rằng một hệ thống vững chắc là nền tảng của mọi chuyến đi hoàn hảo. Tôi tập trung vào việc xử lý dữ liệu thông minh để mọi thao tác của khách hàng luôn mượt mà và an toàn.',
+      image: null as string | null,
+      socials: [{ icon: 'fab fa-github', url: '#' }, { icon: 'fab fa-docker', url: '#' }]
+    },
+    {
+      id: 'TEAM_MEMBER_3_AVATAR',
+      name: 'Bùi Xuân Quân',
+      tag: 'UI/UX',
+      icon: 'fas fa-paint-brush',
+      bio: 'Sáng tạo không ranh giới là tôn chỉ của tôi. Tôi dành trọn tâm huyết để thiết kế nên những hành trình không chỉ đẹp về thị giác mà còn chạm đến cảm xúc của mỗi lữ khách.',
+      image: null as string | null,
+      socials: [{ icon: 'fab fa-dribbble', url: '#' }, { icon: 'fab fa-figma', url: '#' }]
+    },
+    {
+      id: 'TEAM_MEMBER_4_AVATAR',
+      name: 'Chu Văn Sơn',
+      tag: 'AI/DATA',
+      icon: 'fas fa-brain',
+      bio: 'Đưa trí tuệ nhân tạo vào thực tế cuộc sống là mục tiêu lớn nhất của tôi. Tôi mong muốn mỗi gợi ý trong TravelWithMe đều như một người bạn thực thụ hiểu rõ mong muốn của bạn.',
+      image: null as string | null,
+      socials: [{ icon: 'fab fa-github', url: '#' }, { icon: 'fab fa-python', url: '#' }]
+    }
+  ]);
+
+  ngOnInit() {
+    this.loadTeamImages();
+  }
+
+  loadTeamImages() {
+    // Tải toàn bộ ảnh từ system_settings
+    this.http.get<any>('/api/admin/settings').pipe(take(1)).subscribe(res => {
+      const settings = res.data || [];
+      this.teamMembers.update(members => {
+        return members.map(m => {
+          const setting = settings.find((s: any) => s.id === m.id);
+          return { ...m, image: setting ? setting.value : m.image };
+        });
+      });
+    });
+  }
+
+  onFileSelected(event: any, index: number) {
+    const file = event.target.files[0];
+    const member = this.teamMembers()[index];
+
+    if (file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('settingKey', member.id);
+
+      this.http.post<any>('/api/upload', formData).subscribe(res => {
+        if (res.data) {
+          this.teamMembers.update(members => {
+            const newMembers = [...members];
+            newMembers[index].image = res.data;
+            return newMembers;
+          });
+        }
+      });
+    }
+  }
+}

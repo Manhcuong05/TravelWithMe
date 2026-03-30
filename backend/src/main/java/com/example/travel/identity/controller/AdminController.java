@@ -1,5 +1,7 @@
 package com.example.travel.identity.controller;
 
+import com.example.travel.core.entity.SystemSetting;
+import com.example.travel.core.repository.SystemSettingRepository;
 import com.example.travel.core.response.ApiResponse;
 import com.example.travel.identity.dto.RegisterRequest;
 import com.example.travel.identity.entity.User;
@@ -18,6 +20,7 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
+    private final SystemSettingRepository settingRepository;
 
     @PostMapping("/ctv")
     public ApiResponse<User> createCTV(@Valid @RequestBody RegisterRequest request) {
@@ -36,7 +39,14 @@ public class AdminController {
     }
 
     @PutMapping("/users/{id}")
-    public ApiResponse<User> updateUser(@PathVariable String id, @Valid @RequestBody com.example.travel.identity.dto.UserUpdateRequest request) {
+    public ApiResponse<User> updateUser(@PathVariable String id,
+            @Valid @RequestBody com.example.travel.identity.dto.UserUpdateRequest request) {
         return ApiResponse.success(adminService.updateUser(id, request), "Cập nhật người dùng thành công");
+    }
+
+    @GetMapping("/settings")
+    @PreAuthorize("permitAll()") // Cho phép khách xem ảnh team
+    public ApiResponse<List<SystemSetting>> getAllSettings() {
+        return ApiResponse.success(settingRepository.findAll());
     }
 }

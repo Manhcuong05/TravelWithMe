@@ -95,11 +95,6 @@ import { AuthService } from '../../../core/services/auth.service';
           </div>
           
           <div class="header-right">
-            <div class="notification-trigger">
-              <i class="far fa-bell"></i>
-              <span class="pulse-dot"></span>
-            </div>
-            
             <div class="profile-card-pro">
               <div class="profile-text text-right">
                 <span class="p-name">{{ user()?.fullName }}</span>
