@@ -1,4 +1,5 @@
-import { Component, Input, Output, EventEmitter, signal, Signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
+import type { Signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface Column {
