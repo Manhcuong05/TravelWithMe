@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, Signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, Signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface Column {
@@ -20,9 +20,9 @@ export interface Column {
       <div class="header-actions">
         <div class="search-wrap">
           <i class="fas fa-filter"></i>
-          <input type="text" placeholder="Lọc nhanh kết quả...">
+          <input type="text" placeholder="Lọc nhanh kết quả..." (input)="handleSearch($event)">
         </div>
-        <button class="btn-create-pro" (click)="onCreate.emit()">
+        <button class="btn-create-pro" (click)="onCreate.emit()" *ngIf="showCreate">
           <i class="fas fa-plus-circle"></i> <span>Thêm {{ title }} mới</span>
         </button>
       </div>
@@ -37,7 +37,7 @@ export interface Column {
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of items()" class="pro-row">
+          <tr *ngFor="let item of paginatedItems()" class="pro-row">
             <td *ngFor="let col of columns">
               <ng-container [ngSwitch]="col.type">
                 <div *ngSwitchCase="'image'" class="row-thumbnail">
@@ -63,16 +63,16 @@ export interface Column {
             <td class="text-right pr-4">
               <div class="row-actions">
                 <button class="btn-row-action btn-edit" (click)="onEdit.emit(item)" title="Chỉnh sửa">
-                  <i class="fas fa-pen-to-square"></i>
+                   <i class="fas fa-pen-to-square"></i>
                 </button>
                 <button class="btn-row-action btn-delete" (click)="onDelete.emit(item)" title="Xóa bỏ">
-                  <i class="fas fa-trash-can"></i>
+                   <i class="fas fa-trash-can"></i>
                 </button>
               </div>
             </td>
           </tr>
           
-          <tr *ngIf="items().length === 0">
+          <tr *ngIf="filteredItems().length === 0">
             <td [attr.colspan]="columns.length + 1" class="empty-state">
               <div class="empty-content">
                 <i class="fas fa-folder-open mb-4"></i>
@@ -83,9 +83,34 @@ export interface Column {
           </tr>
         </tbody>
       </table>
+
+      <!-- Pagination Footer -->
+      <div class="pagination-footer" *ngIf="totalPages() > 1">
+        <div class="pagination-info">
+          Hiển thị <strong>{{ startIndex() + 1 }}</strong> - <strong>{{ endIndex() }}</strong> trong tổng số <strong>{{ filteredItems().length }}</strong>
+        </div>
+        <div class="pagination-controls">
+          <button class="btn-page" [disabled]="currentPage() === 1" (click)="setPage(currentPage() - 1)">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          
+          <div class="page-numbers">
+            <button *ngFor="let p of getPageRange()" 
+                    class="btn-number" 
+                    [class.active]="p === currentPage()"
+                    (click)="setPage(p)">
+              {{ p }}
+            </button>
+          </div>
+
+          <button class="btn-page" [disabled]="currentPage() === totalPages()" (click)="setPage(currentPage() + 1)">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .mgmt-header { margin-bottom: 40px; display: flex; justify-content: space-between; align-items: flex-end; }
     .main-title { font-size: 2.2rem; margin: 0; color: #fff; letter-spacing: -0.5px; }
     .count-badge { font-size: 0.75rem; color: #64748b; font-weight: 700; background: rgba(255,255,255,0.03); padding: 4px 12px; border-radius: 50px; margin-top: 5px; display: inline-block; }
@@ -107,7 +132,7 @@ export interface Column {
     .btn-create-pro:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(212, 175, 55, 0.3); }
 
     /* Pro Table Frame */
-    .table-frame { border-radius: 30px; overflow: hidden; border: 1px solid rgba(255,255,255,0.03); background: rgba(15, 23, 42, 0.2); backdrop-filter: blur(25px); }
+    .table-frame { border-radius: 30px; border: 1px solid rgba(255,255,255,0.03); background: rgba(15, 23, 42, 0.2); backdrop-filter: blur(25px); }
     .pro-table { width: 100%; border-collapse: separate; border-spacing: 0; }
     
     .pro-table th { padding: 22px 25px; text-align: left; font-size: 0.7rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 2px; }
@@ -133,6 +158,31 @@ export interface Column {
     .btn-edit:hover { background: rgba(212, 175, 55, 0.1); color: #d4af37; border-color: #d4af37; }
     .btn-delete:hover { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: #ef4444; }
 
+    /* Pagination Styling */
+    .pagination-footer { 
+      padding: 20px 25px; border-top: 1px solid rgba(255,255,255,0.04);
+      display: flex; justify-content: space-between; align-items: center;
+      background: rgba(0,0,0,0.1);
+    }
+    .pagination-info { font-size: 0.85rem; color: #64748b; }
+    .pagination-info strong { color: #fff; }
+    
+    .pagination-controls { display: flex; gap: 10px; align-items: center; }
+    .btn-page { 
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+      color: #94a3b8; width: 36px; height: 36px; border-radius: 10px; cursor: pointer; transition: 0.3s;
+    }
+    .btn-page:hover:not(:disabled) { background: rgba(212, 175, 55, 0.15); color: var(--gold-primary); border-color: #d4af37; }
+    .btn-page:disabled { opacity: 0.2; cursor: not-allowed; }
+    
+    .page-numbers { display: flex; gap: 6px; }
+    .btn-number { 
+      background: transparent; border: 1px solid transparent; color: #64748b;
+      min-width: 36px; height: 36px; border-radius: 10px; cursor: pointer; font-weight: 700; transition: 0.3s;
+    }
+    .btn-number:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .btn-number.active { background: var(--gold-gradient); color: #000; border-color: transparent; }
+
     .text-right { text-align: right; }
     .pr-6 { padding-right: 35px !important; }
     .pr-4 { padding-right: 25px !important; }
@@ -151,8 +201,54 @@ export class GenericMgmtComponent {
   @Input() title: string = '';
   @Input() columns: Column[] = [];
   @Input() items: Signal<any[]> = signal([]);
+  @Input() showCreate: boolean = true;
 
   @Output() onCreate = new EventEmitter<void>();
   @Output() onEdit = new EventEmitter<any>();
   @Output() onDelete = new EventEmitter<any>();
+
+  // Pagination Signals
+  currentPage = signal(1);
+  pageSize = signal(15);
+  searchQuery = signal('');
+
+  filteredItems = computed(() => {
+    const q = this.searchQuery().toLowerCase();
+    const all = this.items();
+    if (!q) return all;
+    return all.filter(item => 
+      this.columns.some(col => String(item[col.key]).toLowerCase().includes(q))
+    );
+  });
+
+  totalPages = computed(() => Math.ceil(this.filteredItems().length / this.pageSize()));
+
+  paginatedItems = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return this.filteredItems().slice(start, start + this.pageSize());
+  });
+
+  startIndex = computed(() => (this.currentPage() - 1) * this.pageSize());
+  endIndex = computed(() => Math.min(this.startIndex() + this.pageSize(), this.filteredItems().length));
+
+  handleSearch(event: any) {
+    this.searchQuery.set(event.target.value);
+    this.currentPage.set(1);
+  }
+
+  setPage(page: number) {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+    }
+  }
+
+  getPageRange(): number[] {
+    const total = this.totalPages();
+    const range: number[] = [];
+    
+    for (let i = 1; i <= total; i++) {
+        range.push(i);
+    }
+    return range;
+  }
 }

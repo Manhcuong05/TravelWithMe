@@ -20,6 +20,7 @@ import { BookingService, BookingResponse } from '../../../core/services/booking.
       [title]="'Quản lý Đơn hàng'"
       [columns]="columns"
       [items]="filteredBookings"
+      [showCreate]="false"
       (onCreate)="handleCreate()"
       (onEdit)="openDetail($event)"
       (onDelete)="handleDelete($event)"
