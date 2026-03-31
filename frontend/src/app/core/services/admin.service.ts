@@ -26,4 +26,11 @@ export class AdminService {
     updateUser(id: string, userData: any): Observable<ApiResponse<User>> {
         return this.http.put<ApiResponse<User>>(`${this.API_URL}/users/${id}`, userData);
     }
+
+    exportRevenueReport(startDate: string, endDate: string, serviceType: string): Observable<Blob> {
+        return this.http.get(`${this.API_URL}/reports/revenue/export`, {
+            params: { startDate, endDate, serviceType },
+            responseType: 'blob'
+        });
+    }
 }

@@ -8,10 +8,12 @@ import { AuthService } from '../../../core/services/auth.service';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
+import { FormsModule } from '@angular/forms';
+
 @Component({
     selector: 'app-dashboard',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, FormsModule],
     template: `
     <div class="dashboard-wrapper">
       <div class="welcome-banner">
@@ -81,6 +83,48 @@ import { forkJoin } from 'rxjs';
         </div>
       </div>
 
+      <!-- Revenue Report Section -->
+      <div class="revenue-reporting-card mt-10">
+        <div class="card-glass shadow-lg"></div>
+        <div class="card-content block">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="icon-wrap bg-gold-soft h-10 w-10 text-lg">
+              <i class="fas fa-file-invoice-dollar"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white tracking-wide">Báo Cáo & Sao Kê Doanh Thu</h3>
+          </div>
+          
+          <div class="filter-controls">
+            <div class="control-group">
+              <label>Từ ngày</label>
+              <input type="date" [(ngModel)]="reportFilter.startDate" class="pro-input">
+            </div>
+            
+            <div class="control-group">
+              <label>Đến ngày</label>
+              <input type="date" [(ngModel)]="reportFilter.endDate" class="pro-input">
+            </div>
+
+            <div class="control-group">
+              <label>Loại dịch vụ</label>
+              <select [(ngModel)]="reportFilter.serviceType" class="pro-input select-custom">
+                <option value="ALL">Tất cả dịch vụ</option>
+                <option value="HOTEL">🏨 Khách sạn</option>
+                <option value="TOUR">🏞️ Tour du lịch</option>
+                <option value="FLIGHT">✈️ Vé máy bay</option>
+              </select>
+            </div>
+
+            <button (click)="exportRevenue()" 
+                    [disabled]="isExporting()"
+                    class="export-btn btn-luxury">
+              <i class="fas" [class.fa-download]="!isExporting()" [class.fa-spinner]="isExporting()" [class.fa-spin]="isExporting()"></i>
+              {{ isExporting() ? 'Đang xuất...' : 'Xuất Sao Kê PDF' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
   `,
     styles: [`
@@ -119,6 +163,31 @@ import { forkJoin } from 'rxjs';
 
     .mt-10 { margin-top: 40px; }
     .mr-2 { margin-right: 8px; }
+
+    /* Revenue Reporting Styles */
+    .revenue-reporting-card { position: relative; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
+    .filter-controls { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; }
+    
+    .control-group { display: flex; flex-direction: column; gap: 8px; flex: 1; min-width: 200px; }
+    .control-group label { font-size: 0.75rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; }
+    
+    .pro-input { 
+      background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); 
+      color: #fff; padding: 12px 16px; border-radius: 12px; font-size: 0.9rem; transition: all 0.3s;
+    }
+    .pro-input:focus { border-color: #d4af37; outline: none; box-shadow: 0 0 15px rgba(212,175,55,0.1); }
+    
+    .select-custom { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1rem; }
+
+    .btn-luxury {
+      background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); color: #000; font-weight: 700;
+      padding: 12px 24px; border-radius: 12px; border: none; cursor: pointer; transition: all 0.3s;
+      display: flex; align-items: center; gap: 10px; height: 48px;
+    }
+    .btn-luxury:hover:not(:disabled) { transform: scale(1.02); filter: brightness(1.1); box-shadow: 0 10px 20px rgba(212,175,55,0.2); }
+    .btn-luxury:disabled { opacity: 0.6; cursor: not-allowed; }
+    
+    .export-btn i { font-size: 1rem; }
   `]
 })
 export class DashboardComponent implements OnInit {
@@ -135,6 +204,14 @@ export class DashboardComponent implements OnInit {
         hotels: 0,
         bookings: 0
     });
+
+    reportFilter = {
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date().toISOString().split('T')[0],
+        serviceType: 'ALL'
+    };
+
+    isExporting = signal(false);
 
     ngOnInit() {
         this.loadStats();
@@ -156,6 +233,29 @@ export class DashboardComponent implements OnInit {
                 });
             },
             error: (err) => console.error('Error loading dashboard stats:', err)
+        });
+    }
+
+    exportRevenue() {
+        this.isExporting.set(true);
+        this.adminService.exportRevenueReport(
+            this.reportFilter.startDate,
+            this.reportFilter.endDate,
+            this.reportFilter.serviceType
+        ).subscribe({
+            next: (blob) => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `SaoKe_DoanhThu_${this.reportFilter.startDate}_${this.reportFilter.endDate}.pdf`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+                this.isExporting.set(false);
+            },
+            error: (err) => {
+                console.error('Export failed', err);
+                this.isExporting.set(false);
+            }
         });
     }
 }

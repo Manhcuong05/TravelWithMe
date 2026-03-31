@@ -76,11 +76,12 @@ public class GeminiService {
             }
             throw new BusinessException("AI_SERVICE_ERROR", "Không tìm thấy nội dung phản hồi từ Gemini");
         } catch (HttpClientErrorException e) {
-            log.error("Gemini API returned error - Status: {}, Body: {}", e.getStatusCode(), e.getResponseBodyAsString());
-            throw new BusinessException("AI_SERVICE_ERROR", "Gemini API lỗi " + e.getStatusCode() + ": " + e.getResponseBodyAsString());
+            String errorBody = e.getResponseBodyAsString();
+            log.error("CRITICAL: Gemini API returned error - Status: {}, Body: {}", e.getStatusCode(), errorBody);
+            throw new BusinessException("AI_SERVICE_ERROR", "Gemini API lỗi " + e.getStatusCode() + ": " + errorBody);
         } catch (Exception e) {
-            log.error("Gemini API call failed", e);
-            throw new BusinessException("AI_SERVICE_ERROR", "Lỗi khi gọi Gemini API: " + e.getMessage());
+            log.error("CRITICAL: Gemini API call failed", e);
+            throw new BusinessException("AI_SERVICE_ERROR", "Lỗi kỹ thuật khi gọi AI: " + e.getMessage());
         }
     }
 }
